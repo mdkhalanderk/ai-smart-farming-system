@@ -1,0 +1,80 @@
+{
+  "model_name": "Random Forest Crop Yield Regressor",
+  "algorithm": "RandomForestRegressor(100 trees)",
+  "metrics": {
+    "test_r2": 0.9902,
+    "test_mae": 1.1596,
+    "test_rmse": 2.6307,
+    "train_r2": 0.9978,
+    "train_mae": 0.4549,
+    "train_rmse": 1.1286,
+    "training_time_sec": 0.3,
+    "dataset_rows": 3000
+  },
+  "features": {
+    "categorical": [
+      "crop",
+      "state",
+      "season",
+      "soil_type"
+    ],
+    "numerical": [
+      "area_hectares",
+      "temperature",
+      "humidity",
+      "rainfall",
+      "soil_ph",
+      "soil_moisture",
+      "irrigation"
+    ]
+  },
+  "categories": {
+    "crops": [
+      "Cotton",
+      "Groundnut",
+      "Jute",
+      "Maize",
+      "Mustard",
+      "Potato",
+      "Pulses",
+      "Rice",
+      "Soybean",
+      "Sugarcane",
+      "Tomato",
+      "Wheat"
+    ],
+    "states": [
+      "Andhra Pradesh",
+      "Bihar",
+      "Gujarat",
+      "Haryana",
+      "Karnataka",
+      "Kerala",
+      "Madhya Pradesh",
+      "Maharashtra",
+      "Odisha",
+      "Punjab",
+      "Rajasthan",
+      "Tamil Nadu",
+      "Telangana",
+      "Uttar Pradesh",
+      "West Bengal"
+    ],
+    "seasons": [
+      "Annual",
+      "Kharif",
+      "Rabi",
+      "Zaid"
+    ],
+    "soil_types": [
+      "Alluvial",
+      "Black",
+      "Clay",
+      "Laterite",
+      "Loamy",
+      "Red",
+      "Sandy"
+    ]
+  },
+  "target": "yield_per_hectare (tonnes/ha)"
+}

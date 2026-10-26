@@ -1,0 +1,201 @@
+id,state,district,market,commodity,variety,grade,arrival_date,min_price,max_price,modal_price,fetched_at
+157149,Karnataka,Dharwad,APMC Hubballi,Dry Chillies,Kaddi,Local,2026-09-01,6800,33639,15247,2026-09-01T18:02:35.931+00:00
+157146,Karnataka,Dharwad,APMC Hubballi,Green Gram(Moong)(Whole),Green (Whole),Local,2026-09-01,1339,8829,7277,2026-09-01T18:02:35.931+00:00
+157147,Karnataka,Dharwad,APMC Hubballi,Groundnut,Gejje,Local,2026-09-01,3519,3519,3519,2026-09-01T18:02:35.931+00:00
+157051,Karnataka,Dharwad,APMC Hubballi,Onion,Local,Local,2026-09-01,2500,3700,3200,2026-09-01T18:02:34.917+00:00
+157148,Karnataka,Dharwad,APMC Hubballi,Safflower,Safflower,Local,2026-09-01,5160,5311,5210,2026-09-01T18:02:35.931+00:00
+157145,Karnataka,Dharwad,APMC Hubballi,Wheat,Jawari,Local,2026-09-01,2329,2429,2405,2026-09-01T18:02:35.931+00:00
+157036,Karnataka,Shivamogga,APMC THIRTHAHALLI,Rice,Broken Rice,Local,2026-09-01,2600,2600,2600,2026-09-01T18:02:34.917+00:00
+157018,Karnataka,Hassan,Arasikere APMC,Coconut,Medium,Medium,2026-09-01,58000,58000,58000,2026-09-01T18:02:34.917+00:00
+157178,Karnataka,Bagalkot,Bagalkot APMC,Maize,Hybrid/Local,Local,2026-09-01,2529,2579,2573,2026-09-01T18:02:35.931+00:00
+157033,Karnataka,Chikkaballapur,Bagepalli APMC,Cauliflower,Cauliflower,Small,2026-09-01,1000,1500,1300,2026-09-01T18:02:34.917+00:00
+157150,Karnataka,Chikkaballapur,Bagepalli APMC,Raddish,Raddish,Small,2026-09-01,800,1000,950,2026-09-01T18:02:35.931+00:00
+157034,Karnataka,Chikkaballapur,Bagepalli APMC,Ridgeguard(Tori),Ridgeguard(Tori),Small,2026-09-01,1000,1500,1300,2026-09-01T18:02:34.917+00:00
+157185,Karnataka,Bellary,Ballari APMC,Jowar(Sorghum),Yellow,Non-FAQ,2026-09-01,2001,3352,2880,2026-09-01T18:02:35.931+00:00
+157184,Karnataka,Bellary,Ballari APMC,Maize,Local,Non-FAQ,2026-09-01,2409,2409,2409,2026-09-01T18:02:35.931+00:00
+157097,Karnataka,Bellary,Ballari APMC,Sunflower/Sunflower Seed,Sunflower,Non-FAQ,2026-09-01,6160,8219,7773,2026-09-01T18:02:35.931+00:00
+157124,Karnataka,Kolar,Bangarpet APMC,Beans,Beans (Whole),Local,2026-09-01,4500,5000,4800,2026-09-01T18:02:35.931+00:00
+157123,Karnataka,Kolar,Bangarpet APMC,Bitter gourd,Bitter Gourd,Local,2026-09-01,2000,2500,2200,2026-09-01T18:02:35.931+00:00
+157122,Karnataka,Kolar,Bangarpet APMC,Brinjal,Brinjal,Local,2026-09-01,2000,3000,2500,2026-09-01T18:02:35.931+00:00
+157023,Karnataka,Kolar,Bangarpet APMC,Cauliflower,Local,Local,2026-09-01,1000,1500,1300,2026-09-01T18:02:34.917+00:00
+157024,Karnataka,Kolar,Bangarpet APMC,Chapparad Avare,Chapparada Avarekai,Local,2026-09-01,2500,3000,2800,2026-09-01T18:02:34.917+00:00
+157025,Karnataka,Kolar,Bangarpet APMC,Cucumbar(Kheera),Cucumbar,Local,2026-09-01,1000,1600,1400,2026-09-01T18:02:34.917+00:00
+157022,Karnataka,Kolar,Bangarpet APMC,Potato,Local,Local,2026-09-01,2000,2500,2200,2026-09-01T18:02:34.917+00:00
+157014,Karnataka,Dakshina Kannada,Bantwala APMC,Black pepper,Black Pepper,Local,2026-09-01,40000,69000,58700,2026-09-01T18:02:34.916+00:00
+157195,Karnataka,Bidar,Basava Kalayana APMC,Bengal Gram(Gram)(Whole),Average (Whole),FAQ,2026-09-01,6126,6126,6126,2026-09-01T18:02:35.931+00:00
+157196,Karnataka,Bidar,Basava Kalayana APMC,Black Gram(Urd Beans)(Whole),Black Gram (Whole),FAQ,2026-09-01,5800,8680,8300,2026-09-01T18:02:35.931+00:00
+157006,Karnataka,Bidar,Basava Kalayana APMC,Wheat,Mill Quality,Non-FAQ,2026-09-01,3100,4500,4250,2026-09-01T18:02:34.916+00:00
+157005,Karnataka,Bidar,Basava Kalayana APMC,Wheat,Mexican,FAQ,2026-09-01,2280,2690,2541,2026-09-01T18:02:34.916+00:00
+157042,Karnataka,Bengaluru,Bengaluru APMC,Avare Dal,Avare (Whole),Medium,2026-09-01,7800,8500,8150,2026-09-01T18:02:34.917+00:00
+157038,Karnataka,Bengaluru,Bengaluru APMC,Bengal Gram(Gram)(Whole),Average (Whole),FAQ,2026-09-01,7200,8000,7600,2026-09-01T18:02:34.917+00:00
+157156,Karnataka,Bengaluru,Bengaluru APMC,Black Gram Dal(Urd Dal),Black Gram Dal,Medium,2026-09-01,11500,16500,14000,2026-09-01T18:02:35.931+00:00
+157046,Karnataka,Bengaluru,Bengaluru APMC,Foxtail Millet(Navane),Other,Medium,2026-09-01,4000,4500,4250,2026-09-01T18:02:34.917+00:00
+157045,Karnataka,Bengaluru,Bengaluru APMC,Garlic,Garlic,Medium,2026-09-01,8000,26000,15000,2026-09-01T18:02:34.917+00:00
+157154,Karnataka,Bengaluru,Bengaluru APMC,Green Peas,Green Peas,Medium,2026-09-01,7000,10000,8500,2026-09-01T18:02:35.931+00:00
+157048,Karnataka,Bengaluru,Bengaluru APMC,Ground Nut Seed,Ground Nut Seed,Medium,2026-09-01,14500,16500,15500,2026-09-01T18:02:34.917+00:00
+157037,Karnataka,Bengaluru,Bengaluru APMC,Jowar(Sorghum),Jowar ( White),FAQ,2026-09-01,3000,4000,3500,2026-09-01T18:02:34.917+00:00
+157157,Karnataka,Bengaluru,Bengaluru APMC,Maize,Hybrid/Local,FAQ,2026-09-01,2900,3000,2950,2026-09-01T18:02:35.931+00:00
+157040,Karnataka,Bengaluru,Bengaluru APMC,Mustard,Other,FAQ,2026-09-01,11200,12800,12000,2026-09-01T18:02:34.917+00:00
+157044,Karnataka,Bengaluru,Bengaluru APMC,Onion,Onion,Large,2026-09-01,3500,4500,4200,2026-09-01T18:02:34.917+00:00
+157043,Karnataka,Bengaluru,Bengaluru APMC,Onion,Bangalore-Samall,Small,2026-09-01,1500,2500,2000,2026-09-01T18:02:34.917+00:00
+157041,Karnataka,Bengaluru,Bengaluru APMC,Ragi(Finger Millet),Fine,FAQ,2026-09-01,4800,5400,5100,2026-09-01T18:02:34.917+00:00
+157047,Karnataka,Bengaluru,Bengaluru APMC,Red gram split/Arhar dal/Tur dal,Arhar Dal(Tur),Medium,2026-09-01,9000,13000,11000,2026-09-01T18:02:34.917+00:00
+157152,Karnataka,Bengaluru,Bengaluru APMC,Rice,Medium,Medium,2026-09-01,5000,6000,5500,2026-09-01T18:02:35.931+00:00
+157151,Karnataka,Bengaluru,Bengaluru APMC,Rice,Dappa,Medium,2026-09-01,3000,3100,3050,2026-09-01T18:02:35.931+00:00
+157153,Karnataka,Bengaluru,Bengaluru APMC,Rice,Fine,Medium,2026-09-01,6000,7000,6500,2026-09-01T18:02:35.931+00:00
+157039,Karnataka,Bengaluru,Bengaluru APMC,"Sesamum(Sesame,Gingelly,Til)",White,FAQ,2026-09-01,15500,18500,17000,2026-09-01T18:02:34.917+00:00
+157155,Karnataka,Bengaluru,Bengaluru APMC,Tamarind Fruit,Tamarind Fruit,Medium,2026-09-01,7000,11500,9250,2026-09-01T18:02:35.931+00:00
+157049,Karnataka,Bengaluru,Bengaluru APMC,Wheat,Local,FAQ,2026-09-01,3200,4500,3850,2026-09-01T18:02:34.917+00:00
+157009,Karnataka,Bidar,Bhalki APMC,Bengal Gram(Gram)(Whole),Average (Whole),Non-FAQ,2026-09-01,5000,6250,6052,2026-09-01T18:02:34.916+00:00
+157010,Karnataka,Bidar,Bhalki APMC,Black Gram(Urd Beans)(Whole),Black Gram (Whole),Non-FAQ,2026-09-01,5952,7401,7111,2026-09-01T18:02:34.916+00:00
+157011,Karnataka,Bidar,Bhalki APMC,Green Gram(Moong)(Whole),Green (Whole),Non-FAQ,2026-09-01,6000,9001,8564,2026-09-01T18:02:34.916+00:00
+157132,Karnataka,Bidar,Bidar APMC,Rice,CR 1009 (Coarse) Boiled,Small,2026-09-01,4500,5500,5100,2026-09-01T18:02:35.931+00:00
+157177,Karnataka,Chamarajanagar,Chamarajanagar APMC,Beetroot,Beetroot,Local,2026-09-01,2000,3000,2500,2026-09-01T18:02:35.931+00:00
+157069,Karnataka,Chamarajanagar,Chamarajanagar APMC,Brinjal,Other,Local,2026-09-01,800,1200,1000,2026-09-01T18:02:34.917+00:00
+157174,Karnataka,Chamarajanagar,Chamarajanagar APMC,Brinjal,Round/Long,Local,2026-09-01,1000,1600,1300,2026-09-01T18:02:35.931+00:00
+157089,Karnataka,Chamarajanagar,Chamarajanagar APMC,Cabbage,Cabbage,Local,2026-09-01,600,1000,800,2026-09-01T18:02:34.917+00:00
+157176,Karnataka,Chamarajanagar,Chamarajanagar APMC,Carrot,Carrot,Local,2026-09-01,1500,3000,2200,2026-09-01T18:02:35.931+00:00
+157070,Karnataka,Chamarajanagar,Chamarajanagar APMC,Coconut,Small,Local,2026-09-01,14000,24000,23000,2026-09-01T18:02:34.917+00:00
+157090,Karnataka,Chamarajanagar,Chamarajanagar APMC,Cucumbar(Kheera),Cucumbar,Local,2026-09-01,800,1800,1300,2026-09-01T18:02:34.917+00:00
+157088,Karnataka,Chamarajanagar,Chamarajanagar APMC,Knool Khol,Knool Khol,Local,2026-09-01,1500,2500,2000,2026-09-01T18:02:34.917+00:00
+157087,Karnataka,Chamarajanagar,Chamarajanagar APMC,Raddish,Raddish,Local,2026-09-01,1000,1500,1300,2026-09-01T18:02:34.917+00:00
+157175,Karnataka,Chamarajanagar,Chamarajanagar APMC,Ridgeguard(Tori),Ridgeguard(Tori),Local,2026-09-01,1500,3000,2200,2026-09-01T18:02:35.931+00:00
+157086,Karnataka,Chamarajanagar,Chamarajanagar APMC,Tomato,Tomato,Local,2026-09-01,800,1600,1200,2026-09-01T18:02:34.917+00:00
+157115,Karnataka,Davangere,Channagiri APMC,Arecanut(Betelnut/Supari),Rashi,Grade Range-1,2026-09-01,38000,52299,50065,2026-09-01T18:02:35.931+00:00
+157114,Karnataka,Bengaluru South,Channapatna APMC,Cucumbar(Kheera),Cucumbar,Local,2026-09-01,800,1600,1200,2026-09-01T18:02:35.931+00:00
+157012,Karnataka,Bengaluru South,Channapatna APMC,Green Chilli,Green Chilly,Local,2026-09-01,3000,3500,3300,2026-09-01T18:02:34.916+00:00
+157113,Karnataka,Bengaluru South,Channapatna APMC,Tomato,Tomato,Local,2026-09-01,1000,2000,1500,2026-09-01T18:02:35.931+00:00
+157093,Karnataka,Chikkaballapur,Chintamani APMC,Beans,Beans (Whole),Local,2026-09-01,3000,5000,4000,2026-09-01T18:02:34.917+00:00
+157180,Karnataka,Chikkaballapur,Chintamani APMC,Beetroot,Beetroot,Local,2026-09-01,1000,2000,1500,2026-09-01T18:02:35.931+00:00
+157075,Karnataka,Chikkaballapur,Chintamani APMC,Brinjal,Brinjal,Local,2026-09-01,1000,2000,1500,2026-09-01T18:02:34.917+00:00
+157182,Karnataka,Chikkaballapur,Chintamani APMC,Capsicum,Capsicum,Local,2026-09-01,1500,2500,2000,2026-09-01T18:02:35.931+00:00
+157179,Karnataka,Chikkaballapur,Chintamani APMC,Carrot,Carrot,Local,2026-09-01,2000,4000,3000,2026-09-01T18:02:35.931+00:00
+157092,Karnataka,Chikkaballapur,Chintamani APMC,Chilly Capsicum,Chilly Capsicum,Local,2026-09-01,1500,2500,2000,2026-09-01T18:02:34.917+00:00
+157095,Karnataka,Chikkaballapur,Chintamani APMC,Cucumbar(Kheera),Cucumbar,Local,2026-09-01,400,600,500,2026-09-01T18:02:34.917+00:00
+157076,Karnataka,Chikkaballapur,Chintamani APMC,Green Chilli,Green Chilly,Local,2026-09-01,2000,4000,3000,2026-09-01T18:02:34.917+00:00
+157094,Karnataka,Chikkaballapur,Chintamani APMC,Ladies Finger,Ladies Finger,Local,2026-09-01,1500,2500,2000,2026-09-01T18:02:34.917+00:00
+157181,Karnataka,Chikkaballapur,Chintamani APMC,Raddish,Raddish,Local,2026-09-01,1000,2000,1500,2026-09-01T18:02:35.931+00:00
+157096,Karnataka,Chikkaballapur,Chintamani APMC,Ridgeguard(Tori),Ridgeguard(Tori),Local,2026-09-01,1000,2000,1500,2026-09-01T18:02:34.917+00:00
+157081,Karnataka,Davangere,Davangere APMC,Arecanut(Betelnut/Supari),Sippegotu,Local,2026-09-01,12300,12300,12300,2026-09-01T18:02:34.917+00:00
+157080,Karnataka,Davangere,Davangere APMC,Beans,Beans (Whole),Local,2026-09-01,1200,4000,2600,2026-09-01T18:02:34.917+00:00
+157083,Karnataka,Davangere,Davangere APMC,Beetroot,Beetroot,Local,2026-09-01,900,2700,2000,2026-09-01T18:02:34.917+00:00
+157063,Karnataka,Davangere,Davangere APMC,Brinjal,Round/Long,Local,2026-09-01,700,1500,1200,2026-09-01T18:02:34.917+00:00
+157164,Karnataka,Davangere,Davangere APMC,Bunch Beans,Bunch Beans,Local,2026-09-01,1000,2700,2000,2026-09-01T18:02:35.931+00:00
+157085,Karnataka,Davangere,Davangere APMC,Capsicum,Capsicum,Local,2026-09-01,1500,4000,3200,2026-09-01T18:02:34.917+00:00
+157082,Karnataka,Davangere,Davangere APMC,Carrot,Carrot,Local,2026-09-01,1200,3800,2500,2026-09-01T18:02:34.917+00:00
+157166,Karnataka,Davangere,Davangere APMC,Cauliflower,Cauliflower,Local,2026-09-01,600,2300,1500,2026-09-01T18:02:35.931+00:00
+157167,Karnataka,Davangere,Davangere APMC,Chikoos(Sapota),Sapota,Local,2026-09-01,3000,4000,3500,2026-09-01T18:02:35.931+00:00
+157084,Karnataka,Davangere,Davangere APMC,Cucumbar(Kheera),Cucumbar,Local,2026-09-01,900,2600,1800,2026-09-01T18:02:34.917+00:00
+157170,Karnataka,Davangere,Davangere APMC,Drumstick,Drumstick,Local,2026-09-01,1000,2600,2100,2026-09-01T18:02:35.931+00:00
+157062,Karnataka,Davangere,Davangere APMC,Elephant Yam(Suran)/Amorphophallus,Elephant Yam (Suran),Local,2026-09-01,1000,2300,1800,2026-09-01T18:02:34.917+00:00
+157169,Karnataka,Davangere,Davangere APMC,Green Avare(W),Green Avare (W),Local,2026-09-01,1000,2700,2100,2026-09-01T18:02:35.931+00:00
+157163,Karnataka,Davangere,Davangere APMC,Lime,Lime,Local,2026-09-01,2000,5800,3900,2026-09-01T18:02:35.931+00:00
+157064,Karnataka,Davangere,Davangere APMC,Mousambi(Sweet Lime),Mousambi,Local,2026-09-01,4000,6000,5000,2026-09-01T18:02:34.917+00:00
+157162,Karnataka,Davangere,Davangere APMC,Onion,Onion,Local,2026-09-01,4000,5000,4600,2026-09-01T18:02:35.931+00:00
+157061,Karnataka,Davangere,Davangere APMC,Paddy(Common),Paddy Medium,Local,2026-09-01,2199,2904,2652,2026-09-01T18:02:34.917+00:00
+157079,Karnataka,Davangere,Davangere APMC,Potato,Potato,Local,2026-09-01,1000,2800,2100,2026-09-01T18:02:34.917+00:00
+157066,Karnataka,Davangere,Davangere APMC,Raddish,Raddish,Local,2026-09-01,800,2400,1400,2026-09-01T18:02:34.917+00:00
+157165,Karnataka,Davangere,Davangere APMC,Ragi(Finger Millet),Local,Local,2026-09-01,3000,3800,3465,2026-09-01T18:02:35.931+00:00
+157078,Karnataka,Davangere,Davangere APMC,Rice,Medium,Local,2026-09-01,2400,7045,4783,2026-09-01T18:02:34.917+00:00
+157171,Karnataka,Davangere,Davangere APMC,Sweet Pumpkin,Sweet Pumpkin,Local,2026-09-01,700,1700,1000,2026-09-01T18:02:35.931+00:00
+157065,Karnataka,Davangere,Davangere APMC,Tomato,Tomato,Local,2026-09-01,300,1200,600,2026-09-01T18:02:34.917+00:00
+157168,Karnataka,Davangere,Davangere APMC,Water Melon,Water Melon,Local,2026-09-01,1000,2000,1500,2026-09-01T18:02:35.931+00:00
+157015,Karnataka,Gadag,Gadag APMC,Black Gram(Urd Beans)(Whole),Black Gram (Whole),FAQ,2026-09-01,3412,8359,8106,2026-09-01T18:02:34.917+00:00
+157118,Karnataka,Gadag,Gadag APMC,Coriander(Leaves),Local,Medium,2026-09-01,12369,12369,12369,2026-09-01T18:02:35.931+00:00
+157017,Karnataka,Gadag,Gadag APMC,Dry Chillies,Local,Medium,2026-09-01,5500,5500,5500,2026-09-01T18:02:34.917+00:00
+157117,Karnataka,Gadag,Gadag APMC,Green Gram(Moong)(Whole),Green (Whole),FAQ,2026-09-01,1989,10160,8165,2026-09-01T18:02:35.931+00:00
+157016,Karnataka,Gadag,Gadag APMC,Kulthi(Horse Gram),Horse gram (Whole),Medium,2026-09-01,3477,3477,3477,2026-09-01T18:02:34.917+00:00
+157116,Karnataka,Gadag,Gadag APMC,Maize,Local,FAQ,2026-09-01,2530,2530,2530,2026-09-01T18:02:35.931+00:00
+157100,Karnataka,Koppal,Gangavathi APMC,Paddy(Common),Paddy RNR new,Non-FAQ,2026-09-01,2793,3333,3000,2026-09-01T18:02:35.931+00:00
+157187,Karnataka,Koppal,Gangavathi APMC,Paddy(Common),Sona Masuri (OLD),Non-FAQ,2026-09-01,3465,3880,3707,2026-09-01T18:02:35.931+00:00
+157188,Karnataka,Koppal,Gangavathi APMC,Paddy(Common),Kaveri Sona,Non-FAQ,2026-09-01,2330,2767,2510,2026-09-01T18:02:35.931+00:00
+157101,Karnataka,Koppal,Gangavathi APMC,Rice,Other,Small,2026-09-01,2400,6154,2600,2026-09-01T18:02:35.931+00:00
+156997,Karnataka,Koppal,Gangavathi APMC,Rice,Broken Rice,Small,2026-09-01,2080,2650,2510,2026-09-01T18:02:34.916+00:00
+157137,Karnataka,Chamarajanagar,Gundlupet APMC,Jowar(Sorghum),Jowar Hybrid,Local,2026-09-01,1700,2200,1700,2026-09-01T18:02:35.931+00:00
+157032,Karnataka,Chamarajanagar,Gundlupet APMC,Ragi(Finger Millet),Local,Local,2026-09-01,3170,3350,3170,2026-09-01T18:02:34.917+00:00
+157136,Karnataka,Chamarajanagar,Gundlupet APMC,Tomato,Tomato,Local,2026-09-01,1600,1700,1600,2026-09-01T18:02:35.931+00:00
+157050,Karnataka,Davangere,HarappanaHalli APMC,Maize,Hybrid/Local,FAQ,2026-09-01,2650,2650,2650,2026-09-01T18:02:34.917+00:00
+157159,Karnataka,Davangere,HarappanaHalli APMC,Ragi(Finger Millet),Local,Local,2026-09-01,3250,3400,3345,2026-09-01T18:02:35.931+00:00
+157158,Karnataka,Davangere,Harihara APMC,Paddy(Common),Paddy RNR new,Non-FAQ,2026-09-01,2300,2300,2300,2026-09-01T18:02:35.931+00:00
+157077,Karnataka,Chitradurga,Holalkere APMC,Coconut,Small,Local,2026-09-01,23060,23060,23060,2026-09-01T18:02:34.917+00:00
+157135,Karnataka,Davangere,Honnali APMC,Maize,Local,FAQ,2026-09-01,2000,2000,2000,2026-09-01T18:02:35.931+00:00
+157121,Karnataka,Uttara Kannada,Honnavar APMC,Arecanut(Betelnut/Supari),Hale Chali,Local,2026-09-01,40000,42000,41000,2026-09-01T18:02:35.931+00:00
+157191,Karnataka,Mysuru,Hunsur APMC,Apple,Other,Local,2026-09-01,25000,25000,25000,2026-09-01T18:02:35.931+00:00
+156998,Karnataka,Mysuru,Hunsur APMC,Green Chilli,Green Chilly,Local,2026-09-01,2000,2000,2000,2026-09-01T18:02:34.916+00:00
+156999,Karnataka,Mysuru,Hunsur APMC,Karbuja(Musk Melon),Karbhuja,Local,2026-09-01,10600,10600,10600,2026-09-01T18:02:34.916+00:00
+157105,Karnataka,Mysuru,Hunsur APMC,Pineapple,Pine Apple,Local,2026-09-01,3800,3800,3800,2026-09-01T18:02:35.931+00:00
+157106,Karnataka,Mysuru,Hunsur APMC,Potato,Potato,Local,2026-09-01,1565,1565,1565,2026-09-01T18:02:35.931+00:00
+157073,Karnataka,Kalaburagi,Kalaburagi APMC,Bengal Gram(Gram)(Whole),Average (Whole),Local,2026-09-01,5000,6300,6000,2026-09-01T18:02:34.917+00:00
+157091,Karnataka,Kalaburagi,Kalaburagi APMC,Jowar(Sorghum),Jowar ( White),Non-FAQ,2026-09-01,2200,4800,4300,2026-09-01T18:02:34.917+00:00
+157072,Karnataka,Kalaburagi,Kalaburagi APMC,Rice,Broken Rice,Local,2026-09-01,2350,3100,2700,2026-09-01T18:02:34.917+00:00
+157074,Karnataka,Kalaburagi,Kalaburagi APMC,Safflower,Safflower,Local,2026-09-01,4500,5300,5000,2026-09-01T18:02:34.917+00:00
+157071,Karnataka,Kalaburagi,Kalaburagi APMC,Wheat,Sharbati,Local,2026-09-01,2200,3150,2800,2026-09-01T18:02:34.917+00:00
+157035,Karnataka,Bellary,Kampli APMC,Rice,Medium,Local,2026-09-01,4840,4840,4840,2026-09-01T18:02:34.917+00:00
+157013,Karnataka,Bengaluru South,Kanakapura APMC,Tomato,Hybrid,Medium,2026-09-01,1000,1800,1500,2026-09-01T18:02:34.916+00:00
+157193,Karnataka,Vijayanagara,Kottur APMC,Bajra(Pearl Millet/Cumbu),Hybrid,Local,2026-09-01,2825,2825,2825,2026-09-01T18:02:35.931+00:00
+157109,Karnataka,Vijayanagara,Kottur APMC,Green Gram(Moong)(Whole),Green (Whole),Local,2026-09-01,7421,7421,7421,2026-09-01T18:02:35.931+00:00
+157110,Karnataka,Vijayanagara,Kottur APMC,Groundnut,Natte,Local,2026-09-01,6469,9499,8454,2026-09-01T18:02:35.931+00:00
+157194,Karnataka,Vijayanagara,Kottur APMC,Maize,Hybrid/Local,Local,2026-09-01,1800,1940,1859,2026-09-01T18:02:35.931+00:00
+157108,Karnataka,Vijayanagara,Kottur APMC,Ragi(Finger Millet),Feeds (Poultry Quality),Local,2026-09-01,3535,3689,3612,2026-09-01T18:02:35.931+00:00
+157131,Karnataka,Udupi,Kundapura APMC,Arecanut(Betelnut/Supari),Hosa Chali,Local,2026-09-01,30000,47500,46000,2026-09-01T18:02:35.931+00:00
+157183,Karnataka,Koppal,Kustagi APMC,Sunflower/Sunflower Seed,Hybrid,FAQ,2026-09-01,8000,8000,8000,2026-09-01T18:02:35.931+00:00
+157028,Karnataka,Gadag,Laxmeshwar APMC,Black Gram(Urd Beans)(Whole),Black Gram (Whole),Non-FAQ,2026-09-01,2089,8082,7017,2026-09-01T18:02:34.917+00:00
+157133,Karnataka,Gadag,Laxmeshwar APMC,Green Gram(Moong)(Whole),Green (Whole),Non-FAQ,2026-09-01,1485,9265,7253,2026-09-01T18:02:35.931+00:00
+157134,Karnataka,Gadag,Laxmeshwar APMC,Groundnut,Gejje,Non-FAQ,2026-09-01,4215,6460,5942,2026-09-01T18:02:35.931+00:00
+157029,Karnataka,Gadag,Laxmeshwar APMC,Safflower,Safflower,Non-FAQ,2026-09-01,5079,5079,5079,2026-09-01T18:02:34.917+00:00
+157027,Karnataka,Raichur,Lingasugur APMC,Red gram/Arhar/Tur(whole),Arhar (Whole),Non-FAQ,2026-09-01,8250,8250,8250,2026-09-01T18:02:34.917+00:00
+157026,Karnataka,Raichur,Lingasugur APMC,"Sesamum(Sesame,Gingelly,Til)",White,Non-FAQ,2026-09-01,12750,12750,12750,2026-09-01T18:02:34.917+00:00
+157000,Karnataka,Kolar,Malur APMC,Beans,Beans (Whole),Local,2026-09-01,4000,5000,4580,2026-09-01T18:02:34.916+00:00
+157021,Karnataka,Mandya,Mandya APMC,Gur(Jaggery),Kurikatu,Local,2026-09-01,4400,4850,4600,2026-09-01T18:02:34.917+00:00
+157020,Karnataka,Mandya,Mandya APMC,Gur(Jaggery),Achhu,Local,2026-09-01,4400,4850,4500,2026-09-01T18:02:34.917+00:00
+157019,Karnataka,Mandya,Mandya APMC,Gur(Jaggery),Yellow,Local,2026-09-01,4700,5000,4800,2026-09-01T18:02:34.917+00:00
+157119,Karnataka,Mandya,Mandya APMC,Rice,Broken Rice,Local,2026-09-01,2200,2200,2200,2026-09-01T18:02:35.931+00:00
+157120,Karnataka,Mandya,Mandya APMC,Tender Coconut,Tender Coconut,Local,2026-09-01,15,40,25,2026-09-01T18:02:35.931+00:00
+157002,Karnataka,Mysuru,Mysuru APMC,Apple,Kasmir/Shimla - II,Medium,2026-09-01,15160,16680,16000,2026-09-01T18:02:34.916+00:00
+157003,Karnataka,Mysuru,Mysuru APMC,Mango,Other,Medium,2026-09-01,8500,8500,8500,2026-09-01T18:02:34.916+00:00
+157004,Karnataka,Mysuru,Mysuru APMC,Mousambi(Sweet Lime),Mousambi,Medium,2026-09-01,4760,4760,4760,2026-09-01T18:02:34.916+00:00
+157192,Karnataka,Mysuru,Mysuru APMC,Papaya,Papaya,Medium,2026-09-01,2280,2450,2350,2026-09-01T18:02:35.931+00:00
+157190,Karnataka,Raichur,Raichur APMC,Groundnut,Shelled (Bunch),Grade Range-1,2026-09-01,6096,6096,6096,2026-09-01T18:02:35.931+00:00
+157104,Karnataka,Raichur,Raichur APMC,Paddy(Common),Sona Mahsuri,FAQ,2026-09-01,2811,3269,3018,2026-09-01T18:02:35.931+00:00
+157060,Karnataka,Bengaluru South,Ramanagara APMC,Beans,Beans (Whole),Local,2026-09-01,4000,6000,5000,2026-09-01T18:02:34.917+00:00
+157140,Karnataka,Bengaluru South,Ramanagara APMC,Beetroot,Beetroot,Local,2026-09-01,3000,3600,3200,2026-09-01T18:02:35.931+00:00
+157143,Karnataka,Bengaluru South,Ramanagara APMC,Bitter gourd,Bitter Gourd,Local,2026-09-01,3000,4000,3500,2026-09-01T18:02:35.931+00:00
+157057,Karnataka,Bengaluru South,Ramanagara APMC,Capsicum,Capsicum,Local,2026-09-01,3000,4500,4000,2026-09-01T18:02:34.917+00:00
+157056,Karnataka,Bengaluru South,Ramanagara APMC,Cauliflower,Cauliflower,Local,2026-09-01,2000,3300,3000,2026-09-01T18:02:34.917+00:00
+157059,Karnataka,Bengaluru South,Ramanagara APMC,Chilly Capsicum,Chilly Capsicum,Local,2026-09-01,4000,5600,5000,2026-09-01T18:02:34.917+00:00
+157141,Karnataka,Bengaluru South,Ramanagara APMC,Cucumbar(Kheera),Cucumbar,Local,2026-09-01,1000,1600,1400,2026-09-01T18:02:35.931+00:00
+157142,Karnataka,Bengaluru South,Ramanagara APMC,Green Avare(W),Green Avare (W),Local,2026-09-01,3000,4000,3600,2026-09-01T18:02:35.931+00:00
+157144,Karnataka,Bengaluru South,Ramanagara APMC,Green Chilli,Green Chilly,Local,2026-09-01,3000,5000,4400,2026-09-01T18:02:35.931+00:00
+157058,Karnataka,Bengaluru South,Ramanagara APMC,Knool Khol,Knool Khol,Local,2026-09-01,2000,2800,2200,2026-09-01T18:02:34.917+00:00
+157139,Karnataka,Bengaluru South,Ramanagara APMC,Tomato,Tomato,Local,2026-09-01,1000,1800,1500,2026-09-01T18:02:35.931+00:00
+157189,Karnataka,Haveri,Ranebennur APMC,Carrot,Carrot,Medium,2026-09-01,1500,3500,3000,2026-09-01T18:02:35.931+00:00
+157102,Karnataka,Haveri,Ranebennur APMC,Maize,Local,FAQ,2026-09-01,2290,2728,2500,2026-09-01T18:02:35.931+00:00
+157103,Karnataka,Haveri,Ranebennur APMC,Tomato,Tomato,Medium,2026-09-01,300,1000,800,2026-09-01T18:02:35.931+00:00
+157128,Karnataka,Shivamogga,Sagar APMC,Arecanut(Betelnut/Supari),Rashi,Local,2026-09-01,45999,51529,50599,2026-09-01T18:02:35.931+00:00
+157129,Karnataka,Shivamogga,Sagar APMC,Arecanut(Betelnut/Supari),Sippegotu,Local,2026-09-01,21899,21899,21899,2026-09-01T18:02:35.931+00:00
+157130,Karnataka,Shivamogga,Sagar APMC,Black pepper,Other,Local,2026-09-01,62100,62100,62100,2026-09-01T18:02:35.931+00:00
+157107,Karnataka,Shivamogga,Shikaripura APMC,Maize,Local,FAQ,2026-09-01,2500,2725,2608,2026-09-01T18:02:35.931+00:00
+157001,Karnataka,Shivamogga,Shikaripura APMC,Paddy(Common),Paddy,FAQ,2026-09-01,3800,3880,3849,2026-09-01T18:02:34.916+00:00
+157008,Karnataka,Uttara Kannada,Siddapur APMC,Arecanut(Betelnut/Supari),Bilegotu,Large,2026-09-01,25700,33699,29399,2026-09-01T18:02:34.916+00:00
+157112,Karnataka,Uttara Kannada,Siddapur APMC,Arecanut(Betelnut/Supari),Kempugotu,Large,2026-09-01,28111,36119,33489,2026-09-01T18:02:35.931+00:00
+157007,Karnataka,Uttara Kannada,Siddapur APMC,Arecanut(Betelnut/Supari),Chali,Large,2026-09-01,38099,47339,45899,2026-09-01T18:02:34.916+00:00
+157099,Karnataka,Raichur,Sindhanur APMC,Jowar(Sorghum),Jowar Hybrid,FAQ,2026-09-01,2610,2610,2610,2026-09-01T18:02:35.931+00:00
+157098,Karnataka,Raichur,Sindhanur APMC,Paddy(Common),Paddy RNR Old,FAQ,2026-09-01,2300,4060,3000,2026-09-01T18:02:35.931+00:00
+157186,Karnataka,Raichur,Sindhanur APMC,Sunflower/Sunflower Seed,Sunflower,FAQ,2026-09-01,7790,8000,8000,2026-09-01T18:02:35.931+00:00
+157125,Karnataka,Uttara Kannada,Sirsi APMC,Arecanut(Betelnut/Supari),Chali,Local,2026-09-01,42250,48320,45482,2026-09-01T18:02:35.931+00:00
+157126,Karnataka,Uttara Kannada,Sirsi APMC,Arecanut(Betelnut/Supari),Bilegotu,Local,2026-09-01,23869,32890,29618,2026-09-01T18:02:35.931+00:00
+157127,Karnataka,Uttara Kannada,Sirsi APMC,Arecanut(Betelnut/Supari),Rashi,Local,2026-09-01,48205,52250,50958,2026-09-01T18:02:35.931+00:00
+157160,Karnataka,Mandya,Srirangapattana APMC,Gur(Jaggery),Kurikatu,Local,2026-09-01,4000,5200,4000,2026-09-01T18:02:35.931+00:00
+157161,Karnataka,Mandya,Srirangapattana APMC,Tender Coconut,Tender Coconut,Local,2026-09-01,20000,25000,25000,2026-09-01T18:02:35.931+00:00
+157111,Karnataka,Vijayapura,Talikot APMC,Red gram/Arhar/Tur(whole),Arhar (Whole),FAQ,2026-09-01,7579,8089,7949,2026-09-01T18:02:35.931+00:00
+157030,Karnataka,Udupi,Udupi APMC,Onion,Onion,Local,2026-09-01,3700,3800,3800,2026-09-01T18:02:34.917+00:00
+157031,Karnataka,Udupi,Udupi APMC,Potato,Potato,Local,2026-09-01,1200,1300,1300,2026-09-01T18:02:34.917+00:00
+157053,Karnataka,Vijayapura,Vijayapura APMC,Black Gram(Urd Beans)(Whole),Black Gram (Whole),Local,2026-09-01,7955,7955,7955,2026-09-01T18:02:34.917+00:00
+157138,Karnataka,Vijayapura,Vijayapura APMC,Copra,Copra,Local,2026-09-01,11500,12500,12100,2026-09-01T18:02:35.931+00:00
+157054,Karnataka,Vijayapura,Vijayapura APMC,Cotton,Bunny,Local,2026-09-01,8881,10061,9839,2026-09-01T18:02:34.917+00:00
+157055,Karnataka,Vijayapura,Vijayapura APMC,Ground Nut Seed,Ground Nut Seed,Local,2026-09-01,8500,8500,8500,2026-09-01T18:02:34.917+00:00
+157052,Karnataka,Vijayapura,Vijayapura APMC,Wheat,Sona,Local,2026-09-01,2583,3250,2594,2026-09-01T18:02:34.917+00:00
+157067,Karnataka,Uttara Kannada,Yellapur APMC,Arecanut(Betelnut/Supari),Cqca,Local,2026-09-01,12000,29299,26899,2026-09-01T18:02:34.917+00:00
+157172,Karnataka,Uttara Kannada,Yellapur APMC,Arecanut(Betelnut/Supari),Kempugotu,Local,2026-09-01,18000,34969,31099,2026-09-01T18:02:35.931+00:00
+157068,Karnataka,Uttara Kannada,Yellapur APMC,Black pepper,Other,Local,2026-09-01,54101,64819,63199,2026-09-01T18:02:34.917+00:00
+157173,Karnataka,Uttara Kannada,Yellapur APMC,Coconut,Medium,Local,2026-09-01,23000,23000,23000,2026-09-01T18:02:35.931+00:00

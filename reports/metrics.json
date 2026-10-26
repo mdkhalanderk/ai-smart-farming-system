@@ -1,0 +1,94 @@
+{
+  "dataset": {
+    "source": "PlantVillage Tomato Color",
+    "total_diseased_images": 18160,
+    "num_classes": 10,
+    "train_count": 12712,
+    "val_count": 2724,
+    "test_count": 2724,
+    "split_ratio": "70% / 15% / 15%"
+  },
+  "model": {
+    "name": "VMamba / VSSM Tiny",
+    "pretrained": "vssm_tiny_0230_ckpt_epoch_262.pth",
+    "input_size": "224x224",
+    "total_parameters": 29952586,
+    "trainable_parameters": 29952586
+  },
+  "training": {
+    "best_epoch": 5,
+    "best_val_accuracy": 99.85,
+    "training_time_seconds": 1643.9
+  },
+  "test_results": {
+    "accuracy": 99.82,
+    "precision_macro": 99.84,
+    "recall_macro": 99.72,
+    "f1_macro": 99.78,
+    "precision_weighted": 99.82,
+    "recall_weighted": 99.82,
+    "f1_weighted": 99.82
+  },
+  "per_class_metrics": {
+    "Bacterial Spot": {
+      "precision": 1.0,
+      "recall": 0.9969,
+      "f1_score": 0.9984,
+      "support": 319
+    },
+    "Early Blight": {
+      "precision": 1.0,
+      "recall": 0.98,
+      "f1_score": 0.9899,
+      "support": 150
+    },
+    "Late Blight": {
+      "precision": 0.9931,
+      "recall": 1.0,
+      "f1_score": 0.9965,
+      "support": 286
+    },
+    "Leaf Mold": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 143
+    },
+    "Septoria Leaf Spot": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 265
+    },
+    "Spider Mites \u2013 Two-Spotted Spider Mite": {
+      "precision": 0.9921,
+      "recall": 1.0,
+      "f1_score": 0.996,
+      "support": 252
+    },
+    "Target Spot": {
+      "precision": 1.0,
+      "recall": 0.9953,
+      "f1_score": 0.9976,
+      "support": 211
+    },
+    "Tomato Mosaic Virus": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 56
+    },
+    "Tomato Yellow Leaf Curl Virus": {
+      "precision": 0.9988,
+      "recall": 1.0,
+      "f1_score": 0.9994,
+      "support": 804
+    },
+    "Healthy": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 238
+    }
+  }
+}

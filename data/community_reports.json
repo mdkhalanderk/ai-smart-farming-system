@@ -1,0 +1,15 @@
+[
+  {
+    "id": "5dc434ba-6d7f-4082-a740-b009e54e9f0a",
+    "farmer_id": "26a19cc5-1274-48d3-b676-d8f1358232ed",
+    "district": "Kolar",
+    "crop_name": "Tomato",
+    "disease_name": "Late Blight",
+    "confidence": 0.9859,
+    "warning_title": "Late Blight",
+    "warning_message": "Late Blight has recently been detected on Tomato crops in your area. Watch your plants for large, pale green to dark water-soaked patches on leaves that quickly turn purplish-black. white cottony fungal growth appears under leaves in moist weather.; inspect affected crops, immediately isolate affected areas, prune infected foliage in dry afternoon hours, and avoid touching healthy plants after handling infected ones., plant resistant hybrids (e.g. arka rakshak), destroy volunteer solanaceous plants, and space rows wide to allow fast leaf drying., and contact an agricultural expert if symptoms spread.",
+    "is_active": true,
+    "detected_at": "2026-10-01T06:26:28.003583",
+    "created_at": "2026-10-01T06:26:28.003604"
+  }
+]

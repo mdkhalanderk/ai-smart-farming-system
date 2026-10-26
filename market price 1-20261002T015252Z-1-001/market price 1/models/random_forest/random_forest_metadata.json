@@ -1,0 +1,31 @@
+{
+    "model": "RandomForestRegressor",
+    "weather_features": [
+        "temperature",
+        "humidity",
+        "rain",
+        "wind_speed"
+    ],
+    "features": [
+        "year",
+        "month",
+        "day",
+        "day_of_week",
+        "day_of_year",
+        "season",
+        "commodity_code",
+        "market_code",
+        "district_code",
+        "variety_code",
+        "grade_code",
+        "lag_1",
+        "lag_3",
+        "lag_7",
+        "rolling_7",
+        "temperature",
+        "humidity",
+        "rain",
+        "wind_speed"
+    ],
+    "target": "price_target"
+}

@@ -1,0 +1,23 @@
+==========================================
+VMamba / VSSM Tiny Tomato Disease Classification Report
+==========================================
+
+Test Accuracy: 99.82%
+Macro F1-Score: 99.78%
+
+                                        precision    recall  f1-score   support
+
+                        Bacterial Spot     1.0000    0.9969    0.9984       319
+                          Early Blight     1.0000    0.9800    0.9899       150
+                           Late Blight     0.9931    1.0000    0.9965       286
+                             Leaf Mold     1.0000    1.0000    1.0000       143
+                    Septoria Leaf Spot     1.0000    1.0000    1.0000       265
+Spider Mites – Two-Spotted Spider Mite     0.9921    1.0000    0.9960       252
+                           Target Spot     1.0000    0.9953    0.9976       211
+                   Tomato Mosaic Virus     1.0000    1.0000    1.0000        56
+         Tomato Yellow Leaf Curl Virus     0.9988    1.0000    0.9994       804
+                               Healthy     1.0000    1.0000    1.0000       238
+
+                              accuracy                         0.9982      2724
+                             macro avg     0.9984    0.9972    0.9978      2724
+                          weighted avg     0.9982    0.9982    0.9982      2724
