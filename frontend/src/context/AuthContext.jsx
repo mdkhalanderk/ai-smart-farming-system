@@ -430,6 +430,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Farmer Sign In with seamless fallback
+  const resetPassword = async (email, newPassword) => {
+    setAuthError(null);
+    const cleanEmail = email.trim().toLowerCase();
+    const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: cleanEmail,
+        new_password: newPassword.trim()
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || 'Failed to update password.');
+    }
+
+    const token = data.session?.access_token;
+    if (token) {
+      localStorage.setItem(BACKEND_TOKEN_KEY, token);
+    }
+    setUser(data.user);
+    setSession(data.session);
+    setProfile(data.profile);
+    setAuthProvider('backend');
+    return data;
+  };
+
   // Farmer Sign Out
   const signOut = async () => {
     setAuthError(null);
@@ -563,6 +592,7 @@ export const AuthProvider = ({ children }) => {
         configStatus,
         signUp,
         signIn,
+        resetPassword,
         signOut,
         fetchProfile,
         saveProfile

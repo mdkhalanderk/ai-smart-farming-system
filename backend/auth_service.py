@@ -159,6 +159,7 @@ def register_user(email: str, password: str, extra_data: Optional[Dict[str, Any]
 def login_user(email: str, password: str) -> Dict[str, Any]:
     """Authenticates a farmer, validates password hash, and issues a session token."""
     email = email.strip().lower()
+    password = password.strip()
     conn = get_db()
     try:
         cursor = conn.execute("SELECT id, email, password_hash, salt, created_at FROM users WHERE email = ?", (email,))
@@ -190,6 +191,52 @@ def login_user(email: str, password: str) -> Dict[str, Any]:
             "session": {"access_token": token, "expires_at": expires_at, "token_type": "bearer"},
             "profile": get_profile_by_user_id(user_id)
         }
+    finally:
+        conn.close()
+
+def reset_password(email: str, new_password: str) -> Dict[str, Any]:
+    """Updates password for an existing registered farmer and generates a fresh session."""
+    email = email.strip().lower()
+    new_password = new_password.strip()
+    if len(new_password) < 6:
+        raise ValueError("New password must be at least 6 characters long.")
+    
+    conn = get_db()
+    try:
+        with conn:
+            cursor = conn.execute("SELECT id FROM users WHERE email = ?", (email,))
+            row = cursor.fetchone()
+            if not row:
+                raise ValueError("No account found with this email address.")
+            
+            user_id = row["id"]
+            salt_bytes = _generate_salt()
+            salt_hex = salt_bytes.hex()
+            pw_hash = _hash_password(new_password, salt_bytes)
+            
+            conn.execute(
+                "UPDATE users SET password_hash = ?, salt = ? WHERE id = ?",
+                (pw_hash, salt_hex, user_id)
+            )
+            # Invalidate old sessions
+            conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+            
+            # Issue a new active session token so the user is immediately authenticated
+            now_iso = datetime.utcnow().isoformat() + "Z"
+            token = secrets.token_urlsafe(32)
+            expires_at = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
+            conn.execute(
+                "INSERT INTO sessions (token, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)",
+                (token, user_id, expires_at, now_iso)
+            )
+            
+            return {
+                "status": "success",
+                "message": "Password updated successfully.",
+                "user": {"id": user_id, "email": email, "created_at": now_iso},
+                "session": {"access_token": token, "expires_at": expires_at, "token_type": "bearer"},
+                "profile": get_profile_by_user_id(user_id)
+            }
     finally:
         conn.close()
 

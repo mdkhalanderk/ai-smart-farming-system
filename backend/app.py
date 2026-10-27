@@ -498,7 +498,7 @@ def predict_yield_endpoint(req: YieldPredictRequest):
 # ----------------------------------------------------
 
 from backend.auth_service import (
-    register_user, login_user, get_user_from_token, logout_user,
+    register_user, login_user, reset_password, get_user_from_token, logout_user,
     get_profile_by_user_id, update_profile
 )
 
@@ -516,6 +516,10 @@ class AuthSignupRequest(BaseModel):
 class AuthLoginRequest(BaseModel):
     email: str
     password: str
+
+class AuthResetPasswordRequest(BaseModel):
+    email: str
+    new_password: str
 
 class ProfileUpdateRequest(BaseModel):
     full_name: Optional[str] = None
@@ -570,6 +574,16 @@ def auth_login_endpoint(req: AuthLoginRequest):
         raise HTTPException(status_code=401, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
+
+@app.post("/api/auth/reset-password")
+def auth_reset_password_endpoint(req: AuthResetPasswordRequest):
+    try:
+        res = reset_password(email=req.email, new_password=req.new_password)
+        return {"status": "success", **res}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Password update error: {str(e)}")
 
 @app.get("/api/auth/me")
 def auth_me_endpoint(authorization: Optional[str] = Header(None)):
