@@ -200,7 +200,7 @@ def get_weather_forecast(market_name: str) -> pd.DataFrame:
         "timezone": "Asia/Kolkata",
     }
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, params=params, timeout=2.5)
         if response.status_code == 200:
             data = response.json()
             daily = data.get("daily", {})
@@ -223,13 +223,13 @@ def get_weather_forecast(market_name: str) -> pd.DataFrame:
 
 
 def fetch_current_mandi_price(market: str, commodity: str) -> Optional[Dict[str, Any]]:
-    """Query live Mandi API for current price observation."""
+    """Query live Mandi API for current price observation with fast offline fallback."""
     try:
         response = requests.get(
             MANDI_API_URL,
             params={"state": "Karnataka", "commodity": commodity},
             headers={"Accept": "application/json"},
-            timeout=15,
+            timeout=2.0,
         )
         if response.status_code != 200:
             return None
