@@ -38,3 +38,6 @@ venv/
 *.db
 *.sqlite
 *.sqlite3
+
+# Local testing scripts and temporary files
+/scratch/
