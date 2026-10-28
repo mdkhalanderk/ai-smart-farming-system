@@ -4,8 +4,11 @@ import json
 import torch
 import torch.nn.functional as F
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Header
+import logging
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Header, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from torchvision import transforms
 from dotenv import load_dotenv
 import sys
@@ -43,6 +46,32 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Enable response compression for payloads > 1KB
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Production security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+# Production unhandled exception handler
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Unhandled server error on {request.method} {request.url.path}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "message": "An internal server error occurred. Please contact system administrator or try again.",
+            "path": request.url.path
+        }
+    )
 
 # Global variables for model and configuration
 MODEL = None
@@ -108,6 +137,17 @@ def load_vmamba_model():
 def startup_event():
     load_vmamba_model()
 
+@app.get("/")
+def root_endpoint():
+    return {
+        "name": "Smart Crop Advisory System API",
+        "version": "1.0.0",
+        "status": "online",
+        "docs_url": "/docs",
+        "health_url": "/health"
+    }
+
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
     return {
