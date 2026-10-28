@@ -128,11 +128,6 @@ export const Navbar = () => {
                   <span className="hidden xl:inline">{t('nav_community', currentLang)}</span>
                   <span className="xl:hidden">Community</span>
                 </Link>
-
-                <Link to="/reports" className={navLinkClass('/reports')}>
-                  <BarChart3 className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span>{t('nav_reports', currentLang)}</span>
-                </Link>
               </>
             ) : (
               <>
@@ -352,14 +347,6 @@ export const Navbar = () => {
               >
                 <Users className="w-4 h-4" />
                 <span>{t('nav_community', currentLang)}</span>
-              </Link>
-              <Link
-                to="/reports"
-                onClick={() => setMobileMenuOpen(false)}
-                className={navLinkClass('/reports')}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>{t('nav_reports', currentLang)}</span>
               </Link>
 
               <div className="pt-3 border-t border-[#e4dfd5]">

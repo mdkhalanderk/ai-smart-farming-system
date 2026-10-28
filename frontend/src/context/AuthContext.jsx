@@ -29,16 +29,20 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  const [language, setLanguageState] = useState(() => {
-    try {
-      const p = localStorage.getItem(CACHED_PROFILE_KEY);
-      if (p) {
-        const parsed = JSON.parse(p);
-        if (parsed.preferred_language) return parsed.preferred_language;
+  const [language, setLanguageState] = useState(() => getSavedLanguage());
+
+  // Listen for language changes across components
+  useEffect(() => {
+    const handleLangChange = (e) => {
+      if (e?.detail) {
+        setLanguageState(e.detail);
       }
-    } catch {}
-    return getSavedLanguage();
-  });
+    };
+    window.addEventListener('app-language-changed', handleLangChange);
+    return () => {
+      window.removeEventListener('app-language-changed', handleLangChange);
+    };
+  }, []);
 
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -62,9 +66,14 @@ export const AuthProvider = ({ children }) => {
     setProfileState(newProfile);
     if (newProfile) {
       try {
-        localStorage.setItem(CACHED_PROFILE_KEY, JSON.stringify(newProfile));
+        const activeLang = getSavedLanguage();
+        const merged = { ...newProfile, preferred_language: activeLang || newProfile.preferred_language || 'English' };
+        localStorage.setItem(CACHED_PROFILE_KEY, JSON.stringify(merged));
       } catch {}
-      if (newProfile.preferred_language) {
+
+      // Only adopt profile language if user hasn't explicitly chosen a language in localStorage
+      const savedLang = localStorage.getItem('smart_crop_lang');
+      if (!savedLang && newProfile.preferred_language) {
         setLanguageState(newProfile.preferred_language);
         setSavedLanguage(newProfile.preferred_language);
       }
@@ -85,7 +94,7 @@ export const AuthProvider = ({ children }) => {
       return updated;
     });
 
-    // Silently notify backend
+    // Notify backend
     const token = localStorage.getItem(BACKEND_TOKEN_KEY);
     if (token) {
       fetch(`${API_BASE_URL}/api/auth/profile`, {
@@ -97,7 +106,12 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ preferred_language: newLang })
       }).catch(() => {});
     }
-  }, []);
+
+    // Also update Supabase if user logged in
+    if (user?.id && isSupabaseConfigured) {
+      supabase.from('farmer_profiles').update({ preferred_language: newLang }).eq('id', user.id).then(() => {}).catch(() => {});
+    }
+  }, [user]);
 
   // Helper to fetch profile from backend
   const fetchBackendProfile = useCallback(async (token) => {

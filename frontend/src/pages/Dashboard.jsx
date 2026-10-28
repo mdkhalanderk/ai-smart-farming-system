@@ -19,7 +19,6 @@ import {
   FileText
 } from 'lucide-react';
 import { t } from '../lib/i18n';
-import { IndiaAgriculturalMap } from '../components/IndiaAgriculturalMap';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -94,9 +93,6 @@ export const Dashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* Interactive India Agricultural Map & Regional Crop Intelligence */}
-        <IndiaAgriculturalMap defaultArea={profile?.taluk || farmerDistrict} />
 
         {/* Primary Action Modules Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

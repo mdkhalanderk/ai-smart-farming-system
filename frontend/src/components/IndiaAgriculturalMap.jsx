@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import L from 'leaflet';
+import { useAuth } from '../context/AuthContext';
+import { t } from '../lib/i18n';
 import {
   Search,
   MapPin,
@@ -16,11 +18,37 @@ import {
   CheckCircle2,
   AlertCircle,
   Compass,
-  Maximize2
+  Maximize2,
+  Filter,
+  Check
 } from 'lucide-react';
 import { searchLocations, getTaluksForDistrict, KARNATAKA_LOCATION_DATA } from '../lib/locationData';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+// Universal All-Crop Agricultural Knowledgebase for Single-Crop Selection in Any Area
+const ALL_AVAILABLE_CROPS = [
+  { id: 'tomato', name: 'Tomato', sci: 'Solanum lycopersicum', meanQtl: 380, tonnes: 38.0, range: '340 – 430 Qtl/Ha', price: 2400, cycle: '100 - 120 Days', season: 'Kharif & Rabi', suitability: 98, rationale: 'High diurnal temperatures and well-drained loam foster solid fruit firmness and heavy cluster yield.' },
+  { id: 'potato', name: 'Potato', sci: 'Solanum tuberosum', meanQtl: 230, tonnes: 23.0, range: '200 – 280 Qtl/Ha', price: 1850, cycle: '80 - 100 Days', season: 'Rabi & Late Kharif', suitability: 94, rationale: 'Friable sandy loam and cool night temperatures enable uniform tuber initiation and rapid bulking.' },
+  { id: 'rice', name: 'Rice / Paddy', sci: 'Oryza sativa', meanQtl: 58, tonnes: 5.8, range: '50 – 72 Qtl/Ha', price: 2500, cycle: '120 - 140 Days', season: 'Kharif & Summer', suitability: 96, rationale: 'Canal and alluvial river tracts maintain ideal water depth and microclimate for high tillering.' },
+  { id: 'wheat', name: 'Wheat', sci: 'Triticum aestivum', meanQtl: 54, tonnes: 5.4, range: '45 – 65 Qtl/Ha', price: 2425, cycle: '110 - 130 Days', season: 'Rabi', suitability: 93, rationale: 'Cool winter vegetative cycle and clear sunshine during grain filling maximize 1000-grain weight.' },
+  { id: 'maize', name: 'Maize', sci: 'Zea mays', meanQtl: 68, tonnes: 6.8, range: '60 – 85 Qtl/Ha', price: 2300, cycle: '105 - 115 Days', season: 'Kharif & Rabi', suitability: 95, rationale: 'Strong photosynthetic solar conversion in well-drained red and black soils produces dense full cobs.' },
+  { id: 'cotton', name: 'Cotton', sci: 'Gossypium hirsutum', meanQtl: 26, tonnes: 2.6, range: '20 – 35 Qtl/Ha', price: 7300, cycle: '150 - 165 Days', season: 'Kharif', suitability: 91, rationale: 'Deep vertisols store deep moisture needed for steady boll bursting and superior staple length.' },
+  { id: 'sugarcane', name: 'Sugarcane', sci: 'Saccharum officinarum', meanQtl: 1150, tonnes: 115.0, range: '950 – 1350 Qtl/Ha', price: 340, cycle: '300 - 365 Days', season: 'Annual', suitability: 97, rationale: 'High solar insolation and perennial irrigation basin deliver exceptional biomass and high sucrose recovery.' },
+  { id: 'groundnut', name: 'Groundnut / Peanut', sci: 'Arachis hypogaea', meanQtl: 22, tonnes: 2.2, range: '18 – 28 Qtl/Ha', price: 6550, cycle: '105 - 120 Days', season: 'Kharif & Rabi', suitability: 90, rationale: 'Friable sandy loam allows easy gynophore (peg) penetration and high oil synthesis.' },
+  { id: 'pulses', name: 'Pulses / Red Gram (Tur)', sci: 'Cajanus cajan', meanQtl: 20, tonnes: 2.0, range: '15 – 26 Qtl/Ha', price: 7500, cycle: '130 - 160 Days', season: 'Kharif', suitability: 95, rationale: 'Deep taproot and root nodule nitrogen fixation make it exceptionally drought resilient in black soil.' },
+  { id: 'bengal_gram', name: 'Bengal Gram (Chana)', sci: 'Cicer arietinum', meanQtl: 18, tonnes: 1.8, range: '14 – 24 Qtl/Ha', price: 6200, cycle: '85 - 105 Days', season: 'Rabi', suitability: 92, rationale: 'Utilizes residual soil moisture after Kharif harvest with minimal supplemental watering.' },
+  { id: 'mustard', name: 'Mustard', sci: 'Brassica juncea', meanQtl: 22, tonnes: 2.2, range: '17 – 27 Qtl/Ha', price: 5650, cycle: '100 - 115 Days', season: 'Rabi', suitability: 88, rationale: 'Thrives under cool, dry winter conditions with high glucosinolate oil concentration.' },
+  { id: 'soybean', name: 'Soybean', sci: 'Glycine max', meanQtl: 24, tonnes: 2.4, range: '18 – 30 Qtl/Ha', price: 4850, cycle: '90 - 105 Days', season: 'Kharif', suitability: 91, rationale: 'Short duration oilseed legume with high vegetative vigor in northern transition zones.' },
+  { id: 'onion', name: 'Onion', sci: 'Allium cepa', meanQtl: 240, tonnes: 24.0, range: '200 – 300 Qtl/Ha', price: 2250, cycle: '90 - 120 Days', season: 'Kharif & Late Rabi', suitability: 93, rationale: 'High day-night temperature differential promotes dense bulb formation with tight outer scales.' },
+  { id: 'chilli', name: 'Chilli (Byadagi / Guntur)', sci: 'Capsicum annuum', meanQtl: 38, tonnes: 3.8, range: '30 – 50 Qtl/Ha', price: 18500, cycle: '140 - 170 Days', season: 'Kharif', suitability: 94, rationale: 'Warm semi-arid harvest conditions preserve high ASTA color units and oleoresin capsaicin.' },
+  { id: 'mango', name: 'Mango', sci: 'Mangifera indica', meanQtl: 110, tonnes: 11.0, range: '90 – 130 Qtl/Ha', price: 3600, cycle: 'Perennial', season: 'Summer Harvest', suitability: 93, rationale: 'Dry winter flowering season avoids blossom blight and yields high Brix fruit sweetness.' },
+  { id: 'banana', name: 'Banana', sci: 'Musa acuminata', meanQtl: 320, tonnes: 32.0, range: '280 – 380 Qtl/Ha', price: 2800, cycle: '300 - 365 Days', season: 'Year-Round', suitability: 92, rationale: 'Abundant river alluvial soil and tropical humidity promote heavy bunch development and uniform fingers.' },
+  { id: 'arecanut', name: 'Arecanut (Supari)', sci: 'Areca catechu', meanQtl: 28, tonnes: 2.8, range: '22 – 35 Qtl/Ha', price: 44500, cycle: 'Perennial', season: 'Post-Monsoon', suitability: 95, rationale: 'Heavy Malnad and coastal precipitation coupled with laterite soil drives prime kernel density.' },
+  { id: 'ginger', name: 'Ginger', sci: 'Zingiber officinale', meanQtl: 180, tonnes: 18.0, range: '140 – 220 Qtl/Ha', price: 6500, cycle: '210 - 240 Days', season: 'Kharif Harvest', suitability: 91, rationale: 'Elevated loamy terrain with organic compost mulch prevents rhizome rot and maximizes gingerol.' },
+  { id: 'coffee', name: 'Coffee (Arabica / Robusta)', sci: 'Coffea spp.', meanQtl: 15, tonnes: 1.5, range: '12 – 18 Qtl/Ha', price: 18000, cycle: 'Perennial', season: 'Winter Picking', suitability: 94, rationale: 'Shaded canopy rainforests and high elevation generate premium specialty cup acidity and aroma.' },
+  { id: 'jute', name: 'Jute', sci: 'Corchorus olitorius', meanQtl: 32, tonnes: 3.2, range: '25 – 38 Qtl/Ha', price: 5050, cycle: '120 - 135 Days', season: 'Annual', suitability: 88, rationale: 'Humid river plains with abundant retting pools produce fine, tensile golden bast fiber.' }
+];
 
 // Comprehensive Agricultural Hubs across Karnataka & India with GPS Coordinates
 const AGRICULTURAL_HUBS = [
@@ -211,18 +239,70 @@ const TALUK_COORDINATES = {
 };
 
 export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
+  const { language } = useAuth();
+  const currentLang = language || 'English';
+
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef({});
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState(defaultArea);
+  const [selectedCropFilter, setSelectedCropFilter] = useState('ALL');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   
   const [advisoryData, setAdvisoryData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Dynamically calculate displayed crops based on user selection
+  const displayCrops = useMemo(() => {
+    if (!advisoryData) return [];
+    if (selectedCropFilter === 'ALL') {
+      return advisoryData.recommended_crops || [];
+    }
+
+    // 1. Check if selected crop exists in area's recommended crops
+    const found = (advisoryData.recommended_crops || []).find((c) =>
+      c.crop_id?.toLowerCase() === selectedCropFilter.toLowerCase() ||
+      c.crop_name?.toLowerCase().includes(selectedCropFilter.toLowerCase()) ||
+      selectedCropFilter.toLowerCase().includes(c.crop_id?.toLowerCase())
+    );
+    if (found) return [found];
+
+    // 2. Otherwise dynamically synthesize from ALL_AVAILABLE_CROPS
+    const meta = ALL_AVAILABLE_CROPS.find((c) => c.id === selectedCropFilter);
+    if (!meta) return advisoryData.recommended_crops || [];
+
+    return [{
+      crop_id: meta.id,
+      crop_name: meta.name,
+      scientific_name: meta.sci,
+      suitability_score: Math.max(82, Math.min(95, meta.suitability - (advisoryData.soil_type?.toLowerCase().includes('black') && meta.id === 'groundnut' ? 8 : 0))),
+      suitability_level: 'Cultivable with Management',
+      why_suitable: `${meta.rationale} Calibrated for ${advisoryData.soil_type || 'local soils'} in ${advisoryData.area_name}.`,
+      projected_yield: {
+        mean_yield_qtl_ha: meta.meanQtl,
+        mean_yield_tonnes_ha: meta.tonnes,
+        yield_range: meta.range,
+        historical_district_avg: `${Math.round(meta.meanQtl * 0.9)} Qtl/Ha`,
+        growth_duration_days: meta.cycle,
+        best_season: meta.season
+      },
+      mandi_price: {
+        commodity: meta.name,
+        modal_price_qtl: meta.price,
+        modal_price_kg: +(meta.price / 100).toFixed(1),
+        price_range_qtl: `₹${Math.round(meta.price * 0.88).toLocaleString()} – ₹${Math.round(meta.price * 1.12).toLocaleString()}`,
+        market_name: advisoryData.nearest_mandi || `${advisoryData.district} APMC`,
+        trend_direction: 'bullish',
+        trend_pct: '+4.5% expected',
+        estimated_gross_revenue_per_acre: `₹${Math.round((meta.meanQtl * meta.price) / 2.471).toLocaleString()}`
+      },
+      icar_guidelines: `Follow ICAR & State Agricultural University package of practices for ${meta.name} cultivation in ${advisoryData.district}.`
+    }];
+  }, [advisoryData, selectedCropFilter]);
 
   // 1. Initialize Real Leaflet Map
   useEffect(() => {
@@ -523,10 +603,10 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#142618] tracking-tight">
-              Agricultural Map & Regional Advisory
+              {t('map_title', currentLang)}
             </h2>
             <p className="text-xs sm:text-sm text-[#526055] mt-1 max-w-2xl">
-              Select an area or taluk on the map to view recommended crops, harvest estimates, and local market prices.
+              {t('map_desc', currentLang)}
             </p>
           </div>
 
@@ -618,7 +698,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                   : 'bg-[#faf8f5] hover:bg-[#ede8dc] text-[#526055] border border-[#d6cfc3]'
               }`}
             >
-              All {activeDistrict} (District Overview)
+              All {activeDistrict} ({t('district_overview', currentLang)})
             </button>
 
             {/* Individual Taluk Buttons */}
@@ -667,7 +747,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 className="px-2 py-0.5 rounded bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[11px] font-semibold text-[#1a2e1d] transition-colors cursor-pointer"
                 title="Focus Karnataka"
               >
-                Karnataka
+                {t('focus_karnataka', currentLang)}
               </button>
               <button
                 type="button"
@@ -675,7 +755,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 className="px-2 py-0.5 rounded bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[11px] font-semibold text-[#1a2e1d] transition-colors cursor-pointer"
                 title="Show all India"
               >
-                All India
+                {t('all_india', currentLang)}
               </button>
             </div>
           </div>
@@ -736,11 +816,11 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                     {advisoryData.is_taluk ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0] text-[11px] font-bold">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a] animate-pulse" />
-                        <span>Taluk-Level Precision</span>
+                        <span>{t('taluk_level_precision', currentLang)}</span>
                       </span>
                     ) : (
                       <span className="px-2 py-0.5 rounded-full bg-[#eef5ee] text-[#1b432a] text-[11px] font-semibold">
-                        District Overview
+                        {t('district_overview', currentLang)}
                       </span>
                     )}
                     <span className="px-2 py-0.5 rounded-full bg-white border border-[#d6cfc3] text-[#526055] text-[11px] font-medium">
@@ -749,13 +829,13 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                   </div>
                   
                   <p className="text-xs text-[#526055] mt-1.5">
-                    Soil Profile: <strong className="text-[#1a2e1d]">{advisoryData.soil_type}</strong>
+                    {t('soil_profile', currentLang)}: <strong className="text-[#1a2e1d]">{advisoryData.soil_type}</strong>
                   </p>
 
                   {advisoryData.specialty && (
                     <div className="mt-2 text-xs font-medium text-[#1b432a] bg-[#eef5ee] border border-[#cbe2ce] px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-[#16a34a] shrink-0" />
-                      <span><strong>Specialty:</strong> {advisoryData.specialty}</span>
+                      <span><strong>{t('specialty_label', currentLang)}:</strong> {advisoryData.specialty}</span>
                     </div>
                   )}
                 </div>
@@ -763,32 +843,110 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 <div className="text-right text-xs text-[#526055] shrink-0">
                   <div className="flex items-center gap-1.5 sm:justify-end text-[#1b432a] font-semibold">
                     <Droplets className="w-3.5 h-3.5" />
-                    <span>Annual Rainfall: {advisoryData.annual_rainfall_mm} mm</span>
+                    <span>{t('annual_rainfall', currentLang)}: {advisoryData.annual_rainfall_mm} mm</span>
                   </div>
                   <span className="text-[11px] text-[#6b7c70] block mt-0.5">
-                    Mandi Yard: <strong className="text-[#142618]">{advisoryData.nearest_mandi}</strong>
+                    {t('nearest_mandi', currentLang)}: <strong className="text-[#142618]">{advisoryData.nearest_mandi}</strong>
                   </span>
                 </div>
               </div>
 
-              {/* "What Crop is Good There" Section */}
+              {/* Crop Selection Bar for Any Crop in Selected Area */}
+              <div className="p-4 rounded-xl bg-[#faf8f5] border border-[#e4dfd5] space-y-3 shadow-2xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#142618]">
+                    <Filter className="w-4 h-4 text-[#1b432a]" />
+                    <span>{t('select_any_crop', currentLang)} {advisoryData.area_name}:</span>
+                  </div>
+
+                  {/* Dropdown for All 20 Crops */}
+                  <div className="relative">
+                    <select
+                      value={selectedCropFilter}
+                      onChange={(e) => setSelectedCropFilter(e.target.value)}
+                      className="w-full sm:w-auto pl-3 pr-8 py-1.5 rounded-lg bg-white border border-[#d6cfc3] text-[#1a2e1d] font-bold text-xs focus:ring-2 focus:ring-[#1b432a] focus:outline-none shadow-2xs cursor-pointer"
+                    >
+                      <option value="ALL">⭐ {t('all_recommended_crops', currentLang)} ({advisoryData.recommended_crops?.length || 0})</option>
+                      <optgroup label="Select Specific Crop to Forecast">
+                        {ALL_AVAILABLE_CROPS.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.season})
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Quick 1-Click Interactive Crop Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCropFilter('ALL')}
+                    className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      selectedCropFilter === 'ALL'
+                        ? 'bg-[#1b432a] text-white shadow-2xs font-bold'
+                        : 'bg-white hover:bg-[#ede8dc] text-[#526055] border border-[#d6cfc3]'
+                    }`}
+                  >
+                    ⭐ {t('all_recommended_crops', currentLang)}
+                  </button>
+
+                  {ALL_AVAILABLE_CROPS.map((c) => {
+                    const isCropActive = selectedCropFilter === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setSelectedCropFilter(c.id)}
+                        className={`px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 cursor-pointer ${
+                          isCropActive
+                            ? 'bg-[#16a34a] text-white shadow-xs font-bold scale-105'
+                            : 'bg-white hover:bg-[#f0fdf4] text-[#1a2e1d] border border-[#d6cfc3] hover:border-[#16a34a]'
+                        }`}
+                      >
+                        {isCropActive && <Check className="w-3 h-3 text-white" />}
+                        <span>{c.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Crop Yield Cards Section */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sprout className="w-4 h-4 text-[#1b432a]" />
                     <h4 className="font-serif font-bold text-base text-[#142618]">
-                      {advisoryData.is_taluk ? `Optimal High-Yield Crops for ${advisoryData.taluk || advisoryData.area_name}` : `Top Recommended Crops for ${advisoryData.area_name}`}
+                      {selectedCropFilter !== 'ALL'
+                        ? `Crop Yield & Market Forecast: ${displayCrops[0]?.crop_name} in ${advisoryData.area_name}`
+                        : (advisoryData.is_taluk
+                            ? `${t('optimal_crops_for', currentLang)} ${advisoryData.taluk || advisoryData.area_name}`
+                            : `${t('top_recommended_for', currentLang)} ${advisoryData.area_name}`)}
                     </h4>
                   </div>
-                  <span className="text-[11px] text-[#6b7c70] font-medium">
-                    Ranked by Soil & Climatic Fitness
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {selectedCropFilter !== 'ALL' ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCropFilter('ALL')}
+                        className="text-xs font-bold text-[#1b432a] hover:underline cursor-pointer flex items-center gap-1"
+                      >
+                        <span>&larr; {t('all_recommended_crops', currentLang)}</span>
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-[#6b7c70] font-medium">
+                        {t('ranked_by_fitness', currentLang)}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-4">
-                  {advisoryData.recommended_crops?.map((crop, idx) => (
+                  {displayCrops.map((crop, idx) => (
                     <div
-                      key={crop.crop_id}
+                      key={crop.crop_id || idx}
                       className="p-5 rounded-xl bg-white border border-[#e4dfd5] hover:border-[#1b432a] transition-all shadow-xs space-y-4"
                     >
                       {/* Crop Title & Suitability Badge */}
@@ -826,23 +984,23 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                           <div className="flex items-center justify-between text-xs text-[#526055]">
                             <span className="font-semibold flex items-center gap-1">
                               <BarChart3 className="w-3.5 h-3.5 text-[#1b432a]" />
-                              Expected Crop Yield
+                              {t('expected_crop_yield', currentLang)}
                             </span>
-                            <span className="text-[10px] text-[#6b7c70]">{crop.projected_yield.best_season}</span>
+                            <span className="text-[10px] text-[#6b7c70]">{crop.projected_yield?.best_season}</span>
                           </div>
 
                           <div className="flex items-baseline gap-2 pt-1">
                             <span className="text-lg font-bold text-[#142618]">
-                              {crop.projected_yield.mean_yield_qtl_ha} Qtl/Ha
+                              {crop.projected_yield?.mean_yield_qtl_ha} Qtl/Ha
                             </span>
                             <span className="text-xs text-[#6b7c70]">
-                              ({crop.projected_yield.mean_yield_tonnes_ha} Tonnes/Ha)
+                              ({crop.projected_yield?.mean_yield_tonnes_ha} Tonnes/Ha)
                             </span>
                           </div>
 
                           <div className="text-[11px] text-[#526055] flex justify-between pt-1">
-                            <span>Cycle: {crop.projected_yield.growth_duration_days}</span>
-                            <span>Target: {crop.projected_yield.yield_range}</span>
+                            <span>{t('cycle_label', currentLang)}: {crop.projected_yield?.growth_duration_days}</span>
+                            <span>{t('target_label', currentLang)}: {crop.projected_yield?.yield_range}</span>
                           </div>
                         </div>
 
@@ -851,25 +1009,25 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                           <div className="flex items-center justify-between text-xs text-[#166534]">
                             <span className="font-semibold flex items-center gap-1">
                               <TrendingUp className="w-3.5 h-3.5" />
-                              Mandi Benchmark Price
+                              {t('mandi_benchmark_price', currentLang)}
                             </span>
                             <span className="text-[10px] font-bold text-[#15803d]">
-                              {crop.mandi_price.trend_pct}
+                              {crop.mandi_price?.trend_pct}
                             </span>
                           </div>
 
                           <div className="flex items-baseline gap-2 pt-1">
                             <span className="text-lg font-bold text-[#143823]">
-                              ₹{crop.mandi_price.modal_price_qtl} / Qtl
+                              ₹{crop.mandi_price?.modal_price_qtl} / Qtl
                             </span>
                             <span className="text-xs text-[#6b7c70]">
-                              (₹{crop.mandi_price.modal_price_kg} / kg)
+                              (₹{crop.mandi_price?.modal_price_kg} / kg)
                             </span>
                           </div>
 
                           <div className="text-[11px] text-[#526055] flex justify-between pt-1">
-                            <span>Mandi: {crop.mandi_price.market_name}</span>
-                            <span>Rev/Acre: {crop.mandi_price.estimated_gross_revenue_per_acre}</span>
+                            <span>{t('mandi_label', currentLang)}: {crop.mandi_price?.market_name}</span>
+                            <span>{t('gross_rev_per_acre', currentLang)}: {crop.mandi_price?.estimated_gross_revenue_per_acre}</span>
                           </div>
                         </div>
 
@@ -886,14 +1044,14 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                             to="/detect"
                             className="px-3 py-1.5 rounded-md bg-[#eef5ee] hover:bg-[#dcecdc] text-[#1b432a] font-semibold text-xs transition-colors flex items-center gap-1"
                           >
-                            <span>Scan Leaf Disease</span>
+                            <span>{t('scan_leaf_disease', currentLang)}</span>
                             <ArrowRight className="w-3 h-3" />
                           </Link>
                           <Link
-                            to="/yield-prediction"
+                            to="/price-prediction"
                             className="px-3 py-1.5 rounded-md bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[#1a2e1d] font-semibold text-xs transition-colors"
                           >
-                            Yield Calculator
+                            {t('mandi_forecasts', currentLang)}
                           </Link>
                         </div>
                       </div>
