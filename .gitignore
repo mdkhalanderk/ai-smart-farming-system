@@ -20,6 +20,8 @@ venv/
 *.pt
 *.pth
 *.pkl
+!market price 1-20261002T015252Z-1-001/market price 1/models/random_forest/random_forest_model.pkl
+!market price 1-20261002T015252Z-1-001/market price 1/models/random_forest/random_forest_features.pkl
 
 !model/vssm_tiny_0230_ckpt_epoch_262.pth
 
