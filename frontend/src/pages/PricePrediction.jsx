@@ -14,12 +14,297 @@ import {
   Info,
   MapPin,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  BarChart3,
+  Droplets,
+  Thermometer
 } from 'lucide-react';
 
 import { t } from '../lib/i18n';
+import {
+  getLocalizedLocation,
+  getLocalizedCropName,
+  getLocalizedMarket,
+  formatLocalizedDate
+} from '../lib/dynamicTranslator';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+// Interactive SVG 7-Day Price Forecast Graph Component
+const PriceTrendChart = ({ forecast, avgPrice, currentLang, commodity, market }) => {
+  const [hoveredIdx, setHoveredIdx] = useState(null);
+
+  if (!forecast || forecast.length === 0) return null;
+
+  const width = 800;
+  const height = 280;
+  const paddingLeft = 70;
+  const paddingRight = 40;
+  const paddingTop = 35;
+  const paddingBottom = 50;
+
+  const chartWidth = width - paddingLeft - paddingRight;
+  const chartHeight = height - paddingTop - paddingBottom;
+
+  const prices = forecast.map((f) => f.predicted_price_quintal);
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const priceRange = maxPrice - minPrice || 1;
+
+  const yMin = Math.max(0, Math.floor((minPrice - priceRange * 0.15) / 50) * 50);
+  const yMax = Math.ceil((maxPrice + priceRange * 0.15) / 50) * 50;
+  const ySpan = yMax - yMin || 1;
+
+  const getX = (i) => paddingLeft + (i / Math.max(1, forecast.length - 1)) * chartWidth;
+  const getY = (val) => paddingTop + chartHeight - ((val - yMin) / ySpan) * chartHeight;
+
+  const points = forecast.map((f, i) => ({
+    x: getX(i),
+    y: getY(f.predicted_price_quintal),
+    day: f,
+    price: f.predicted_price_quintal,
+    i
+  }));
+
+  const linePath = points.reduce((acc, p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`), '');
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${paddingTop + chartHeight} L ${points[0].x} ${paddingTop + chartHeight} Z`;
+
+  const gridTicks = [0, 0.33, 0.66, 1].map((r) => {
+    const val = yMin + r * ySpan;
+    return { val: Math.round(val), y: getY(val) };
+  });
+
+  const activeDay = hoveredIdx !== null ? forecast[hoveredIdx] : forecast[0];
+
+  return (
+    <div className="space-y-4">
+      <div className="w-full bg-[#faf8f5] rounded-xl border border-[#e4dfd5] p-3 sm:p-4 overflow-hidden shadow-inner">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-auto select-none"
+          style={{ maxHeight: '340px' }}
+        >
+          <defs>
+            <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#16a34a" stopOpacity="0.28" />
+              <stop offset="85%" stopColor="#16a34a" stopOpacity="0.04" />
+              <stop offset="100%" stopColor="#16a34a" stopOpacity="0.00" />
+            </linearGradient>
+            <filter id="shadowFilter" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.12" />
+            </filter>
+          </defs>
+
+          {gridTicks.map((tick, idx) => (
+            <g key={idx}>
+              <line
+                x1={paddingLeft}
+                y1={tick.y}
+                x2={paddingLeft + chartWidth}
+                y2={tick.y}
+                stroke="#e5e0d6"
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+              <text
+                x={paddingLeft - 10}
+                y={tick.y + 4}
+                textAnchor="end"
+                fontSize="11"
+                fontWeight="500"
+                fill="#6b7c70"
+                className="font-mono"
+              >
+                ₹{tick.val.toLocaleString('en-IN')}
+              </text>
+            </g>
+          ))}
+
+          {avgPrice && (
+            <g>
+              <line
+                x1={paddingLeft}
+                y1={getY(avgPrice)}
+                x2={paddingLeft + chartWidth}
+                y2={getY(avgPrice)}
+                stroke="#d97706"
+                strokeWidth="1.5"
+                strokeDasharray="6 4"
+                opacity="0.8"
+              />
+              <text
+                x={paddingLeft + chartWidth - 6}
+                y={getY(avgPrice) - 6}
+                textAnchor="end"
+                fontSize="10"
+                fontWeight="bold"
+                fill="#b45309"
+              >
+                Avg ₹{Math.round(avgPrice).toLocaleString('en-IN')}
+              </text>
+            </g>
+          )}
+
+          <path d={areaPath} fill="url(#priceGradient)" />
+
+          <path
+            d={linePath}
+            fill="none"
+            stroke="#15803d"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#shadowFilter)"
+          />
+
+          {points.map((p, idx) => {
+            const isHovered = hoveredIdx === idx;
+            return (
+              <g
+                key={idx}
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+              >
+                <rect
+                  x={p.x - chartWidth / (forecast.length * 2)}
+                  y={paddingTop}
+                  width={chartWidth / forecast.length}
+                  height={chartHeight + paddingBottom}
+                  fill="transparent"
+                />
+
+                {isHovered && (
+                  <line
+                    x1={p.x}
+                    y1={paddingTop}
+                    x2={p.x}
+                    y2={paddingTop + chartHeight}
+                    stroke="#16a34a"
+                    strokeWidth="1.5"
+                    strokeDasharray="3 3"
+                    opacity="0.6"
+                  />
+                )}
+
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={isHovered ? 7 : 5}
+                  fill={isHovered ? '#15803d' : '#1b432a'}
+                  stroke="#ffffff"
+                  strokeWidth="2.5"
+                  className="transition-all duration-150"
+                />
+
+                <g transform={`translate(${p.x}, ${p.y - 12})`}>
+                  <rect
+                    x="-26"
+                    y="-18"
+                    width="52"
+                    height="18"
+                    rx="4"
+                    fill={isHovered ? '#15803d' : '#ffffff'}
+                    stroke={isHovered ? '#15803d' : '#d6cfc3'}
+                    strokeWidth="1"
+                  />
+                  <text
+                    x="0"
+                    y="-5"
+                    textAnchor="middle"
+                    fontSize="10"
+                    fontWeight="bold"
+                    fill={isHovered ? '#ffffff' : '#1a2e1d'}
+                    className="font-mono"
+                  >
+                    ₹{Math.round(p.price)}
+                  </text>
+                </g>
+
+                <text
+                  x={p.x}
+                  y={paddingTop + chartHeight + 20}
+                  textAnchor="middle"
+                  fontSize="11"
+                  fontWeight={isHovered ? 'bold' : '600'}
+                  fill={isHovered ? '#1b432a' : '#526055'}
+                >
+                  {formatLocalizedDate(p.day.date, currentLang)}
+                </text>
+                <text
+                  x={p.x}
+                  y={paddingTop + chartHeight + 35}
+                  textAnchor="middle"
+                  fontSize="9.5"
+                  fontWeight="500"
+                  fill="#78887b"
+                >
+                  ₹{p.day.predicted_price_kg}/kg
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Interactive Detail Card for Hovered / Active Day */}
+      <div className="p-3.5 rounded-xl bg-[#faf8f5] border border-[#e4dfd5] flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[#eef5ee] text-[#1b432a] flex items-center justify-center font-bold">
+            <Calendar className="w-4 h-4 text-[#16a34a]" />
+          </div>
+          <div>
+            <div className="font-bold text-sm text-[#142618]">
+              {formatLocalizedDate(activeDay.date, currentLang)} • {activeDay.day_name}
+            </div>
+            <div className="text-[11px] text-[#6b7c70]">
+              {getLocalizedCropName(commodity, currentLang)} • {getLocalizedMarket(market, currentLang)}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <span className="text-[10px] text-[#6b7c70] uppercase font-bold block">{t('predicted_modal_price', currentLang) || 'Predicted Modal Price'}</span>
+            <span className="text-sm font-bold text-[#143823]">
+              ₹{activeDay.predicted_price_quintal?.toLocaleString('en-IN')} <span className="text-xs font-normal text-[#526055]">/ {t('qtl_short', currentLang) || 'Qtl'}</span>
+            </span>
+          </div>
+
+          <div>
+            <span className="text-[10px] text-[#6b7c70] uppercase font-bold block">{t('retail_equivalent_label', currentLang) || 'Retail Equivalent'}</span>
+            <span className="text-sm font-semibold text-[#166534]">
+              ₹{activeDay.predicted_price_kg} <span className="text-xs font-normal text-[#526055]">/ {t('kg_short', currentLang) || 'kg'}</span>
+            </span>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-3 pl-2 border-l border-[#e4dfd5] text-[11px] text-[#526055]">
+            <span className="flex items-center gap-1">
+              <Thermometer className="w-3.5 h-3.5 text-amber-600" />
+              {activeDay.weather?.temperature}°C
+            </span>
+            <span className="flex items-center gap-1">
+              <Droplets className="w-3.5 h-3.5 text-sky-600" />
+              {activeDay.weather?.rain} mm
+            </span>
+          </div>
+
+          <span
+            className={`px-2.5 py-1 rounded-md text-[11px] font-bold ${
+              activeDay.trend === 'up'
+                ? 'bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]'
+                : activeDay.trend === 'down'
+                ? 'bg-[#fffbeb] text-[#92400e] border border-[#fde68a]'
+                : 'bg-[#f5f2ea] text-[#2d3a2f] border border-[#d6cfc3]'
+            }`}
+          >
+            {activeDay.trend_label}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const PricePrediction = () => {
   const { profile, language } = useAuth();
@@ -181,15 +466,15 @@ export const PricePrediction = () => {
           {profile && (
             <div className="p-3.5 rounded-xl bg-[#faf8f5] border border-[#e4dfd5] text-xs space-y-1 shrink-0 w-full sm:w-auto">
               <div className="text-[10px] font-semibold text-[#526055] uppercase tracking-wider">
-                Farmer Profile Context
+                {t('farmer_profile_context', currentLang) || 'Farmer Profile Context'}
               </div>
               <div className="flex items-center gap-1.5 text-[#2d3a2f]">
                 <MapPin className="w-3.5 h-3.5 text-[#1b432a]" />
-                <span>{t('agri_district', currentLang)}: <strong className="font-semibold text-[#142618]">{profile.district || 'Kolar'}</strong></span>
+                <span>{t('agri_district', currentLang)}: <strong className="font-semibold text-[#142618]">{getLocalizedLocation(profile.district || 'Kolar', currentLang)}</strong></span>
               </div>
               <div className="flex items-center gap-1.5 text-[#2d3a2f]">
                 <Sprout className="w-3.5 h-3.5 text-[#1b432a]" />
-                <span>{t('primary_crop', currentLang)}: <strong className="font-semibold text-[#142618]">{profile.main_crop || 'Tomato'}</strong></span>
+                <span>{t('primary_crop', currentLang)}: <strong className="font-semibold text-[#142618]">{getLocalizedCropName(profile.main_crop || 'Tomato', currentLang)}</strong></span>
               </div>
             </div>
           )}
@@ -214,7 +499,7 @@ export const PricePrediction = () => {
               >
                 {markets.map((m) => (
                   <option key={m} value={m}>
-                    {m}
+                    {getLocalizedMarket(m, currentLang)}
                   </option>
                 ))}
               </select>
@@ -235,7 +520,7 @@ export const PricePrediction = () => {
               >
                 {commodities.map((c) => (
                   <option key={c} value={c}>
-                    {c}
+                    {getLocalizedCropName(c, currentLang)}
                   </option>
                 ))}
               </select>
@@ -373,7 +658,7 @@ export const PricePrediction = () => {
                 </div>
 
                 <div className="pt-2.5 border-t border-[#e4dfd5] text-[11px] text-[#6b7c70]">
-                  <span>Market: {predictionResult.market} • Crop: {predictionResult.commodity}</span>
+                  <span>{t('market_label', currentLang) || 'Market'}: {getLocalizedMarket(predictionResult.market, currentLang)} • {t('crop_label', currentLang) || 'Crop'}: {getLocalizedCropName(predictionResult.commodity, currentLang)}</span>
                 </div>
               </div>
 
@@ -384,14 +669,14 @@ export const PricePrediction = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#e4dfd5] pb-3">
                 <div>
                   <h2 className="font-serif font-bold text-lg text-[#142618]">
-                    Daily 7-Day Price Forecast & Weather Regressors
+                    {t('daily_price_forecast_title', currentLang) || 'Daily 7-Day Price Forecast & Weather Regressors'}
                   </h2>
                   <p className="text-[11px] text-[#526055]">
-                    Estimated Mandi modal values per quintal (100 kg) and per kilogram
+                    {t('estimated_modal_values', currentLang) || 'Estimated Mandi modal values per quintal (100 kg) and per kilogram'}
                   </p>
                 </div>
                 <span className="text-[11px] text-[#1b432a] font-semibold bg-[#eef5ee] px-2.5 py-0.5 rounded-full border border-[#cbe2ce]">
-                  Random Forest Model
+                  {t('random_forest_model', currentLang) || 'Random Forest Model'}
                 </span>
               </div>
 
@@ -404,24 +689,18 @@ export const PricePrediction = () => {
                   >
                     <div>
                       <span className="text-[10px] font-semibold text-[#526055] uppercase block">
-                        {day.day_name}
-                      </span>
-                      <span className="text-xs font-bold text-[#142618]">
-                        {new Date(day.date).toLocaleDateString('en-IN', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        {formatLocalizedDate(day.date, currentLang)}
                       </span>
                     </div>
 
                     <div>
                       <div className="text-sm font-bold text-[#142618]">
                         ₹{day.predicted_price_quintal?.toLocaleString('en-IN')}
-                        <span className="text-[10px] font-normal text-[#526055] block">/ Qtl</span>
+                        <span className="text-[10px] font-normal text-[#526055] block">/ {t('qtl_short', currentLang) || 'Qtl'}</span>
                       </div>
                       <div className="text-xs font-semibold text-[#166534]">
                         ₹{day.predicted_price_kg}{' '}
-                        <span className="text-[10px] font-normal text-[#526055]">/ kg</span>
+                        <span className="text-[10px] font-normal text-[#526055]">/ {t('kg_short', currentLang) || 'kg'}</span>
                       </div>
                     </div>
 
@@ -454,6 +733,42 @@ export const PricePrediction = () => {
                 ))}
               </div>
             </div>
+
+            {/* 7-Day Price Forecast Interactive Graph */}
+            {predictionResult.forecast && predictionResult.forecast.length > 0 && (
+              <div className="editorial-card p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[#e4dfd5] pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-[#1b432a]" />
+                      <h2 className="font-serif font-bold text-lg text-[#142618]">
+                        {t('seven_day_price_trend_graph', currentLang) || '7-Day Mandi Price Trend Graph'}
+                      </h2>
+                    </div>
+                    <p className="text-[11px] text-[#526055] mt-0.5">
+                      {t('visual_price_projection', currentLang) || 'Visual price projection (₹/Quintal) across the upcoming 7-day trading cycle'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-[#526055] bg-[#faf8f5] border border-[#e4dfd5] px-2.5 py-1 rounded-lg">
+                      {t('avg_benchmark_line', currentLang) || '7-Day Avg'}: <strong className="text-[#142618]">₹{predictionResult.summary?.avg_predicted_quintal?.toLocaleString('en-IN')}</strong>
+                    </span>
+                    <span className="text-[11px] font-semibold text-[#15803d] bg-[#ecfdf5] border border-[#a7f3d0] px-2.5 py-1 rounded-lg">
+                      {predictionResult.summary?.overall_trend === 'upward' ? '📈 ' + (t('bullish', currentLang) || 'Bullish') : predictionResult.summary?.overall_trend === 'downward' ? '📉 ' + (t('bearish', currentLang) || 'Bearish') : '⚖️ ' + (t('stable', currentLang) || 'Stable')}
+                    </span>
+                  </div>
+                </div>
+
+                <PriceTrendChart
+                  forecast={predictionResult.forecast}
+                  avgPrice={predictionResult.summary?.avg_predicted_quintal}
+                  currentLang={currentLang}
+                  commodity={predictionResult.commodity}
+                  market={predictionResult.market}
+                />
+              </div>
+            )}
 
           </div>
         )}

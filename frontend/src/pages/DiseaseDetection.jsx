@@ -276,7 +276,7 @@ export const DiseaseDetection = () => {
             >
               {CROP_OPTIONS.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {t(c.name, lang) || c.name}
                 </option>
               ))}
             </select>
@@ -287,15 +287,15 @@ export const DiseaseDetection = () => {
             <div className="flex items-center gap-2">
               <span className="badge-active">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Ready for Inspection</span>
+                <span>{t('ready_for_inspection', lang) || 'Ready for Inspection'}</span>
               </span>
               <span className="text-xs font-semibold text-[#1a2e1d]">
-                {currentCropOption.name} Health Scanner
+                {t(currentCropOption.name, lang) || currentCropOption.name} {t('health_scanner', lang) || 'Health Scanner'}
               </span>
             </div>
 
             <span className="text-[11px] text-[#526055]">
-              Accredited Agricultural Guidelines
+              {t('accredited_guidelines', lang) || 'Accredited Agricultural Guidelines'}
             </span>
           </div>
 
@@ -303,7 +303,7 @@ export const DiseaseDetection = () => {
           {cropMetadata?.classes && (
             <div className="space-y-1.5 pt-1">
               <span className="text-[11px] font-semibold text-[#526055] uppercase tracking-wider block">
-                Common Crop Conditions & Diseases:
+                {t('common_conditions_label', lang) || 'Common Crop Conditions & Diseases:'}
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {cropMetadata.classes.map((cls, idx) => (

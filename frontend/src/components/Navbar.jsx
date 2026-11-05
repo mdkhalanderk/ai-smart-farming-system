@@ -14,10 +14,13 @@ import {
   MapPin,
   ChevronDown,
   Globe,
-  BarChart3,
-  Edit3
+  Edit3,
+  Bell,
+  MessageSquare
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getSavedLanguage, setSavedLanguage, t } from '../lib/i18n';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const Navbar = () => {
   const { user, profile, signOut, language, setLanguage } = useAuth();
@@ -26,7 +29,83 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationsRef = useRef(null);
   const currentLang = language || 'English';
+
+  const fetchNotifications = async () => {
+    const token = localStorage.getItem('smart_crop_backend_token');
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/notifications`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.status === 'success' && Array.isArray(data.notifications)) {
+        setNotifications(data.notifications);
+        setUnreadCount(data.unread_count || 0);
+      }
+    } catch (e) {
+      // silent
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 25000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  // Close notifications dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+        setNotificationsOpen(false);
+      }
+    };
+    if (notificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [notificationsOpen]);
+
+  const handleMarkAllRead = async () => {
+    const token = localStorage.getItem('smart_crop_backend_token');
+    if (!token) return;
+    try {
+      await fetch(`${API_BASE_URL}/api/community/notifications/read-all`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: 1 })));
+      setUnreadCount(0);
+    } catch (e) {}
+  };
+
+  const handleNotificationClick = async (notif) => {
+    const token = localStorage.getItem('smart_crop_backend_token');
+    if (token && !notif.is_read) {
+      fetch(`${API_BASE_URL}/api/community/notifications/${notif.id}/read`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => {});
+      setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, is_read: 1 } : n)));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
+    setNotificationsOpen(false);
+
+    if (notif.alert_id) {
+      navigate(`/community?alert_id=${notif.alert_id}`);
+    } else if (notif.conversation_id) {
+      navigate(`/community?tab=messages&conv_id=${notif.conversation_id}`);
+    } else {
+      navigate('/community');
+    }
+  };
 
   // Close profile dropdown on outside click
   useEffect(() => {
@@ -82,10 +161,12 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16 gap-2 lg:gap-3">
           
           {/* Brand Logo & Editorial Title */}
-          <Link to="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-8 h-8 xl:w-9 xl:h-9 rounded-lg bg-[#1b432a] flex items-center justify-center text-white shrink-0">
-              <Sprout className="w-4 h-4 xl:w-5 xl:h-5" />
-            </div>
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+            <img
+              src="/logo.png"
+              alt="Smart Crop Advisory Logo"
+              className="w-9 h-9 xl:w-10 xl:h-10 rounded-xl object-cover shrink-0 shadow-xs ring-1 ring-black/5 group-hover:scale-105 transition-transform"
+            />
             <div className="flex flex-col shrink-0">
               <span className="font-serif font-bold text-[#1a2e1d] text-sm sm:text-base xl:text-lg tracking-tight leading-tight whitespace-nowrap group-hover:text-[#143420] transition-colors">
                 Smart Crop Advisory
@@ -107,26 +188,22 @@ export const Navbar = () => {
 
                 <Link to="/detect" className={navLinkClass('/detect')}>
                   <ShieldAlert className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span className="hidden xl:inline">{t('nav_detect', currentLang)}</span>
-                  <span className="xl:hidden">Disease</span>
+                  <span>{t('nav_detect', currentLang)}</span>
                 </Link>
 
                 <Link to="/price-prediction" className={navLinkClass('/price-prediction')}>
                   <TrendingUp className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span className="hidden xl:inline">{t('nav_mandi', currentLang)}</span>
-                  <span className="xl:hidden">Prices</span>
+                  <span>{t('nav_mandi', currentLang)}</span>
                 </Link>
 
                 <Link to="/yield-prediction" className={navLinkClass('/yield-prediction')}>
                   <Sprout className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span className="hidden xl:inline">{t('nav_yield', currentLang)}</span>
-                  <span className="xl:hidden">Yield</span>
+                  <span>{t('nav_yield', currentLang)}</span>
                 </Link>
 
                 <Link to="/community" className={navLinkClass('/community')}>
                   <Users className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span className="hidden xl:inline">{t('nav_community', currentLang)}</span>
-                  <span className="xl:hidden">Community</span>
+                  <span>{t('nav_community', currentLang)}</span>
                 </Link>
               </>
             ) : (
@@ -162,21 +239,100 @@ export const Navbar = () => {
             </div>
 
             {user ? (
-              <div className="relative flex items-center pl-2 border-l border-[#e4dfd5] shrink-0" ref={profileDropdownRef}>
-                {/* Profile Logo Button */}
-                <button
-                  type="button"
-                  id="profile-avatar-btn"
-                  onClick={() => setProfileDropdownOpen((prev) => !prev)}
-                  className="w-9 h-9 rounded-full bg-[#1b432a] text-white font-serif font-bold flex items-center justify-center text-sm shadow-xs hover:bg-[#143420] transition-all cursor-pointer ring-2 ring-transparent hover:ring-[#1b432a]/30 focus:outline-none shrink-0"
-                  title={t('profile_settings', currentLang)}
-                  aria-label={t('profile_settings', currentLang)}
+              <div className="flex items-center gap-2 pl-2 border-l border-[#e4dfd5] shrink-0">
+                {/* Farmer Messages Shortcut */}
+                <Link
+                  to="/community?tab=messages"
+                  className="p-2 rounded-lg text-[#526055] hover:text-[#1b432a] hover:bg-[#f0ece2] transition-colors relative"
+                  title="Farmer Messages & Discussions"
                 >
-                  {profile?.full_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || 'F'}
-                </button>
+                  <MessageSquare className="w-4 h-4" />
+                </Link>
 
-                {/* Profile Settings Dropdown */}
-                {profileDropdownOpen && (
+                {/* Biosecurity & Chat Notification Bell */}
+                <div className="relative" ref={notificationsRef}>
+                  <button
+                    type="button"
+                    onClick={() => setNotificationsOpen((prev) => !prev)}
+                    className="p-2 rounded-lg text-[#526055] hover:text-[#1b432a] hover:bg-[#f0ece2] transition-colors relative cursor-pointer"
+                    title="Biosecurity & Chat Notifications"
+                  >
+                    <Bell className="w-4 h-4" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-600 rounded-full ring-2 ring-white animate-pulse" />
+                    )}
+                  </button>
+
+                  {/* Notifications Dropdown Drawer */}
+                  {notificationsOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white border border-[#e4dfd5] shadow-xl py-2 z-50">
+                      <div className="px-4 py-2.5 border-b border-[#f0ece2] flex items-center justify-between bg-[#faf8f5]/60 rounded-t-2xl">
+                        <span className="font-serif font-bold text-xs text-[#1a2e1d] flex items-center gap-1.5">
+                          <Bell className="w-3.5 h-3.5 text-[#1b432a]" />
+                          <span>Notifications</span>
+                          {unreadCount > 0 && (
+                            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-100 text-rose-800 font-bold">
+                              {unreadCount}
+                            </span>
+                          )}
+                        </span>
+
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={handleMarkAllRead}
+                            className="text-[10px] text-[#1b432a] hover:underline font-semibold cursor-pointer"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="max-h-72 overflow-y-auto divide-y divide-[#f0ece2]">
+                        {notifications.length > 0 ? (
+                          notifications.map((n) => (
+                            <div
+                              key={n.id}
+                              onClick={() => handleNotificationClick(n)}
+                              className={`p-3 text-xs hover:bg-[#faf8f5] transition-colors cursor-pointer space-y-1 ${
+                                !n.is_read ? 'bg-[#f0fdf4]/60 font-medium' : ''
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-1.5">
+                                <span className="font-bold text-[#142618] text-[11px] truncate">{n.title}</span>
+                                <span className="text-[9px] text-[#6b7c70] shrink-0">
+                                  {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-[#526055] line-clamp-2 leading-relaxed">
+                                {n.content}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-6 text-center text-xs text-[#6b7c70]">
+                            No new biosecurity or chat notifications
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Logo Button */}
+                <div className="relative" ref={profileDropdownRef}>
+                  <button
+                    type="button"
+                    id="profile-avatar-btn"
+                    onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                    className="w-9 h-9 rounded-full bg-[#1b432a] text-white font-serif font-bold flex items-center justify-center text-sm shadow-xs hover:bg-[#143420] transition-all cursor-pointer ring-2 ring-transparent hover:ring-[#1b432a]/30 focus:outline-none shrink-0"
+                    title={t('profile_settings', currentLang)}
+                    aria-label={t('profile_settings', currentLang)}
+                  >
+                    {profile?.full_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || 'F'}
+                  </button>
+
+                  {/* Profile Settings Dropdown */}
+                  {profileDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl bg-white border border-[#e4dfd5] shadow-xl py-2 z-50">
                     <div className="px-4 py-3 border-b border-[#f0ece2] bg-[#faf8f5]/60 rounded-t-2xl">
                       <div className="flex items-center gap-2.5">
@@ -231,6 +387,7 @@ export const Navbar = () => {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             ) : (
               <Link

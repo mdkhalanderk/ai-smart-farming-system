@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { t } from '../lib/i18n';
 import { IndiaAgriculturalMap } from '../components/IndiaAgriculturalMap';
 import { Sprout, MapPin, Globe } from 'lucide-react';
+import { getLocalizedLocation, getLocalizedCropName } from '../lib/dynamicTranslator';
 
 export const YieldPrediction = () => {
   const { profile, user, language } = useAuth();
@@ -27,7 +28,7 @@ export const YieldPrediction = () => {
               {t('yield_title', currentLang)}
             </h1>
             <p className="text-xs sm:text-sm text-[#526055] max-w-2xl leading-relaxed">
-              Select any district or taluk on the interactive map below to view optimal high-yield crops, expected harvest quantities, soil suitability, and local APMC market prices.
+              {t('yield_subtitle', currentLang)}
             </p>
           </div>
 
@@ -36,17 +37,17 @@ export const YieldPrediction = () => {
             <div className="flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5 text-[#1b432a]" />
               <span>
-                {t('agri_district', currentLang)}: <strong className="font-semibold text-[#142618]">{farmerDistrict}</strong>
-                {profile?.taluk && <span className="text-[#526055]"> • {profile.taluk}</span>}
+                {t('agri_district', currentLang)}: <strong className="font-semibold text-[#142618]">{getLocalizedLocation(farmerDistrict, currentLang)}</strong>
+                {profile?.taluk && <span className="text-[#526055]"> • {getLocalizedLocation(profile.taluk, currentLang)}</span>}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Sprout className="w-3.5 h-3.5 text-[#1b432a]" />
-              <span>{t('primary_crop', currentLang)}: <strong className="font-semibold text-[#142618]">{farmerCrop}</strong></span>
+              <span>{t('primary_crop', currentLang)}: <strong className="font-semibold text-[#142618]">{getLocalizedCropName(farmerCrop, currentLang)}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <Globe className="w-3.5 h-3.5 text-[#1b432a]" />
-              <span>Region: <strong className="font-semibold text-[#142618]">{profile?.state || 'Karnataka'}</strong></span>
+              <span>{t('region_label', currentLang) || 'Region'}: <strong className="font-semibold text-[#142618]">{getLocalizedLocation(profile?.state || 'Karnataka', currentLang)}</strong></span>
             </div>
           </div>
         </div>

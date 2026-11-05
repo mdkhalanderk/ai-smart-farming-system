@@ -1,17 +1,21 @@
 import os
 import io
 import json
+import time
 import torch
 import torch.nn.functional as F
 from PIL import Image
 import logging
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Header, Request
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from torchvision import transforms
 from dotenv import load_dotenv
 import sys
+from typing import Optional, Dict, Any, List, Tuple
+from pydantic import BaseModel
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
@@ -72,6 +76,38 @@ async def global_exception_handler(request: Request, exc: Exception):
             "path": request.url.path
         }
     )
+
+# Static uploads mount for media, alert photographs and chat attachments
+uploads_dir = os.path.join(BACKEND_DIR, "uploads")
+os.makedirs(os.path.join(uploads_dir, "alert-photos"), exist_ok=True)
+os.makedirs(os.path.join(uploads_dir, "chat-photos"), exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
+import backend.supabase_service as supa_svc
+
+def _extract_token(authorization: Optional[str]) -> Optional[str]:
+    if not authorization:
+        return None
+    parts = authorization.split()
+    if len(parts) == 2 and parts[0].lower() == "bearer":
+        return parts[1]
+    return authorization
+
+def _resolve_user(authorization: Optional[str]) -> Optional[Dict[str, Any]]:
+    token = _extract_token(authorization)
+    if not token:
+        return None
+    try:
+        user = supa_svc.verify_supabase_token(token)
+        if user:
+            return user
+    except Exception as e:
+        logging.warning(f"Supabase token verification note: {e}")
+    try:
+        from backend.auth_service import get_user_from_token
+        return get_user_from_token(token)
+    except Exception:
+        return None
 
 # Global variables for model and configuration
 MODEL = None
@@ -374,6 +410,220 @@ def upvote_report_endpoint(report_id: int):
     new_count = comm_svc.upvote_community_report(report_id)
     return {"status": "success", "upvotes": new_count}
 
+# -------------------------------------------------------------------------
+# ADVANCED COMMUNITY ALERTS & FARMER-TO-FARMER COMMUNITY PLATFORM
+# -------------------------------------------------------------------------
+
+class CreateAlertRequest(BaseModel):
+    title: str
+    description: str
+    crop: str
+    district: str
+    taluk: Optional[str] = ""
+    village: Optional[str] = ""
+    danger_level: Optional[str] = "Medium"
+    photo_url: Optional[str] = None
+    author_name: Optional[str] = None
+    author_phone: Optional[str] = None
+
+class CreateConversationRequest(BaseModel):
+    alert_id: str
+    receiver_id: Optional[str] = None
+
+class SendChatMessageRequest(BaseModel):
+    content: Optional[str] = ""
+    photo_url: Optional[str] = None
+
+@app.get("/api/community/alerts")
+def get_community_alerts_endpoint(
+    district: Optional[str] = None,
+    crop: Optional[str] = None,
+    danger_level: Optional[str] = None,
+    sort_by: str = "priority",
+    user_district: Optional[str] = None,
+    search: Optional[str] = None,
+    limit: int = 12,
+    offset: int = 0,
+    authorization: Optional[str] = Header(None)
+):
+    if not user_district and authorization:
+        user = _resolve_user(authorization)
+        if user:
+            prof = supa_svc.get_or_create_farmer_profile(user["id"], user.get("email", ""))
+            user_district = prof.get("district")
+
+    res = supa_svc.get_community_alerts(
+        district=district,
+        crop=crop,
+        danger_level=danger_level,
+        sort_by=sort_by,
+        user_district=user_district,
+        search=search,
+        limit=limit,
+        offset=offset
+    )
+    return {
+        "status": "success",
+        "alerts": res.get("alerts", []),
+        "total_count": res.get("total", len(res.get("alerts", []))),
+        "has_more": res.get("has_more", False)
+    }
+
+@app.post("/api/community/alerts")
+def create_community_alert_endpoint(req: CreateAlertRequest, authorization: Optional[str] = Header(None)):
+    user_dict = _resolve_user(authorization) if authorization else None
+    if not user_dict:
+        user_dict = {
+            "id": f"farmer_{int(time.time())}",
+            "email": "farmer@krishidrishti.local",
+            "name": req.author_name or "Local Farmer"
+        }
+
+    alert_data = req.model_dump()
+    new_alert = supa_svc.create_community_alert(alert_data, user_dict)
+
+    try:
+        supa_svc.dispatch_alert_notifications(new_alert)
+    except Exception as e:
+        logging.warning(f"Notification dispatch warning: {e}")
+
+    return {"status": "success", "alert": new_alert}
+
+@app.get("/api/community/alerts/{alert_id}")
+def get_single_alert_endpoint(alert_id: str, user_district: Optional[str] = None):
+    res = supa_svc.get_community_alerts(user_district=user_district, limit=100)
+    for a in res["alerts"]:
+        if a["id"] == alert_id:
+            return {"status": "success", "alert": a}
+    raise HTTPException(status_code=404, detail="Community alert not found.")
+
+@app.post("/api/community/alerts/{alert_id}/upvote")
+def upvote_alert_endpoint(alert_id: str):
+    new_count = supa_svc.upvote_alert(alert_id)
+    return {"status": "success", "upvotes": new_count}
+
+@app.post("/api/community/upload")
+async def upload_community_file_endpoint(
+    file: UploadFile = File(...),
+    bucket: str = Form("alert-photos"),
+    authorization: Optional[str] = Header(None)
+):
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
+    if file.content_type and file.content_type.lower() not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG, PNG, and WebP images are allowed.")
+
+    file_bytes = await file.read()
+    if len(file_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum image size is 5MB.")
+
+    token = _extract_token(authorization)
+    result = supa_svc.upload_file_to_storage(
+        file_bytes=file_bytes,
+        original_filename=file.filename or "upload.jpg",
+        content_type=file.content_type or "image/jpeg",
+        bucket=bucket,
+        token=token
+    )
+    return {"status": "success", **result}
+
+@app.get("/api/community/conversations")
+def get_user_conversations_endpoint(authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication token required.")
+    user = _resolve_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid authentication session.")
+
+    convs = supa_svc.get_user_conversations(user["id"])
+    return {"status": "success", "conversations": convs}
+
+@app.post("/api/community/conversations")
+def create_conversation_endpoint(req: CreateConversationRequest, authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication token required.")
+    user = _resolve_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid authentication session.")
+
+    conv = supa_svc.create_or_get_conversation(
+        alert_id=req.alert_id,
+        user_id=user["id"],
+        other_user_id=req.receiver_id
+    )
+    return {"status": "success", "conversation": conv}
+
+@app.get("/api/community/conversations/{conv_id}/messages")
+def get_conversation_messages_endpoint(conv_id: str, authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication token required.")
+    user = _resolve_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid authentication session.")
+
+    messages = supa_svc.get_conversation_messages(conv_id, user["id"])
+    return {"status": "success", "messages": messages}
+
+@app.post("/api/community/conversations/{conv_id}/messages")
+def send_chat_message_endpoint(conv_id: str, req: SendChatMessageRequest, authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication token required.")
+    user = _resolve_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid authentication session.")
+
+    if not req.content and not req.photo_url:
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+
+    msg = supa_svc.send_chat_message(
+        conv_id=conv_id,
+        sender_id=user["id"],
+        message_text=req.content or "",
+        photo_url=req.photo_url
+    )
+    return {"status": "success", "message": msg}
+
+@app.get("/api/community/notifications")
+def get_user_notifications_endpoint(authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        return {"status": "success", "notifications": [], "unread_count": 0}
+    user = _resolve_user(authorization)
+    if not user:
+        return {"status": "success", "notifications": [], "unread_count": 0}
+
+    notifs = supa_svc.get_user_notifications(user["id"])
+    unread = sum(1 for n in notifs if not n.get("is_read"))
+    return {"status": "success", "notifications": notifs, "unread_count": unread}
+
+@app.put("/api/community/notifications/{notif_id}/read")
+def mark_notification_read_endpoint(notif_id: str, authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    user = _resolve_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required.")
+
+    supa_svc.mark_notification_read(notif_id, user["id"])
+    return {"status": "success"}
+
+@app.put("/api/community/notifications/read-all")
+def mark_all_notifications_read_endpoint(authorization: Optional[str] = Header(None)):
+    token = _extract_token(authorization)
+    if not token:
+        raise HTTPException(status_code=401, detail="Authentication required.")
+    user = _resolve_user(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required.")
+
+    supa_svc.mark_all_notifications_read(user["id"])
+    return {"status": "success"}
+
+
 class SaveDiagnosisRequest(BaseModel):
     user_id: str
     crop: str
@@ -411,6 +661,36 @@ def get_evaluation_reports():
             "status": "pending",
             "message": "Model evaluation metrics pending completed training."
         }
+
+# ----------------------------------------------------
+# MODEL EVALUATION & PERFORMANCE ANALYSIS ENDPOINTS
+# ----------------------------------------------------
+import backend.evaluation_service as eval_svc
+
+@app.get("/api/evaluation/all")
+def get_all_evaluation_endpoint():
+    """Returns evaluation metrics, confusion matrices, and reports for all 3 models + overall."""
+    return eval_svc.get_all_evaluations()
+
+@app.get("/api/evaluation/disease")
+def get_disease_evaluation_endpoint():
+    """Returns multiclass confusion matrix and classification report for Disease Detection."""
+    return eval_svc.get_disease_evaluation()
+
+@app.get("/api/evaluation/price")
+def get_price_evaluation_endpoint():
+    """Returns regression metrics (MAE/RMSE/R2) and 3-class confusion matrix for Price Prediction."""
+    return eval_svc.get_price_evaluation()
+
+@app.get("/api/evaluation/yield")
+def get_yield_evaluation_endpoint():
+    """Returns regression metrics (MAE/RMSE/R2) and 3-class confusion matrix for Yield Prediction."""
+    return eval_svc.get_yield_evaluation()
+
+@app.get("/api/evaluation/overall")
+def get_overall_evaluation_endpoint():
+    """Returns executive summary and system-level binary confusion matrix across all models."""
+    return eval_svc.get_overall_evaluation()
 
 # ----------------------------------------------------
 # PRICE PREDICTION ENDPOINTS
@@ -630,22 +910,27 @@ def auth_me_endpoint(authorization: Optional[str] = Header(None)):
     token = _extract_token(authorization)
     if not token:
         raise HTTPException(status_code=401, detail="Authentication token required.")
-    user = get_user_from_token(token)
+    user = _resolve_user(authorization)
     if not user:
         raise HTTPException(status_code=401, detail="Session expired or invalid.")
-    profile = get_profile_by_user_id(user["id"])
+    user_id = str(user.get("id", ""))
+    email = user.get("email", "")
+    profile = supa_svc.get_or_create_farmer_profile(user_id, email)
     return {"status": "success", "user": user, "profile": profile}
 
 @app.post("/api/auth/logout")
 def auth_logout_endpoint(authorization: Optional[str] = Header(None)):
     token = _extract_token(authorization)
     if token:
-        logout_user(token)
+        try:
+            logout_user(token)
+        except Exception:
+            pass
     return {"status": "success", "message": "Logged out successfully"}
 
 @app.get("/api/auth/profile/{user_id}")
 def auth_get_profile_endpoint(user_id: str):
-    profile = get_profile_by_user_id(user_id)
+    profile = supa_svc.get_or_create_farmer_profile(user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Farmer profile not found.")
     return {"status": "success", "profile": profile}
@@ -655,13 +940,10 @@ def auth_update_profile_endpoint(req: ProfileUpdateRequest, authorization: Optio
     token = _extract_token(authorization)
     if not token:
         raise HTTPException(status_code=401, detail="Authentication token required.")
-    user = get_user_from_token(token)
+    user = _resolve_user(authorization)
     if not user:
         raise HTTPException(status_code=401, detail="Session expired or invalid.")
-    updated = update_profile(user["id"], req.dict(exclude_unset=True))
+    user_id = str(user.get("id", ""))
+    updates = req.model_dump(exclude_unset=True)
+    updated = supa_svc.update_farmer_profile(user_id, updates)
     return {"status": "success", "profile": updated}
-
-
-
-
-

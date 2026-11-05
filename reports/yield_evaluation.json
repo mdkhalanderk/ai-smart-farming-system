@@ -1,0 +1,94 @@
+{
+  "model_name": "Random Forest Crop Yield Regressor",
+  "algorithm": "RandomForestRegressor(n_estimators=100, max_depth=16, min_samples_split=4)",
+  "dataset": "DES MoA&FW Agricultural Statistics + ICRISAT Meso-Level Database",
+  "dataset_file": "crop_yield_data.csv (3,000 agro-climatic records)",
+  "task_type": "regression_and_categorization",
+  "test_split_method": "Stratified random 80/20 train/test split (random_state=42)",
+  "test_samples": 600,
+  "training_samples": 2400,
+  "features_count": 11,
+  "features": {
+    "categorical": [
+      "crop",
+      "state",
+      "season",
+      "soil_type"
+    ],
+    "numerical": [
+      "area_hectares",
+      "temperature",
+      "humidity",
+      "rainfall",
+      "soil_ph",
+      "soil_moisture",
+      "irrigation"
+    ]
+  },
+  "regression_metrics": {
+    "mae": 1.1596,
+    "rmse": 2.6307,
+    "r2": 0.9902,
+    "unit": "Tonnes per Hectare (t/ha)"
+  },
+  "categorization": {
+    "method": "Tercile percentiles (33.3rd and 66.7th) fitted strictly on training data",
+    "rationale": "Prevents data leakage. Agronomically separates low-yield crops (oilseeds, pulses, dryland staples <= 2.0 t/ha), moderate-yield staples (wheat, maize, rice 2.0 - 4.42 t/ha), and high-biomass commercial crops (sugarcane, potato, tomato > 4.42 t/ha).",
+    "thresholds": {
+      "low_max": 2.0,
+      "medium_min": 2.0,
+      "medium_max": 4.42,
+      "high_min": 4.42,
+      "description": "Low: Yield <= 2.00 t/ha | Medium: 2.00 < Yield <= 4.42 t/ha | High: Yield > 4.42 t/ha"
+    },
+    "categories": [
+      "Low",
+      "Medium",
+      "High"
+    ],
+    "confusion_matrix": [
+      [
+        194,
+        12,
+        0
+      ],
+      [
+        8,
+        167,
+        15
+      ],
+      [
+        0,
+        6,
+        198
+      ]
+    ],
+    "accuracy": 93.17,
+    "macro_precision": 93.09,
+    "macro_recall": 93.04,
+    "macro_f1": 93.04,
+    "weighted_precision": 93.16,
+    "weighted_recall": 93.17,
+    "weighted_f1": 93.14,
+    "classification_report": {
+      "Low": {
+        "precision": 0.9604,
+        "recall": 0.9417,
+        "f1_score": 0.951,
+        "support": 206
+      },
+      "Medium": {
+        "precision": 0.9027,
+        "recall": 0.8789,
+        "f1_score": 0.8907,
+        "support": 190
+      },
+      "High": {
+        "precision": 0.9296,
+        "recall": 0.9706,
+        "f1_score": 0.9496,
+        "support": 204
+      }
+    }
+  }
+}

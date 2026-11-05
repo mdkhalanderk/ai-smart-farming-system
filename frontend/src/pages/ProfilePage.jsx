@@ -102,7 +102,7 @@ export const ProfilePage = () => {
                 className="inline-flex items-center gap-1.5 text-red-700 hover:text-red-900 font-semibold cursor-pointer transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
+                <span>{t('nav_signout', lang) || 'Sign Out'}</span>
               </button>
               <span className="text-[#d6cfc3]">|</span>
               <Link to="/dashboard" className="text-[#1b432a] font-semibold hover:underline">

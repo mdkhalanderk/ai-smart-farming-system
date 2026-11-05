@@ -75,9 +75,11 @@ export const SignUpPage = () => {
         
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-[#1b432a] text-white mx-auto flex items-center justify-center mb-4">
-            <Sprout className="w-6 h-6" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="Smart Crop Advisory Logo"
+            className="w-14 h-14 rounded-2xl object-cover mx-auto mb-4 shadow-md ring-1 ring-black/5"
+          />
           <h1 className="text-2xl font-serif font-bold text-[#1a2e1d] tracking-tight">
             Create Farmer Account
           </h1>

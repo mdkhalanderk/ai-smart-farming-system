@@ -93,7 +93,23 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/messages"
+                    element={
+                      <ProtectedRoute requireProfile={true}>
+                        <CommunityPage initialTab="messages" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/reports"
+                    element={
+                      <ProtectedRoute requireProfile={true}>
+                        <ReportsPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/evaluation"
                     element={
                       <ProtectedRoute requireProfile={true}>
                         <ReportsPage />

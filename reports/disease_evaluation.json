@@ -1,0 +1,222 @@
+{
+  "model_name": "VMamba Tiny (Visual State Space Model)",
+  "dataset": "PlantVillage Tomato",
+  "test_samples": 2724,
+  "classes": [
+    "Bacterial Spot",
+    "Early Blight",
+    "Late Blight",
+    "Leaf Mold",
+    "Septoria Leaf Spot",
+    "Spider Mites \u2013 Two-Spotted Spider Mite",
+    "Target Spot",
+    "Tomato Mosaic Virus",
+    "Tomato Yellow Leaf Curl Virus",
+    "Healthy"
+  ],
+  "accuracy": 89.32,
+  "precision_macro": 85.54,
+  "recall_macro": 88.43,
+  "f1_macro": 86.33,
+  "precision_weighted": 90.35,
+  "recall_weighted": 89.32,
+  "f1_weighted": 89.46,
+  "confusion_matrix": [
+    [
+      295,
+      5,
+      3,
+      2,
+      3,
+      0,
+      1,
+      0,
+      10,
+      0
+    ],
+    [
+      11,
+      106,
+      4,
+      17,
+      1,
+      1,
+      5,
+      2,
+      1,
+      2
+    ],
+    [
+      2,
+      12,
+      219,
+      32,
+      3,
+      2,
+      3,
+      1,
+      5,
+      7
+    ],
+    [
+      0,
+      1,
+      1,
+      136,
+      2,
+      2,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      7,
+      0,
+      17,
+      217,
+      5,
+      7,
+      7,
+      4,
+      1
+    ],
+    [
+      0,
+      7,
+      1,
+      2,
+      0,
+      213,
+      20,
+      7,
+      0,
+      2
+    ],
+    [
+      2,
+      4,
+      0,
+      3,
+      3,
+      6,
+      192,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      55,
+      0,
+      0
+    ],
+    [
+      15,
+      4,
+      6,
+      8,
+      0,
+      6,
+      0,
+      0,
+      765,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      235
+    ]
+  ],
+  "classification_report": {
+    "Bacterial Spot": {
+      "precision": 0.9076923076923077,
+      "recall": 0.9247648902821317,
+      "f1-score": 0.9161490683229814,
+      "support": 319.0
+    },
+    "Early Blight": {
+      "precision": 0.726027397260274,
+      "recall": 0.7066666666666667,
+      "f1-score": 0.7162162162162162,
+      "support": 150.0
+    },
+    "Late Blight": {
+      "precision": 0.9358974358974359,
+      "recall": 0.7657342657342657,
+      "f1-score": 0.8423076923076923,
+      "support": 286.0
+    },
+    "Leaf Mold": {
+      "precision": 0.6238532110091743,
+      "recall": 0.951048951048951,
+      "f1-score": 0.7534626038781164,
+      "support": 143.0
+    },
+    "Septoria Leaf Spot": {
+      "precision": 0.9475982532751092,
+      "recall": 0.8188679245283019,
+      "f1-score": 0.8785425101214575,
+      "support": 265.0
+    },
+    "Spider Mites \u2013 Two-Spotted Spider Mite": {
+      "precision": 0.902542372881356,
+      "recall": 0.8452380952380952,
+      "f1-score": 0.8729508196721312,
+      "support": 252.0
+    },
+    "Target Spot": {
+      "precision": 0.8347826086956521,
+      "recall": 0.909952606635071,
+      "f1-score": 0.8707482993197279,
+      "support": 211.0
+    },
+    "Tomato Mosaic Virus": {
+      "precision": 0.7534246575342466,
+      "recall": 0.9821428571428571,
+      "f1-score": 0.8527131782945736,
+      "support": 56.0
+    },
+    "Tomato Yellow Leaf Curl Virus": {
+      "precision": 0.9745222929936306,
+      "recall": 0.9514925373134329,
+      "f1-score": 0.9628697293895532,
+      "support": 804.0
+    },
+    "Healthy": {
+      "precision": 0.9475806451612904,
+      "recall": 0.9873949579831933,
+      "f1-score": 0.9670781893004116,
+      "support": 238.0
+    },
+    "accuracy": 0.8931718061674009,
+    "macro avg": {
+      "precision": 0.8553921182400478,
+      "recall": 0.8843303752572966,
+      "f1-score": 0.863303830682286,
+      "support": 2724.0
+    },
+    "weighted avg": {
+      "precision": 0.9035465767400287,
+      "recall": 0.8931718061674009,
+      "f1-score": 0.8946102092310039,
+      "support": 2724.0
+    }
+  },
+  "evaluation_time_sec": 261.0
+}

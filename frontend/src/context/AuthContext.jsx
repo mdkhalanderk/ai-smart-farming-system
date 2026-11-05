@@ -173,7 +173,31 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true;
 
     const restoreSession = async () => {
-      // 1. Check local backend session token first
+      // 1. Check Supabase session first
+      if (isSupabaseConfigured) {
+        try {
+          const { data: { session: activeSession }, error } = await supabase.auth.getSession();
+          if (isMounted && !error && activeSession?.user) {
+            setUser(activeSession.user);
+            setSession(activeSession);
+            setAuthProvider('supabase');
+            if (activeSession.access_token) {
+              localStorage.setItem(BACKEND_TOKEN_KEY, activeSession.access_token);
+              // Fetch synchronized profile
+              const prof = await fetchBackendProfile(activeSession.access_token);
+              if (!prof) {
+                await fetchSupabaseProfile(activeSession.user.id);
+              }
+            }
+            setLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.warn('Supabase getSession notice:', err.message);
+        }
+      }
+
+      // 2. Fallback: check local backend session token
       const backendToken = localStorage.getItem(BACKEND_TOKEN_KEY);
       if (backendToken) {
         try {
@@ -194,28 +218,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem(BACKEND_TOKEN_KEY);
           }
         } catch (e) {
-          console.warn('Backend session restoration failed, checking Supabase:', e.message);
-        }
-      }
-
-      // 2. If no backend token, check Supabase session
-      if (isSupabaseConfigured) {
-        try {
-          const { data: { session: activeSession }, error } = await supabase.auth.getSession();
-          if (isMounted) {
-            if (!error && activeSession?.user) {
-              setUser(activeSession.user);
-              setSession(activeSession);
-              setAuthProvider('supabase');
-              await fetchSupabaseProfile(activeSession.user.id);
-            } else {
-              setUser(null);
-              setSession(null);
-              setProfile(null);
-            }
-          }
-        } catch (err) {
-          console.warn('Supabase getSession notice:', err.message);
+          console.warn('Backend session restoration notice:', e.message);
         }
       }
 
@@ -231,20 +234,21 @@ export const AuthProvider = ({ children }) => {
     if (isSupabaseConfigured) {
       const { data } = supabase.auth.onAuthStateChange(async (event, newSession) => {
         if (!isMounted) return;
-        // Only override if not currently logged in via backend token
-        if (!localStorage.getItem(BACKEND_TOKEN_KEY)) {
-          if (newSession?.user) {
-            setUser(newSession.user);
-            setSession(newSession);
-            setAuthProvider('supabase');
-            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-              await fetchSupabaseProfile(newSession.user.id);
-            }
-          } else if (event === 'SIGNED_OUT') {
-            setUser(null);
-            setSession(null);
-            setProfile(null);
+        if (newSession?.user) {
+          setUser(newSession.user);
+          setSession(newSession);
+          setAuthProvider('supabase');
+          if (newSession.access_token) {
+            localStorage.setItem(BACKEND_TOKEN_KEY, newSession.access_token);
           }
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+            await fetchBackendProfile(newSession.access_token || '');
+          }
+        } else if (event === 'SIGNED_OUT') {
+          localStorage.removeItem(BACKEND_TOKEN_KEY);
+          setUser(null);
+          setSession(null);
+          setProfile(null);
         }
         setLoading(false);
       });
@@ -300,12 +304,12 @@ export const AuthProvider = ({ children }) => {
       };
     };
 
-    // If Supabase is not configured or configured with an unreachable placeholder URL, use backend auth directly
-    if (!isSupabaseConfigured || configStatus.url?.includes('cgqztsvrnjkzytzhxwiy')) {
+    // If Supabase is not configured, register via backend
+    if (!isSupabaseConfigured) {
       return await registerViaBackend();
     }
 
-    // Otherwise attempt Supabase first
+    // Otherwise prioritize Supabase Auth
     try {
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
@@ -320,13 +324,13 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (error) {
-        // If Supabase remote host is unreachable (paused / deleted / NXDOMAIN / network drop), automatically fall back to backend auth
+        // If Supabase remote host is unreachable, fall back to backend auth
         if (
           error.message?.includes('fetch failed') ||
           error.message?.includes('Failed to fetch') ||
           error.status === 0
         ) {
-          console.warn('Supabase endpoint unreachable. Switching to secure backend authentication...');
+          console.warn('Supabase endpoint unreachable. Switching to local backend auth...');
           return await registerViaBackend();
         }
         if (error.message?.toLowerCase().includes('already registered')) {
@@ -341,10 +345,29 @@ export const AuthProvider = ({ children }) => {
 
       const requiresVerification = !data.session;
       if (data.session) {
+        if (data.session.access_token) {
+          localStorage.setItem(BACKEND_TOKEN_KEY, data.session.access_token);
+        }
         setUser(data.user);
         setSession(data.session);
         setAuthProvider('supabase');
-        await fetchSupabaseProfile(data.user.id);
+
+        // Create or update profile
+        try {
+          await supabase.from('farmer_profiles').upsert({
+            id: data.user.id,
+            name: extraData.full_name || 'Farmer',
+            mobile: extraData.mobile_number || extraData.phone || '',
+            district: extraData.district || 'Kolar',
+            main_crop: extraData.main_crop || 'Tomato',
+            language: language || 'English',
+            updated_at: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('Profile sync notice:', e);
+        }
+
+        await fetchBackendProfile(data.session.access_token);
       }
 
       return {
@@ -361,7 +384,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Farmer Sign In with seamless fallback
+  // Farmer Sign In with Supabase prioritization and fallback
   const signIn = async (email, password) => {
     setAuthError(null);
     const cleanEmail = email.trim().toLowerCase();
@@ -392,7 +415,7 @@ export const AuthProvider = ({ children }) => {
       return data;
     };
 
-    if (!isSupabaseConfigured || configStatus.url?.includes('cgqztsvrnjkzytzhxwiy')) {
+    if (!isSupabaseConfigured) {
       return await loginViaBackend();
     }
 
@@ -412,7 +435,7 @@ export const AuthProvider = ({ children }) => {
           return await loginViaBackend();
         }
         if (error.message?.toLowerCase().includes('invalid login credentials')) {
-          // Try backend in case user was registered in local backend database
+          // Try backend in case user was registered in SQLite before Supabase migration
           try {
             return await loginViaBackend();
           } catch {
@@ -420,17 +443,25 @@ export const AuthProvider = ({ children }) => {
           }
         }
         if (error.message?.toLowerCase().includes('email not confirmed')) {
-          throw new Error('Your email address has not been confirmed yet. Please verify your email using the link sent to your inbox.');
+          // If unconfirmed in Supabase, also attempt backend in case it's a pre-existing verified SQLite account
+          try {
+            return await loginViaBackend();
+          } catch {
+            throw new Error('Your email address has not been confirmed yet. Please verify your email using the link sent to your inbox, or check your credentials.');
+          }
         }
         throw new Error(error.message || 'Failed to sign in. Please check your credentials.');
       }
 
       if (data?.session && data?.user) {
-        localStorage.removeItem(BACKEND_TOKEN_KEY);
+        localStorage.setItem(BACKEND_TOKEN_KEY, data.session.access_token);
         setUser(data.user);
         setSession(data.session);
         setAuthProvider('supabase');
-        await fetchSupabaseProfile(data.user.id);
+        const prof = await fetchBackendProfile(data.session.access_token);
+        if (!prof) {
+          await fetchSupabaseProfile(data.user.id);
+        }
         return data;
       } else {
         throw new Error('Authentication succeeded but no active session was returned.');
@@ -562,23 +593,27 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Fallback or Supabase auth
-    if (isSupabaseConfigured && !configStatus.url?.includes('cgqztsvrnjkzytzhxwiy')) {
+    // Supabase farmer_profiles table update
+    if (isSupabaseConfigured) {
       try {
         const payload = {
           id: user.id,
-          ...normalizedData,
+          name: normalizedData.full_name,
+          mobile: normalizedData.mobile_number,
+          district: normalizedData.district,
+          main_crop: normalizedData.main_crop,
+          language: normalizedData.preferred_language,
           updated_at: new Date().toISOString()
         };
         const { data, error } = await supabase
           .from('farmer_profiles')
           .upsert(payload)
           .select()
-          .single();
+          .maybeSingle();
 
         if (!error && data) {
-          setProfile(data);
-          return data;
+          setProfile({ ...normalizedData, ...data });
+          return { ...normalizedData, ...data };
         }
       } catch (err) {
         console.warn('Supabase profile save notice:', err);

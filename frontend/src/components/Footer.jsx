@@ -16,9 +16,11 @@ export const Footer = () => {
           {/* Brand & Overview */}
           <div className="md:col-span-1 space-y-3">
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#254d32] text-white flex items-center justify-center">
-                <Sprout className="w-4 h-4" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Smart Crop Advisory Logo"
+                className="w-9 h-9 rounded-xl object-cover shrink-0 shadow-xs ring-1 ring-white/10"
+              />
               <span className="font-serif font-bold text-white text-lg tracking-tight">
                 {t('app_name', currentLang)}
               </span>

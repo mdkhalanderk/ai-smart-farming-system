@@ -43,3 +43,7 @@ venv/
 
 # Local testing scripts and temporary files
 /scratch/
+
+# Private user data and uploaded files
+backend/sqlite_migration_export.json
+backend/uploads/

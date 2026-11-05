@@ -1,7 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
-  <rect width="36" height="36" rx="8" fill="#1b432a"/>
-  <path d="M18 29V17" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M18 19C18 14 13 10 7 11C7 17 11 21 18 21Z" fill="#4ade80" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
-  <path d="M18 15C18 11 22 7 29 8C29 14 25 18 18 18Z" fill="#86efac" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>
-  <circle cx="18" cy="29" r="1.5" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect width="100" height="100" rx="22" fill="#183623"/>
+  <!-- Two leaves sprouting above A -->
+  <g transform="translate(68, 25)">
+    <!-- Left Leaf -->
+    <path d="M 0,15 C -12,12 -14,-2 -2,-4 C 5,2 3,11 0,15 Z" fill="#84a585"/>
+    <path d="M 0,15 C -5,7 -4,1 -2,-4" stroke="#5d7b5e" stroke-width="0.8" fill="none"/>
+    <!-- Right Leaf -->
+    <path d="M 0,15 C 3,7 9,0 17,4 C 18,12 10,16 0,15 Z" fill="#84a585"/>
+    <path d="M 0,15 C 6,10 10,6 17,4" stroke="#5d7b5e" stroke-width="0.8" fill="none"/>
+  </g>
+  <!-- S C A Typography -->
+  <text x="50" y="65" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="400" fill="#f4f6f0" letter-spacing="4" text-anchor="middle">SCA</text>
 </svg>

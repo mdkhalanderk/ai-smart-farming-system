@@ -1,0 +1,98 @@
+{
+  "model_name": "Random Forest Regressor (Weather-Aware 19-Feature)",
+  "algorithm": "RandomForestRegressor(n_estimators=300, max_depth=25, min_samples_split=3)",
+  "dataset": "AGMARKNET Karnataka APMC Daily Market Series",
+  "dataset_file": "training_dataset.csv (59.5 MB)",
+  "task_type": "regression_and_categorization",
+  "test_split_method": "Chronological 80/20 held-out split (no future lookahead)",
+  "test_samples": 2629,
+  "training_samples": 10515,
+  "features_count": 19,
+  "features": [
+    "year",
+    "month",
+    "day",
+    "day_of_week",
+    "day_of_year",
+    "season",
+    "commodity_code",
+    "market_code",
+    "district_code",
+    "variety_code",
+    "grade_code",
+    "lag_1",
+    "lag_3",
+    "lag_7",
+    "rolling_7",
+    "temperature",
+    "humidity",
+    "rain",
+    "wind_speed"
+  ],
+  "regression_metrics": {
+    "mae": 294.47,
+    "rmse": 526.65,
+    "r2": 0.7525,
+    "unit": "INR per Quintal (\u20b9/Qtl)"
+  },
+  "categorization": {
+    "method": "Tercile percentiles (33.3rd and 66.7th) fitted strictly on training data",
+    "rationale": "Prevents data leakage. Divides commodity rates into three balanced economic regimes: Low (bottom 33% distressed / glut rates), Medium (middle 33% normal trading rates), and High (top 33% peak seasonal rates).",
+    "thresholds": {
+      "low_max": 1800.0,
+      "medium_min": 1800.0,
+      "medium_max": 2750.0,
+      "high_min": 2750.0,
+      "description": "Low: Price <= \u20b91,800.00 | Medium: \u20b91,800.00 < Price <= \u20b92,750.00 | High: Price > \u20b92,750.00"
+    },
+    "categories": [
+      "Low",
+      "Medium",
+      "High"
+    ],
+    "confusion_matrix": [
+      [
+        293,
+        275,
+        11
+      ],
+      [
+        45,
+        906,
+        88
+      ],
+      [
+        4,
+        181,
+        826
+      ]
+    ],
+    "accuracy": 77.03,
+    "macro_precision": 80.5,
+    "macro_recall": 73.17,
+    "macro_f1": 74.81,
+    "weighted_precision": 79.5,
+    "weighted_recall": 77.03,
+    "weighted_f1": 76.65,
+    "classification_report": {
+      "Low": {
+        "precision": 0.8567,
+        "recall": 0.506,
+        "f1_score": 0.6363,
+        "support": 579
+      },
+      "Medium": {
+        "precision": 0.6652,
+        "recall": 0.872,
+        "f1_score": 0.7547,
+        "support": 1039
+      },
+      "High": {
+        "precision": 0.893,
+        "recall": 0.817,
+        "f1_score": 0.8533,
+        "support": 1011
+      }
+    }
+  }
+}

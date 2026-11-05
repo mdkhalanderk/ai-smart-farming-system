@@ -23,6 +23,16 @@ import {
   Check
 } from 'lucide-react';
 import { searchLocations, getTaluksForDistrict, KARNATAKA_LOCATION_DATA } from '../lib/locationData';
+import {
+  getLocalizedLocation,
+  getLocalizedCropName,
+  getLocalizedSoil,
+  getLocalizedMarket,
+  getLocalizedSeason,
+  getLocalizedSuitability,
+  getLocalizedCropRationale,
+  getLocalizedIcarTip
+} from '../lib/dynamicTranslator';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -619,7 +629,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onFocus={() => searchQuery.trim() && setShowSuggestions(true)}
-                placeholder="Search District, Taluk, or State..."
+                placeholder={t('search_locations_placeholder', currentLang) || "Search District, Taluk, or State..."}
                 className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-[#d6cfc3] bg-white text-xs text-[#1a2e1d] font-medium placeholder:text-[#88968d] focus:outline-none focus:ring-2 focus:ring-[#1b432a] shadow-xs"
               />
             </div>
@@ -658,7 +668,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
         {/* Quick Filter Chips for Major Hubs */}
         <div className="mt-4 pt-3 border-t border-[#e4dfd5] flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
           <span className="text-[11px] font-semibold text-[#6b7c70] uppercase tracking-wider shrink-0">
-            Districts / States:
+            {t('districts_or_states', currentLang) || 'Districts / States:'}
           </span>
           {AGRICULTURAL_HUBS.map((loc) => {
             const isActive = !advisoryData?.is_taluk && selectedArea.toLowerCase().includes(loc.name.toLowerCase());
@@ -674,7 +684,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 }`}
               >
                 <MapPin className="w-3 h-3" />
-                <span>{loc.name}</span>
+                <span>{getLocalizedLocation(loc.name, currentLang)}</span>
               </button>
             );
           })}
@@ -685,7 +695,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
           <div className="mt-2.5 pt-2.5 border-t border-[#f0ece2] flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
             <span className="text-[11px] font-bold text-[#15803d] uppercase tracking-wider shrink-0 flex items-center gap-1">
               <Compass className="w-3.5 h-3.5 text-[#16a34a]" />
-              <span>Taluks in {activeDistrict}:</span>
+              <span>{t('taluks_in_district', currentLang, { district: getLocalizedLocation(activeDistrict, currentLang) }) || `Taluks in ${activeDistrict}:`}</span>
             </span>
 
             {/* All District Option */}
@@ -698,7 +708,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                   : 'bg-[#faf8f5] hover:bg-[#ede8dc] text-[#526055] border border-[#d6cfc3]'
               }`}
             >
-              All {activeDistrict} ({t('district_overview', currentLang)})
+              {t('all_prefix', currentLang) || 'All'} {getLocalizedLocation(activeDistrict, currentLang)} ({t('district_overview', currentLang)})
             </button>
 
             {/* Individual Taluk Buttons */}
@@ -720,7 +730,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                   }`}
                 >
                   <MapPin className={`w-3 h-3 ${isTalukActive ? 'text-white' : 'text-[#16a34a]'}`} />
-                  <span>{tlk}</span>
+                  <span>{getLocalizedLocation(tlk, currentLang)}</span>
                   {isTalukActive && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
                 </button>
               );
@@ -733,55 +743,57 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-[#e4dfd5]">
         
         {/* Left Column: Interactive Leaflet Map (5 Cols) */}
-        <div className="lg:col-span-5 p-5 bg-[#faf8f5] flex flex-col justify-between relative">
+        <div className="lg:col-span-5 p-4 sm:p-5 bg-[#faf8f5] relative">
           
-          <div className="flex items-center justify-between mb-2.5 text-xs text-[#526055]">
-            <span className="font-semibold text-[#1a2e1d] flex items-center gap-1.5">
-              <Compass className="w-4 h-4 text-[#1b432a]" />
-              Live Interactive Map • {advisoryData?.is_taluk ? `Zoomed in: ${advisoryData.taluk}` : activeDistrict}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={handleFocusKarnataka}
-                className="px-2 py-0.5 rounded bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[11px] font-semibold text-[#1a2e1d] transition-colors cursor-pointer"
-                title="Focus Karnataka"
-              >
-                {t('focus_karnataka', currentLang)}
-              </button>
-              <button
-                type="button"
-                onClick={handleResetIndia}
-                className="px-2 py-0.5 rounded bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[11px] font-semibold text-[#1a2e1d] transition-colors cursor-pointer"
-                title="Show all India"
-              >
-                {t('all_india', currentLang)}
-              </button>
-            </div>
-          </div>
-
-          {/* Real Leaflet Map Container */}
-          <div
-            ref={mapContainerRef}
-            className="w-full h-[400px] sm:h-[480px] rounded-xl border border-[#e4dfd5] shadow-inner overflow-hidden relative z-10"
-            style={{ background: '#e5e7eb' }}
-          />
-
-          {/* Regional Climate Badge */}
-          {advisoryData && (
-            <div className="w-full mt-3 p-3.5 rounded-xl bg-white border border-[#e4dfd5] text-xs text-[#2d3a2f] space-y-1.5 shadow-2xs">
-              <div className="flex items-center justify-between text-[#1b432a] font-semibold">
-                <span className="flex items-center gap-1.5">
-                  <Sun className="w-3.5 h-3.5" />
-                  <span>{advisoryData.agro_climatic_zone}</span>
-                </span>
-                <span className="text-[11px] text-[#6b7c70]">{advisoryData.annual_rainfall_mm} mm/yr</span>
+          <div className="lg:sticky lg:top-6 space-y-3.5">
+            <div className="flex items-center justify-between text-xs text-[#526055]">
+              <span className="font-semibold text-[#1a2e1d] flex items-center gap-1.5">
+                <Compass className="w-4 h-4 text-[#1b432a]" />
+                {t('live_interactive_map', currentLang) || 'Live Interactive Map'} • {advisoryData?.is_taluk ? `${t('zoomed_in', currentLang) || 'Zoomed in'}: ${getLocalizedLocation(advisoryData.taluk, currentLang)}` : getLocalizedLocation(activeDistrict, currentLang)}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleFocusKarnataka}
+                  className="px-2 py-0.5 rounded bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[11px] font-semibold text-[#1a2e1d] transition-colors cursor-pointer"
+                  title="Focus Karnataka"
+                >
+                  {t('focus_karnataka', currentLang)}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetIndia}
+                  className="px-2 py-0.5 rounded bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[11px] font-semibold text-[#1a2e1d] transition-colors cursor-pointer"
+                  title="Show all India"
+                >
+                  {t('all_india', currentLang)}
+                </button>
               </div>
-              <p className="text-[11px] text-[#526055] leading-relaxed">
-                {advisoryData.climate_summary}
-              </p>
             </div>
-          )}
+
+            {/* Real Leaflet Map Container */}
+            <div
+              ref={mapContainerRef}
+              className="w-full h-[400px] sm:h-[460px] rounded-xl border border-[#e4dfd5] shadow-inner overflow-hidden relative z-10"
+              style={{ background: '#e5e7eb' }}
+            />
+
+            {/* Regional Climate Badge */}
+            {advisoryData && (
+              <div className="w-full p-3.5 rounded-xl bg-white border border-[#e4dfd5] text-xs text-[#2d3a2f] space-y-1.5 shadow-2xs">
+                <div className="flex items-center justify-between text-[#1b432a] font-semibold">
+                  <span className="flex items-center gap-1.5">
+                    <Sun className="w-3.5 h-3.5" />
+                    <span>{advisoryData.agro_climatic_zone}</span>
+                  </span>
+                  <span className="text-[11px] text-[#6b7c70]">{advisoryData.annual_rainfall_mm} mm/yr</span>
+                </div>
+                <p className="text-[11px] text-[#526055] leading-relaxed">
+                  {advisoryData.climate_summary}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Column: Dynamic Crop Suitability, Yield & Price Advisory (7 Cols) */}
@@ -811,7 +823,9 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-serif font-bold text-lg text-[#1a2e1d]">
-                      {advisoryData.area_name}
+                      {advisoryData.is_taluk
+                        ? `${getLocalizedLocation(advisoryData.taluk || advisoryData.area_name, currentLang)} ${t('taluk_label', currentLang) || 'Taluk'} (${getLocalizedLocation(advisoryData.district, currentLang)} ${t('district_label', currentLang) || 'District'})`
+                        : `${getLocalizedLocation(advisoryData.district || advisoryData.area_name, currentLang)} ${t('district_label', currentLang) || 'District'}`}
                     </h3>
                     {advisoryData.is_taluk ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0] text-[11px] font-bold">
@@ -824,12 +838,12 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                       </span>
                     )}
                     <span className="px-2 py-0.5 rounded-full bg-white border border-[#d6cfc3] text-[#526055] text-[11px] font-medium">
-                      {advisoryData.district} • {advisoryData.state}
+                      {getLocalizedLocation(advisoryData.district, currentLang)} • {getLocalizedLocation(advisoryData.state, currentLang)}
                     </span>
                   </div>
                   
                   <p className="text-xs text-[#526055] mt-1.5">
-                    {t('soil_profile', currentLang)}: <strong className="text-[#1a2e1d]">{advisoryData.soil_type}</strong>
+                    {t('soil_profile', currentLang)}: <strong className="text-[#1a2e1d]">{getLocalizedSoil(advisoryData.soil_type, currentLang)}</strong>
                   </p>
 
                   {advisoryData.specialty && (
@@ -846,7 +860,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                     <span>{t('annual_rainfall', currentLang)}: {advisoryData.annual_rainfall_mm} mm</span>
                   </div>
                   <span className="text-[11px] text-[#6b7c70] block mt-0.5">
-                    {t('nearest_mandi', currentLang)}: <strong className="text-[#142618]">{advisoryData.nearest_mandi}</strong>
+                    {t('nearest_mandi', currentLang)}: <strong className="text-[#142618]">{getLocalizedMarket(advisoryData.nearest_mandi, currentLang)}</strong>
                   </span>
                 </div>
               </div>
@@ -856,7 +870,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-[#142618]">
                     <Filter className="w-4 h-4 text-[#1b432a]" />
-                    <span>{t('select_any_crop', currentLang)} {advisoryData.area_name}:</span>
+                    <span>{t('select_any_crop', currentLang)} {getLocalizedLocation(advisoryData.taluk || advisoryData.district || advisoryData.area_name, currentLang)}:</span>
                   </div>
 
                   {/* Dropdown for All 20 Crops */}
@@ -867,10 +881,10 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                       className="w-full sm:w-auto pl-3 pr-8 py-1.5 rounded-lg bg-white border border-[#d6cfc3] text-[#1a2e1d] font-bold text-xs focus:ring-2 focus:ring-[#1b432a] focus:outline-none shadow-2xs cursor-pointer"
                     >
                       <option value="ALL">⭐ {t('all_recommended_crops', currentLang)} ({advisoryData.recommended_crops?.length || 0})</option>
-                      <optgroup label="Select Specific Crop to Forecast">
+                      <optgroup label={t('select_specific_crop', currentLang) || "Select Specific Crop to Forecast"}>
                         {ALL_AVAILABLE_CROPS.map((c) => (
                           <option key={c.id} value={c.id}>
-                            {c.name} ({c.season})
+                            {getLocalizedCropName(c.name, currentLang)} ({getLocalizedSeason(c.season, currentLang)})
                           </option>
                         ))}
                       </optgroup>
@@ -906,7 +920,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                         }`}
                       >
                         {isCropActive && <Check className="w-3 h-3 text-white" />}
-                        <span>{c.name}</span>
+                        <span>{getLocalizedCropName(c.name, currentLang)}</span>
                       </button>
                     );
                   })}
@@ -920,10 +934,10 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                     <Sprout className="w-4 h-4 text-[#1b432a]" />
                     <h4 className="font-serif font-bold text-base text-[#142618]">
                       {selectedCropFilter !== 'ALL'
-                        ? `Crop Yield & Market Forecast: ${displayCrops[0]?.crop_name} in ${advisoryData.area_name}`
+                        ? `${t('crop_yield_market_forecast', currentLang) || 'Crop Yield & Market Forecast'}: ${getLocalizedCropName(displayCrops[0]?.crop_name, currentLang)} (${getLocalizedLocation(advisoryData.taluk || advisoryData.district, currentLang)})`
                         : (advisoryData.is_taluk
-                            ? `${t('optimal_crops_for', currentLang)} ${advisoryData.taluk || advisoryData.area_name}`
-                            : `${t('top_recommended_for', currentLang)} ${advisoryData.area_name}`)}
+                            ? `${t('optimal_crops_for', currentLang)} ${getLocalizedLocation(advisoryData.taluk || advisoryData.area_name, currentLang)}`
+                            : `${t('top_recommended_for', currentLang)} ${getLocalizedLocation(advisoryData.area_name, currentLang)}`)}
                     </h4>
                   </div>
                   <div className="flex items-center gap-2">
@@ -957,7 +971,7 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                               #{idx + 1}
                             </span>
                             <h5 className="font-serif font-bold text-base text-[#1a2e1d]">
-                              {crop.crop_name}
+                              {getLocalizedCropName(crop.crop_name, currentLang)}
                             </h5>
                           </div>
                           <span className="text-[11px] italic text-[#6b7c70]">
@@ -967,13 +981,13 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
 
                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0] text-xs font-semibold">
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>{crop.suitability_score}% Match • {crop.suitability_level}</span>
+                          <span>{crop.suitability_score}% {t('match_label', currentLang) || 'Match'} • {getLocalizedSuitability(crop.suitability_level, currentLang)}</span>
                         </div>
                       </div>
 
                       {/* Agronomic Suitability Rationale */}
                       <p className="text-xs text-[#435446] leading-relaxed">
-                        {crop.why_suitable}
+                        {getLocalizedCropRationale(crop.crop_id, currentLang, crop.why_suitable)}
                       </p>
 
                       {/* Dual Metric Cards: Expected Yield & Mandi APMC Price */}
@@ -986,20 +1000,20 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
                               <BarChart3 className="w-3.5 h-3.5 text-[#1b432a]" />
                               {t('expected_crop_yield', currentLang)}
                             </span>
-                            <span className="text-[10px] text-[#6b7c70]">{crop.projected_yield?.best_season}</span>
+                            <span className="text-[10px] text-[#6b7c70]">{getLocalizedSeason(crop.projected_yield?.best_season, currentLang)}</span>
                           </div>
 
                           <div className="flex items-baseline gap-2 pt-1">
                             <span className="text-lg font-bold text-[#142618]">
-                              {crop.projected_yield?.mean_yield_qtl_ha} Qtl/Ha
+                              {crop.projected_yield?.mean_yield_qtl_ha} {t('qtl_ha', currentLang) || 'Qtl/Ha'}
                             </span>
                             <span className="text-xs text-[#6b7c70]">
-                              ({crop.projected_yield?.mean_yield_tonnes_ha} Tonnes/Ha)
+                              ({crop.projected_yield?.mean_yield_tonnes_ha} {t('tonnes_ha', currentLang) || 'Tonnes/Ha'})
                             </span>
                           </div>
 
                           <div className="text-[11px] text-[#526055] flex justify-between pt-1">
-                            <span>{t('cycle_label', currentLang)}: {crop.projected_yield?.growth_duration_days}</span>
+                            <span>{t('cycle_label', currentLang)}: {String(crop.projected_yield?.growth_duration_days || '').replace('Days', t('days_unit', currentLang) || 'Days')}</span>
                             <span>{t('target_label', currentLang)}: {crop.projected_yield?.yield_range}</span>
                           </div>
                         </div>
@@ -1018,42 +1032,26 @@ export const IndiaAgriculturalMap = ({ defaultArea = 'Kolar' }) => {
 
                           <div className="flex items-baseline gap-2 pt-1">
                             <span className="text-lg font-bold text-[#143823]">
-                              ₹{crop.mandi_price?.modal_price_qtl} / Qtl
+                              ₹{crop.mandi_price?.modal_price_qtl} / {t('qtl_short', currentLang) || 'Qtl'}
                             </span>
                             <span className="text-xs text-[#6b7c70]">
-                              (₹{crop.mandi_price?.modal_price_kg} / kg)
+                              (₹{crop.mandi_price?.modal_price_kg} / {t('kg_short', currentLang) || 'kg'})
                             </span>
                           </div>
 
                           <div className="text-[11px] text-[#526055] flex justify-between pt-1">
-                            <span>{t('mandi_label', currentLang)}: {crop.mandi_price?.market_name}</span>
+                            <span>{t('mandi_label', currentLang)}: {getLocalizedMarket(crop.mandi_price?.market_name, currentLang)}</span>
                             <span>{t('gross_rev_per_acre', currentLang)}: {crop.mandi_price?.estimated_gross_revenue_per_acre}</span>
                           </div>
                         </div>
 
                       </div>
 
-                      {/* Action Links */}
-                      <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs">
-                        <span className="text-[11px] text-[#6b7c70] italic">
-                          ICAR Tip: {crop.icar_guidelines}
+                      {/* Agronomic Guidance Tip */}
+                      <div className="pt-2 border-t border-[#f0ece2] flex items-center text-xs">
+                        <span className="text-[11px] text-[#526055] leading-relaxed">
+                          <strong className="text-[#1a2e1d] font-semibold">{t('icar_tip_label', currentLang) || 'ICAR Tip'}:</strong> {getLocalizedIcarTip(crop.crop_id, currentLang, crop.icar_guidelines)}
                         </span>
-
-                        <div className="flex items-center gap-2">
-                          <Link
-                            to="/detect"
-                            className="px-3 py-1.5 rounded-md bg-[#eef5ee] hover:bg-[#dcecdc] text-[#1b432a] font-semibold text-xs transition-colors flex items-center gap-1"
-                          >
-                            <span>{t('scan_leaf_disease', currentLang)}</span>
-                            <ArrowRight className="w-3 h-3" />
-                          </Link>
-                          <Link
-                            to="/price-prediction"
-                            className="px-3 py-1.5 rounded-md bg-white border border-[#d6cfc3] hover:bg-[#f5f2ea] text-[#1a2e1d] font-semibold text-xs transition-colors"
-                          >
-                            {t('mandi_forecasts', currentLang)}
-                          </Link>
-                        </div>
                       </div>
 
                     </div>
