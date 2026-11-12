@@ -188,10 +188,13 @@ def init_extended_tables():
         conn.execute("CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conversation_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_notif_user ON notifications(user_id, is_read)")
 
-        # Sync legacy SQLite community_reports into community_alerts if empty
+        # Sync legacy SQLite community_reports into community_alerts if empty and table exists
         alert_count = conn.execute("SELECT COUNT(*) FROM community_alerts").fetchone()[0]
         if alert_count == 0:
-            legacy_reports = conn.execute("SELECT * FROM community_reports").fetchall()
+            has_legacy = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='community_reports'"
+            ).fetchone()
+            legacy_reports = conn.execute("SELECT * FROM community_reports").fetchall() if has_legacy else []
             for r in legacy_reports:
                 r_dict = dict(r)
                 # Map Moderate to Medium

@@ -87,6 +87,8 @@ os.makedirs(os.path.join(uploads_dir, "alert-photos"), exist_ok=True)
 os.makedirs(os.path.join(uploads_dir, "chat-photos"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
+import backend.auth_service
+import backend.community_service
 import backend.supabase_service as supa_svc
 
 def _extract_token(authorization: Optional[str]) -> Optional[str]:
