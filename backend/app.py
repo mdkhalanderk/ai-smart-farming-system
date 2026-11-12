@@ -163,11 +163,17 @@ def load_vmamba_model():
         model_path = os.path.join(BASE_DIR, "model", "best_model.pth")
 
     try:
+        import gc
+        if os.getenv("LOW_MEMORY_MODE", "false").lower() == "true":
+            torch.set_num_threads(1)
+
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path, map_location=DEVICE, weights_only=False)
             num_classes = checkpoint.get("num_classes", len(MULTICROP_CLASSES) if MULTICROP_CLASSES else 10)
             model = build_vssm_tiny(num_classes=num_classes)
             model.load_state_dict(checkpoint["model_state_dict"])
+            del checkpoint
+            gc.collect()
             print(f"Loaded trained fine-tuned VMamba model ({num_classes} classes) from {model_path}")
         else:
             ckpt_path = os.path.join(BASE_DIR, "vssm_tiny_0230_ckpt_epoch_262.pth")

@@ -94,27 +94,39 @@ _HISTORICAL_DF = None
 
 
 def load_model_and_metadata():
-    """Load model, feature specification, and category encoders."""
+    """Load model, feature specification, and category encoders with low-memory footprint."""
     global _MODEL, _FEATURE_COLUMNS, _CATEGORY_MAPPINGS, _HISTORICAL_DF
     if _MODEL is None:
+        import gc
         if not MODEL_FILE.exists():
             raise FileNotFoundError(f"Missing trained model file at {MODEL_FILE}")
-        
+
         _MODEL = joblib.load(MODEL_FILE)
         _FEATURE_COLUMNS = joblib.load(FEATURES_FILE)
 
-        _HISTORICAL_DF = pd.read_csv(HISTORICAL_FILE)
-        all_training = _HISTORICAL_DF.copy()
+        df = pd.read_csv(HISTORICAL_FILE)
         for col in ["District Name", "Market Name", "Commodity", "Variety", "Grade"]:
-            all_training[col] = all_training[col].fillna("Unknown").astype(str).str.strip().str.lower()
+            df[col] = df[col].fillna("Unknown").astype(str).str.strip().str.lower()
 
         _CATEGORY_MAPPINGS = {
-            "commodity": sorted(all_training["Commodity"].unique()),
-            "market": sorted(all_training["Market Name"].unique()),
-            "district": sorted(all_training["District Name"].unique()),
-            "variety": sorted(all_training["Variety"].unique()),
-            "grade": sorted(all_training["Grade"].unique()),
+            "commodity": sorted(df["Commodity"].unique()),
+            "market": sorted(df["Market Name"].unique()),
+            "district": sorted(df["District Name"].unique()),
+            "variety": sorted(df["Variety"].unique()),
+            "grade": sorted(df["Grade"].unique()),
         }
+
+        # Keep only Karnataka rows (recent 60 per market-commodity) to save >120MB RAM
+        df["STATE"] = df["STATE"].astype(str).str.strip().str.lower()
+        df["market_clean"] = df["Market Name"].replace({"bangalore": "bengaluru apmc"})
+        df["commodity_clean"] = df["Commodity"]
+        ka_df = df[df["STATE"] == "karnataka"]
+        if len(ka_df) > 0:
+            _HISTORICAL_DF = ka_df.groupby(["market_clean", "commodity_clean"], group_keys=False).tail(60).copy()
+        else:
+            _HISTORICAL_DF = df.tail(500).copy()
+        del df, ka_df
+        gc.collect()
     return _MODEL, _FEATURE_COLUMNS, _CATEGORY_MAPPINGS, _HISTORICAL_DF
 
 

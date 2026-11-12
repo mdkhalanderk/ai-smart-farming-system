@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 from PIL import Image
@@ -7,15 +8,15 @@ import torchvision.models as models
 
 class ImageValidator:
     """
-    Validates uploaded images to ensure they are suitable tomato leaf images.
+    Validates uploaded images to ensure they are suitable crop leaf images.
     Filters out non-leaf images (dogs, cars, people, documents, landscapes, etc.)
     and severely blurry/unclear images.
     """
     def __init__(self):
-        # Pretrained MobileNetV3 feature extractor for Out-of-Distribution (OOD) verification
-        self.mobilenet = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT)
-        self.mobilenet.eval()
-        
+        # Lazy-load MobileNetV3 only when needed (and skip in LOW_MEMORY_MODE to fit 512MB RAM)
+        self.mobilenet = None
+        self.low_memory_mode = os.getenv("LOW_MEMORY_MODE", "false").lower() == "true"
+
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
@@ -54,7 +55,13 @@ class ImageValidator:
     def check_imagenet_leaf_relevance(self, pil_img):
         """
         Checks ImageNet top predictions for non-leaf / unrelated domain objects (e.g. vehicles, animals, people, furniture).
+        Skipped in LOW_MEMORY_MODE so OpenCV blur + HSV vegetation color checks handle OOD with ~0MB RAM.
         """
+        if self.low_memory_mode:
+            return True, -1, 0.0
+        if self.mobilenet is None:
+            self.mobilenet = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT)
+            self.mobilenet.eval()
         img_tensor = self.transform(pil_img).unsqueeze(0)
         with torch.no_grad():
             outputs = self.mobilenet(img_tensor)
