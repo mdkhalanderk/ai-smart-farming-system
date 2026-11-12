@@ -1,9 +1,9 @@
 import os
 import io
+import gc
 import json
 import time
-import torch
-import torch.nn.functional as F
+import numpy as np
 from PIL import Image
 import logging
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Header, Request
@@ -11,11 +11,31 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from torchvision import transforms
 from dotenv import load_dotenv
 import sys
 from typing import Optional, Dict, Any, List, Tuple
 from pydantic import BaseModel
+
+LOW_MEMORY_MODE = os.getenv("LOW_MEMORY_MODE", "false").lower() == "true"
+
+try:
+    import onnxruntime as ort
+except ImportError:
+    ort = None
+
+if not LOW_MEMORY_MODE:
+    try:
+        import torch
+        import torch.nn.functional as F
+        from torchvision import transforms
+    except ImportError:
+        torch = None
+        F = None
+        transforms = None
+else:
+    torch = None
+    F = None
+    transforms = None
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
@@ -29,7 +49,6 @@ frontend_env_path = os.path.join(os.path.dirname(__file__), "..", "frontend", ".
 if os.path.exists(frontend_env_path):
     load_dotenv(frontend_env_path)
 
-from model.vmamba import build_vssm_tiny
 from backend.ood_validator import validator
 from backend.disease_data import TOMATO_DISEASE_KNOWLEDGE, CROP_DISEASE_DATABASE
 from backend.crop_registry import (
@@ -117,7 +136,8 @@ def _resolve_user(authorization: Optional[str]) -> Optional[Dict[str, Any]]:
 
 # Global variables for model and configuration
 MODEL = None
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+MODEL_BACKEND = None
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") if torch is not None else "cpu"
 CONFIDENCE_THRESHOLD = 0.70 # Configurable threshold for low confidence
 
 INDEX_TO_CLASS = {
@@ -150,23 +170,54 @@ if os.path.exists(MULTICROP_CLASSES_FILE):
     except Exception as e:
         print(f"Notice: Failed to load multicrop classes: {e}")
 
-EVAL_TRANSFORM = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
+def preprocess_image_numpy(pil_img: Image.Image) -> np.ndarray:
+    """Pure PIL+NumPy preprocessing matching torchvision Resize(224,224) + ImageNet Normalize."""
+    resized = pil_img.resize((224, 224), Image.BILINEAR)
+    arr = np.asarray(resized, dtype=np.float32) / 255.0
+    mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+    arr = (arr - mean) / std
+    arr = np.transpose(arr, (2, 0, 1))
+    return np.expand_dims(arr, axis=0).astype(np.float32)
 
 MAX_IMAGE_SIZE = 15 * 1024 * 1024  # 15 MB limit
 
 def load_vmamba_model():
-    global MODEL, INDEX_TO_CLASS
+    global MODEL, MODEL_BACKEND, INDEX_TO_CLASS
+
+    if LOW_MEMORY_MODE:
+        try:
+            import backend.price_service as price_svc
+            price_svc.unload_price_model()
+        except Exception:
+            pass
+
+    onnx_path = os.path.join(BASE_DIR, "model", "vmamba_int8.onnx")
+    if ort is not None and os.path.exists(onnx_path) and (LOW_MEMORY_MODE or torch is None):
+        try:
+            sess_opts = ort.SessionOptions()
+            sess_opts.intra_op_num_threads = 1
+            sess_opts.inter_op_num_threads = 1
+            MODEL = ort.InferenceSession(onnx_path, sess_options=sess_opts, providers=["CPUExecutionProvider"])
+            MODEL_BACKEND = "onnx"
+            gc.collect()
+            print(f"Loaded quantized ONNX INT8 VMamba model from {onnx_path}")
+            return MODEL
+        except Exception as e:
+            print(f"Warning: ONNX Runtime load failed ({e}), trying PyTorch...")
+
+    if torch is None:
+        print("Warning: Neither ONNX Runtime model nor PyTorch is available.")
+        MODEL = None
+        return None
+
+    from model.vmamba import build_vssm_tiny
     model_path = os.path.join(BASE_DIR, "model", "best_multicrop_model.pth")
     if not os.path.exists(model_path):
         model_path = os.path.join(BASE_DIR, "model", "best_model.pth")
 
     try:
-        import gc
-        if os.getenv("LOW_MEMORY_MODE", "false").lower() == "true":
+        if LOW_MEMORY_MODE:
             torch.set_num_threads(1)
 
         if os.path.exists(model_path):
@@ -197,6 +248,7 @@ def load_vmamba_model():
         model = model.to(DEVICE)
         model.eval()
         MODEL = model
+        MODEL_BACKEND = "torch"
         return MODEL
     except Exception as e:
         print(f"Error loading VMamba model: {e}")
@@ -273,7 +325,7 @@ def health_check():
     return {
         "status": "healthy",
         "device": str(DEVICE),
-        "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU",
+        "gpu_name": torch.cuda.get_device_name(0) if (torch is not None and torch.cuda.is_available()) else "CPU",
         "confidence_threshold": CONFIDENCE_THRESHOLD,
         "model_loaded": MODEL is not None
     }
@@ -357,28 +409,34 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             raise HTTPException(status_code=503, detail="AI Disease Detection model is currently unavailable on the server.")
 
         try:
-            input_tensor = EVAL_TRANSFORM(pil_img).unsqueeze(0).to(DEVICE)
-            with torch.no_grad():
-                outputs = MODEL(input_tensor)
-                crop_indices = CROP_TO_INDICES[crop_id]
-                crop_logits = outputs[:, crop_indices]
-                probs = F.softmax(crop_logits, dim=1)
-                top_prob, top_local_idx = torch.max(probs, dim=1)
+            input_arr = preprocess_image_numpy(pil_img)
+            if MODEL_BACKEND == "onnx":
+                outputs = MODEL.run(["logits"], {"input": input_arr})[0]
+            else:
+                with torch.no_grad():
+                    input_tensor = torch.from_numpy(input_arr).to(DEVICE)
+                    outputs = MODEL(input_tensor).cpu().numpy()
 
-            confidence = float(top_prob.item())
-            global_idx = crop_indices[top_local_idx.item()]
+            crop_indices = CROP_TO_INDICES[crop_id]
+            crop_logits = outputs[0, crop_indices]
+            exp_logits = np.exp(crop_logits - np.max(crop_logits))
+            probs = exp_logits / np.sum(exp_logits)
+
+            top_local_idx = int(np.argmax(probs))
+            confidence = float(probs[top_local_idx])
+            global_idx = crop_indices[top_local_idx]
             meta = INDEX_TO_MULTICROP.get(global_idx, {})
             predicted_disease = meta.get("disease_name", "Unknown Disease")
             is_healthy = meta.get("is_healthy", False)
 
-            k_candidates = min(3, probs.size(1))
-            topk_probs, topk_local = torch.topk(probs, k=k_candidates, dim=1)
+            k_candidates = min(3, len(probs))
+            topk_local = np.argsort(probs)[::-1][:k_candidates]
             top_probabilities = [
                 {
-                    "disease": INDEX_TO_MULTICROP.get(crop_indices[loc_idx.item()], {}).get("disease_name", f"Class {loc_idx.item()}"),
-                    "probability": round(float(p.item()), 4)
+                    "disease": INDEX_TO_MULTICROP.get(crop_indices[int(loc_idx)], {}).get("disease_name", f"Class {int(loc_idx)}"),
+                    "probability": round(float(probs[int(loc_idx)]), 4)
                 }
-                for p, loc_idx in zip(topk_probs[0], topk_local[0])
+                for loc_idx in topk_local
             ]
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Model inference failed: {str(e)}")
@@ -819,10 +877,18 @@ def get_price_current(market: str = "Bengaluru APMC", commodity: str = "Onion"):
         }
     return {"status": "success", "data": price_info}
 
+def _run_price_safe(market: str, commodity: str):
+    global MODEL, MODEL_BACKEND
+    if LOW_MEMORY_MODE and MODEL is not None:
+        MODEL = None
+        MODEL_BACKEND = None
+        gc.collect()
+    return run_price_prediction(market, commodity)
+
 @app.post("/api/price/predict")
 def predict_price_post(req: PricePredictRequest):
     try:
-        res = run_price_prediction(req.market, req.commodity)
+        res = _run_price_safe(req.market, req.commodity)
         return res
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -834,7 +900,7 @@ def predict_price_post(req: PricePredictRequest):
 @app.get("/api/price/predict")
 def predict_price_get(market: str = "Bengaluru APMC", commodity: str = "Onion"):
     try:
-        res = run_price_prediction(market, commodity)
+        res = _run_price_safe(market, commodity)
         return res
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))

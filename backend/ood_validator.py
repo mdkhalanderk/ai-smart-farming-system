@@ -2,9 +2,6 @@ import os
 import cv2
 import numpy as np
 from PIL import Image
-import torch
-import torchvision.transforms as transforms
-import torchvision.models as models
 
 class ImageValidator:
     """
@@ -15,13 +12,8 @@ class ImageValidator:
     def __init__(self):
         # Lazy-load MobileNetV3 only when needed (and skip in LOW_MEMORY_MODE to fit 512MB RAM)
         self.mobilenet = None
+        self.transform = None
         self.low_memory_mode = os.getenv("LOW_MEMORY_MODE", "false").lower() == "true"
-
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
 
     def check_blurriness(self, cv_img, threshold=3.0):
         """
@@ -59,9 +51,17 @@ class ImageValidator:
         """
         if self.low_memory_mode:
             return True, -1, 0.0
+        import torch
+        import torchvision.transforms as transforms
+        import torchvision.models as models
         if self.mobilenet is None:
             self.mobilenet = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT)
             self.mobilenet.eval()
+            self.transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
         img_tensor = self.transform(pil_img).unsqueeze(0)
         with torch.no_grad():
             outputs = self.mobilenet(img_tensor)

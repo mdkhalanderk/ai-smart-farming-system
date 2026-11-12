@@ -15,6 +15,7 @@ PRICE_PROJECT_ROOT = PROJECT_ROOT / "market price 1-20261002T015252Z-1-001" / "m
 
 MODEL_FILE = PRICE_PROJECT_ROOT / "models" / "random_forest" / "random_forest_model.pkl"
 FEATURES_FILE = PRICE_PROJECT_ROOT / "models" / "random_forest" / "random_forest_features.pkl"
+KARNATAKA_RECENT_FILE = PRICE_PROJECT_ROOT / "data" / "historical" / "karnataka_recent.csv"
 HISTORICAL_FILE = PRICE_PROJECT_ROOT / "data" / "historical" / "training_dataset.csv"
 
 MANDI_API_URL = "https://mandi-api.onrender.com/v1/prices"
@@ -93,6 +94,15 @@ _CATEGORY_MAPPINGS = None
 _HISTORICAL_DF = None
 
 
+def unload_price_model():
+    """Frees Price Random Forest model memory in LOW_MEMORY_MODE."""
+    global _MODEL, _FEATURE_COLUMNS, _CATEGORY_MAPPINGS, _HISTORICAL_DF
+    import gc
+    _MODEL = None
+    _HISTORICAL_DF = None
+    gc.collect()
+
+
 def load_model_and_metadata():
     """Load model, feature specification, and category encoders with low-memory footprint."""
     global _MODEL, _FEATURE_COLUMNS, _CATEGORY_MAPPINGS, _HISTORICAL_DF
@@ -104,7 +114,8 @@ def load_model_and_metadata():
         _MODEL = joblib.load(MODEL_FILE)
         _FEATURE_COLUMNS = joblib.load(FEATURES_FILE)
 
-        df = pd.read_csv(HISTORICAL_FILE)
+        csv_to_read = KARNATAKA_RECENT_FILE if KARNATAKA_RECENT_FILE.exists() else HISTORICAL_FILE
+        df = pd.read_csv(csv_to_read)
         for col in ["District Name", "Market Name", "Commodity", "Variety", "Grade"]:
             df[col] = df[col].fillna("Unknown").astype(str).str.strip().str.lower()
 

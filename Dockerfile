@@ -1,4 +1,4 @@
-# Production Dockerfile for Krishi Drishti AI Backend (CPU-Optimized & 512MB RAM Friendly)
+# Production Dockerfile for Krishi Drishti AI Backend (ONNX Runtime INT8 - Ultra-Low RAM < 512MB)
 FROM python:3.10-slim AS backend
 
 WORKDIR /app
@@ -18,25 +18,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install CPU-only PyTorch & torchvision first to avoid multi-GB CUDA libraries (keep PyPI as fallback for build deps like flit_core)
-RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
-
-# Install remaining Python dependencies
+# Install lightweight ONNX Runtime + remaining dependencies (NO PyTorch/CUDA needed!)
 COPY requirements.txt /app/
 RUN grep -viE "^(torch|torchvision)" requirements.txt > requirements.nocuda.txt && \
+    pip install --no-cache-dir onnxruntime && \
     pip install --no-cache-dir -r requirements.nocuda.txt && \
     rm -f requirements.nocuda.txt
 
-# Copy backend code, trained models, evaluation reports, and yield data
+# Copy backend code, lightweight ONNX & Yield models, evaluation reports, and yield data
 COPY backend /app/backend
-COPY model /app/model
+COPY model/vmamba_int8.onnx /app/model/vmamba_int8.onnx
+COPY model/multicrop_classes.json /app/model/multicrop_classes.json
+COPY model/yield_model.joblib /app/model/yield_model.joblib
+COPY model/yield_metadata.json /app/model/yield_metadata.json
 COPY reports /app/reports
 COPY data/crop_yield_data.csv /app/data/crop_yield_data.csv
 COPY data/community_reports.json /app/data/community_reports.json
 
-# Copy Mandi price Random Forest model and historical APMC series
+# Copy Mandi price Random Forest model and lightweight 398KB Karnataka recent dataset
 COPY ["market price 1-20261002T015252Z-1-001/market price 1/models", "/app/market price 1-20261002T015252Z-1-001/market price 1/models"]
-COPY ["market price 1-20261002T015252Z-1-001/market price 1/data/historical", "/app/market price 1-20261002T015252Z-1-001/market price 1/data/historical"]
+COPY ["market price 1-20261002T015252Z-1-001/market price 1/data/historical/karnataka_recent.csv", "/app/market price 1-20261002T015252Z-1-001/market price 1/data/historical/karnataka_recent.csv"]
 
 # Create storage directory for SQLite DB & uploaded photos
 RUN mkdir -p /app/storage/uploads/alert-photos /app/storage/uploads/chat-photos && \
