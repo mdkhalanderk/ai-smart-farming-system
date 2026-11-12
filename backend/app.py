@@ -305,9 +305,19 @@ def resolve_disease_advisory(crop_id: str, crop_name: str, disease_name: str) ->
         "source": f"ICAR Agricultural Extension Service ({crop_name})"
     }
 
+def _trim_memory():
+    """Forces Python GC and asks Linux glibc to return freed C++ arenas to OS."""
+    gc.collect()
+    try:
+        import ctypes
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:
+        pass
+
 @app.on_event("startup")
 def startup_event():
-    load_vmamba_model()
+    if not LOW_MEMORY_MODE:
+        load_vmamba_model()
 
 @app.get("/")
 def root_endpoint():
@@ -322,12 +332,13 @@ def root_endpoint():
 @app.get("/health")
 @app.get("/api/health")
 def health_check():
+    model_ready = MODEL is not None or os.path.exists(os.path.join(BASE_DIR, "model", "vmamba_int8.onnx"))
     return {
         "status": "healthy",
         "device": str(DEVICE),
         "gpu_name": torch.cuda.get_device_name(0) if (torch is not None and torch.cuda.is_available()) else "CPU",
         "confidence_threshold": CONFIDENCE_THRESHOLD,
-        "model_loaded": MODEL is not None
+        "model_loaded": model_ready
     }
 
 @app.get("/api/crops")
@@ -882,7 +893,7 @@ def _run_price_safe(market: str, commodity: str):
     if LOW_MEMORY_MODE and MODEL is not None:
         MODEL = None
         MODEL_BACKEND = None
-        gc.collect()
+        _trim_memory()
     return run_price_prediction(market, commodity)
 
 @app.post("/api/price/predict")

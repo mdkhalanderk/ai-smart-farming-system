@@ -101,6 +101,11 @@ def unload_price_model():
     _MODEL = None
     _HISTORICAL_DF = None
     gc.collect()
+    try:
+        import ctypes
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:
+        pass
 
 
 def load_model_and_metadata():
