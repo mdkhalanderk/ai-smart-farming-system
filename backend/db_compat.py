@@ -139,6 +139,23 @@ class CompatPgConnection:
             cur.execute(pg_sql)
         return CompatCursor(cur)
 
+    def executemany(self, sql: str, seq_of_params: Iterable[Iterable[Any]]) -> CompatCursor:
+        pg_sql = _translate_sql_to_postgres(sql)
+        cur = self._conn.cursor()
+        cur.executemany(pg_sql, [tuple(p) for p in seq_of_params])
+        return CompatCursor(cur)
+
+    def cursor(self):
+        return self._conn.cursor()
+
+    @property
+    def row_factory(self):
+        return None
+
+    @row_factory.setter
+    def row_factory(self, val):
+        pass
+
     def commit(self):
         self._conn.commit()
 
