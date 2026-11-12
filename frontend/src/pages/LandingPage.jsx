@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { t } from '../lib/i18n';
 
 export const LandingPage = () => {
-  const { language } = useAuth();
+  const { user, language } = useAuth();
   const currentLang = language || 'English';
 
   return (
@@ -41,19 +41,39 @@ export const LandingPage = () => {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              to="/signup"
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#1b432a] hover:bg-[#143420] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-            >
-              <span>{t('cta_create_account', currentLang)}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/login"
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-[#faf8f5] text-[#1a2e1d] text-sm font-semibold border border-[#d6cfc3] transition-colors flex items-center justify-center gap-2"
-            >
-              <span>{t('cta_signin', currentLang)}</span>
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#1b432a] hover:bg-[#143420] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>{t('nav_dashboard', currentLang) || 'Go to Dashboard'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/detect"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-[#faf8f5] text-[#1a2e1d] text-sm font-semibold border border-[#d6cfc3] transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>{t('nav_detect', currentLang) || 'Detect Crop Disease'}</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/signup"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#1b432a] hover:bg-[#143420] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>{t('cta_create_account', currentLang)}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/login"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-white hover:bg-[#faf8f5] text-[#1a2e1d] text-sm font-semibold border border-[#d6cfc3] transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>{t('cta_signin', currentLang)}</span>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Key Feature Scope */}

@@ -165,7 +165,8 @@ export const Navbar = () => {
             href={user ? '/dashboard' : '/'}
             onClick={(e) => {
               e.preventDefault();
-              window.location.href = user ? '/dashboard' : '/';
+              const hasSession = Boolean(user || localStorage.getItem('smart_crop_backend_token'));
+              window.location.href = hasSession ? '/dashboard' : '/';
             }}
             className="flex items-center gap-2.5 group shrink-0 cursor-pointer"
           >
