@@ -18,8 +18,15 @@ except ImportError:
 
 
 def get_database_url() -> str:
-    url = os.getenv("DATABASE_URL", "").strip().strip('"').strip("'")
-    if url.startswith("postgres://"):
+    url = os.getenv("DATABASE_URL", "").strip()
+    # Handle accidental 'psql ...' or 'DATABASE_URL=...' paste
+    m = re.search(r"(postgres(?:ql)?://[^\s'\"]+|//[^\s'\"]+)", url)
+    if m:
+        url = m.group(1)
+    url = url.strip().strip('"').strip("'")
+    if url.startswith("//"):
+        url = "postgresql:" + url
+    elif url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
     # Remove channel_binding=require if present for maximum libpq compatibility
     url = re.sub(r"[?&]channel_binding=[^&]*", "", url)
