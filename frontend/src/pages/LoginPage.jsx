@@ -127,17 +127,6 @@ export const LoginPage = () => {
           </p>
         </div>
 
-        {/* Auth Mode Indicator */}
-        <div className="mb-6 p-3 rounded-xl bg-[#f5f8f5] border border-[#d8e2dc] text-[#2d5038] text-xs leading-relaxed flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-            <span className="font-medium text-[#1b432a]">Instant FastAuth Active</span>
-          </div>
-          <span className="text-[11px] text-[#166534] font-medium bg-[#dcfce7] px-2 py-0.5 rounded-full border border-[#bbf7d0]">
-            ⚡ Direct Sign In
-          </span>
-        </div>
-
         {/* Error message banner */}
         {error && (
           <div className="mb-6 p-4 rounded-xl bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium flex items-start gap-3 animate-shake">
@@ -258,20 +247,8 @@ export const LoginPage = () => {
             {/* Quick Demo Credentials */}
             <div className="pt-3 space-y-2">
               <p className="text-[11px] font-semibold text-[#526055] uppercase tracking-wider text-center">
-                One-Click Instant Sign In
+                Demo Account
               </p>
-              
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('mohammedkhalanderk3636@gmail.com');
-                  setPassword('password123');
-                  setError('');
-                }}
-                className="w-full py-2 px-3 rounded-lg border border-dashed border-[#1b432a]/40 bg-[#f0fdf4] hover:bg-[#dcfce7] text-[#166534] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>👤 Primary Farmer: mohammedkhalanderk3636@gmail.com</span>
-              </button>
 
               <button
                 type="button"
@@ -280,7 +257,7 @@ export const LoginPage = () => {
                   setPassword('password123');
                   setError('');
                 }}
-                className="w-full py-2 px-3 rounded-lg border border-dashed border-[#526055]/30 bg-[#f9fafb] hover:bg-[#f3f4f6] text-[#374151] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="w-full py-2 px-3 rounded-lg border border-dashed border-[#1b432a]/40 bg-[#f0fdf4] hover:bg-[#dcfce7] text-[#166534] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <span>⚡ Demo Account: test_farmer@krishi.in</span>
               </button>
@@ -307,7 +284,7 @@ export const LoginPage = () => {
                   setResetEmail(e.target.value);
                   if (error) setError('');
                 }}
-                placeholder="mohammedkhalanderk3636@gmail.com"
+                placeholder="farmer@example.in"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-[#d6cfc3] focus:outline-none focus:ring-2 focus:ring-[#1b432a] focus:border-transparent font-normal text-[#1a2e1d] text-sm bg-white"
               />
             </div>

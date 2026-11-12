@@ -88,17 +88,6 @@ export const SignUpPage = () => {
           </p>
         </div>
 
-        {/* Auth Mode Indicator */}
-        <div className="mb-6 p-3 rounded-xl bg-[#f5f8f5] border border-[#d8e2dc] text-[#2d5038] text-xs leading-relaxed flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-            <span className="font-medium text-[#1b432a]">Instant Account Activation</span>
-          </div>
-          <span className="text-[11px] text-[#166534] font-medium bg-[#dcfce7] px-2 py-0.5 rounded-full border border-[#bbf7d0]">
-            ⚡ Instant Login (No Email Wait)
-          </span>
-        </div>
-
         {/* Error message */}
         {error && (
           <div className="mb-6 p-4 rounded-xl bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium flex items-start gap-3">
