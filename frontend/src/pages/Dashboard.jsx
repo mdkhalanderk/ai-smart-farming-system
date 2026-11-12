@@ -171,7 +171,7 @@ export const Dashboard = () => {
             <div className="mt-5 pt-3 border-t border-[#e4dfd5]">
               <Link
                 to="/price-prediction"
-                className="w-full py-2 px-3 rounded-md bg-white hover:bg-[#faf8f5] text-[#1a2e1d] border border-[#d6cfc3] text-xs font-semibold flex items-center justify-between transition-colors"
+                className="w-full py-2 px-3 rounded-md bg-[#1b432a] hover:bg-[#143420] text-white text-xs font-semibold flex items-center justify-between transition-colors"
               >
                 <span>{t('view_prices', currentLang)}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -198,7 +198,7 @@ export const Dashboard = () => {
             <div className="mt-5 pt-3 border-t border-[#e4dfd5]">
               <Link
                 to="/yield-prediction"
-                className="w-full py-2 px-3 rounded-md bg-white hover:bg-[#faf8f5] text-[#1a2e1d] border border-[#d6cfc3] text-xs font-semibold flex items-center justify-between transition-colors"
+                className="w-full py-2 px-3 rounded-md bg-[#1b432a] hover:bg-[#143420] text-white text-xs font-semibold flex items-center justify-between transition-colors"
               >
                 <span>{t('forecast_harvest', currentLang)}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -225,7 +225,7 @@ export const Dashboard = () => {
             <div className="mt-5 pt-3 border-t border-[#e4dfd5]">
               <Link
                 to="/community"
-                className="w-full py-2 px-3 rounded-md bg-white hover:bg-[#faf8f5] text-[#1a2e1d] border border-[#d6cfc3] text-xs font-semibold flex items-center justify-between transition-colors"
+                className="w-full py-2 px-3 rounded-md bg-[#1b432a] hover:bg-[#143420] text-white text-xs font-semibold flex items-center justify-between transition-colors"
               >
                 <span>{t('view_alerts', currentLang)}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
