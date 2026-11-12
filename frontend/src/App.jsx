@@ -1,11 +1,11 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { PageLoader } from './components/PageLoader';
+import { PageLoader, GlobalNetworkLoader } from './components/PageLoader';
 
 // Lazy-loaded routes for production performance and code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -21,10 +21,24 @@ const YieldPrediction = lazy(() => import('./pages/YieldPrediction').then(m => (
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
 
 export default function App() {
+  // Silently preload heavy route bundles after initial paint so mobile navigation is instant
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      import('./pages/Dashboard');
+      import('./pages/DiseaseDetection');
+      import('./pages/PricePrediction');
+      import('./pages/YieldPrediction');
+      import('./pages/CommunityPage');
+      import('./pages/ReportsPage');
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>
         <Router>
+          <GlobalNetworkLoader />
           <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#faf8f5] font-sans text-[#1a2e1d] flex flex-col selection:bg-[#cbe2ce] selection:text-[#143823]">
             <Navbar />
             <main className="flex-1">
