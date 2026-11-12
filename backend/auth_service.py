@@ -83,6 +83,53 @@ def _hash_password(password: str, salt: bytes) -> str:
 def _generate_salt() -> bytes:
     return os.urandom(16)
 
+def _seed_default_demo_accounts():
+    """Ensures the One-Click Demo Accounts exist on fresh/ephemeral cloud deployments."""
+    demo_accounts = [
+        {
+            "email": "mohammedkhalanderk3636@gmail.com",
+            "password": "password123",
+            "full_name": "Mohammed Khalander",
+            "district": "Davangere",
+            "main_crop": "Tomato",
+        },
+        {
+            "email": "test_farmer@krishi.in",
+            "password": "password123",
+            "full_name": "Ramesh Patel",
+            "district": "Kolar",
+            "main_crop": "Tomato",
+        },
+    ]
+    conn = get_db()
+    try:
+        now_iso = datetime.utcnow().isoformat() + "Z"
+        with conn:
+            for acc in demo_accounts:
+                if conn.execute("SELECT id FROM users WHERE email = ?", (acc["email"],)).fetchone():
+                    continue
+                uid = secrets.token_hex(16)
+                salt_bytes = _generate_salt()
+                pw_hash = _hash_password(acc["password"], salt_bytes)
+                conn.execute(
+                    "INSERT INTO users (id, email, password_hash, salt, created_at) VALUES (?, ?, ?, ?, ?)",
+                    (uid, acc["email"], pw_hash, salt_bytes.hex(), now_iso),
+                )
+                pid = secrets.token_hex(16)
+                conn.execute(
+                    """
+                    INSERT INTO profiles (
+                        id, user_id, full_name, phone, mobile_number, district, state,
+                        primary_crops, main_crop, preferred_language, land_size, farming_type, experience_years, updated_at
+                    ) VALUES (?, ?, ?, '', '', ?, 'Karnataka', ?, ?, 'English', '2.5 Acres', 'Integrated', 5, ?)
+                    """,
+                    (pid, uid, acc["full_name"], acc["district"], acc["main_crop"], acc["main_crop"], now_iso),
+                )
+    finally:
+        conn.close()
+
+_seed_default_demo_accounts()
+
 def register_user(email: str, password: str, extra_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Registers a new farmer with salted hash and creates their default profile."""
     email = email.strip().lower()
