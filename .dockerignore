@@ -1,0 +1,28 @@
+.git
+.gitignore
+node_modules
+**/node_modules
+frontend
+scratch
+training
+docs
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+*.db
+*.sqlite
+*.sqlite3
+backend/uploads
+backend/sqlite_migration_export.json
+vssm_tiny_0230_ckpt_epoch_262.pth
+
+# Ignore raw multi-GB training image directories inside data/
+data/*/
+!data/crop_yield_data.csv
+!data/community_reports.json
+
+# Ignore extra/unused files inside market price directory
+market price 1-20261002T015252Z-1-001/market price 1/venv
+market price 1-20261002T015252Z-1-001/market price 1/__pycache__
+

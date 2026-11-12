@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getSavedLanguage, setSavedLanguage, t } from '../lib/i18n';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../lib/config';
 
 export const Navbar = () => {
   const { user, profile, signOut, language, setLanguage } = useAuth();

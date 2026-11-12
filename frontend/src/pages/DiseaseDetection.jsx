@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { t, getSavedLanguage } from '../lib/i18n';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../lib/config';
 
 const CROP_OPTIONS = [
   { id: 'tomato', name: 'Tomato' },
@@ -189,7 +189,7 @@ export const DiseaseDetection = () => {
               user_id: userId,
               crop: data.crop || currentCropOption.name,
               disease: data.disease,
-              confidence: typeof data.confidence === 'number' ? Math.round(data.confidence * 100) / 100 : 96.5,
+              confidence: typeof data.confidence === 'number' ? Math.round(data.confidence * 100) / 100 : 0.96,
               image_name: selectedFile?.name || 'field_leaf_sample.jpg'
             })
           }).catch((e) => console.warn('Diagnosis history save notice:', e));

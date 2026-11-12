@@ -22,9 +22,9 @@ class ImageValidator:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
-    def check_blurriness(self, cv_img, threshold=12.0):
+    def check_blurriness(self, cv_img, threshold=3.0):
         """
-        Calculates Laplacian variance to detect blurry images.
+        Calculates Laplacian variance to detect blurry or blank images.
         """
         gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
         variance = cv2.Laplacian(gray, cv2.CV_64F).var()
@@ -81,17 +81,17 @@ class ImageValidator:
         # 1. Blurriness Check
         is_sharp, blur_var = self.check_blurriness(cv_img)
         if not is_sharp:
-            return False, f"Image is too blurry or unclear (sharpness score: {blur_var:.1f}). Please upload a clearer image of a tomato leaf."
+            return False, f"Image is too blurry or unclear (sharpness score: {blur_var:.1f}). Please upload a clearer image of a crop leaf."
 
         # 2. Vegetation Color Check
         is_plant_colored, plant_ratio = self.check_color_distribution(cv_img)
         if not is_plant_colored:
-            return False, "Unable to detect. Please upload a clear image of a tomato leaf."
+            return False, "Unable to detect. Please upload a clear image of a crop leaf."
 
         # 3. Domain Relevance Check
         is_relevant, top_cls, top_prob = self.check_imagenet_leaf_relevance(pil_img)
         if not is_relevant:
-            return False, "Unable to detect. Please upload a clear image of a tomato leaf."
+            return False, "Unable to detect. Please upload a clear image of a crop leaf."
 
         return True, "Image is valid."
 

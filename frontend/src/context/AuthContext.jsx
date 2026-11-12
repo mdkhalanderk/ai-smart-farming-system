@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { supabase, isSupabaseConfigured, getSupabaseConfigStatus } from '../lib/supabase';
 import { getSavedLanguage, setSavedLanguage } from '../lib/i18n';
 
+import { API_BASE_URL } from '../lib/config';
+
 const AuthContext = createContext(null);
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const BACKEND_TOKEN_KEY = 'smart_crop_backend_token';
 const CACHED_PROFILE_KEY = 'smart_crop_profile';
 const CACHED_USER_KEY = 'smart_crop_user';
@@ -173,31 +174,7 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true;
 
     const restoreSession = async () => {
-      // 1. Check Supabase session first
-      if (isSupabaseConfigured) {
-        try {
-          const { data: { session: activeSession }, error } = await supabase.auth.getSession();
-          if (isMounted && !error && activeSession?.user) {
-            setUser(activeSession.user);
-            setSession(activeSession);
-            setAuthProvider('supabase');
-            if (activeSession.access_token) {
-              localStorage.setItem(BACKEND_TOKEN_KEY, activeSession.access_token);
-              // Fetch synchronized profile
-              const prof = await fetchBackendProfile(activeSession.access_token);
-              if (!prof) {
-                await fetchSupabaseProfile(activeSession.user.id);
-              }
-            }
-            setLoading(false);
-            return;
-          }
-        } catch (err) {
-          console.warn('Supabase getSession notice:', err.message);
-        }
-      }
-
-      // 2. Fallback: check local backend session token
+      // 1. Check local backend session token first for instant FastAuth restoration
       const backendToken = localStorage.getItem(BACKEND_TOKEN_KEY);
       if (backendToken) {
         try {
@@ -219,6 +196,29 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (e) {
           console.warn('Backend session restoration notice:', e.message);
+        }
+      }
+
+      // 2. Fallback: check Supabase session if configured
+      if (isSupabaseConfigured) {
+        try {
+          const { data: { session: activeSession }, error } = await supabase.auth.getSession();
+          if (isMounted && !error && activeSession?.user) {
+            setUser(activeSession.user);
+            setSession(activeSession);
+            setAuthProvider('supabase');
+            if (activeSession.access_token) {
+              localStorage.setItem(BACKEND_TOKEN_KEY, activeSession.access_token);
+              const prof = await fetchBackendProfile(activeSession.access_token);
+              if (!prof) {
+                await fetchSupabaseProfile(activeSession.user.id);
+              }
+            }
+            setLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.warn('Supabase getSession notice:', err.message);
         }
       }
 
@@ -261,13 +261,13 @@ export const AuthProvider = ({ children }) => {
     };
   }, [fetchBackendProfile, fetchSupabaseProfile]);
 
-  // Farmer Registration with seamless fallback
+  // Farmer Registration with seamless FastAuth Engine
   const signUp = async (email, password, extraData = {}) => {
     setAuthError(null);
     const cleanEmail = email.trim().toLowerCase();
 
-    // Function to register directly against our secure FastAPI Backend
-    const registerViaBackend = async () => {
+    // 1. Direct registration against our high-speed FastAPI Backend (Zero email confirmation blockage)
+    try {
       const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -296,65 +296,10 @@ export const AuthProvider = ({ children }) => {
       setProfile(data.profile);
       setAuthProvider('backend');
 
-      return {
-        user: data.user,
-        session: data.session,
-        profile: data.profile,
-        requiresVerification: false
-      };
-    };
-
-    // If Supabase is not configured, register via backend
-    if (!isSupabaseConfigured) {
-      return await registerViaBackend();
-    }
-
-    // Otherwise prioritize Supabase Auth
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password: password,
-        options: {
-          data: {
-            full_name: extraData.full_name || '',
-            district: extraData.district || 'Kolar',
-            main_crop: extraData.main_crop || 'Tomato'
-          }
-        }
-      });
-
-      if (error) {
-        // If Supabase remote host is unreachable, fall back to backend auth
-        if (
-          error.message?.includes('fetch failed') ||
-          error.message?.includes('Failed to fetch') ||
-          error.status === 0
-        ) {
-          console.warn('Supabase endpoint unreachable. Switching to local backend auth...');
-          return await registerViaBackend();
-        }
-        if (error.message?.toLowerCase().includes('already registered')) {
-          throw new Error('An account with this email address already exists. Please sign in instead.');
-        }
-        throw new Error(error.message || 'Failed to register account.');
-      }
-
-      if (!data?.user) {
-        throw new Error('Registration failed to return user data.');
-      }
-
-      const requiresVerification = !data.session;
-      if (data.session) {
-        if (data.session.access_token) {
-          localStorage.setItem(BACKEND_TOKEN_KEY, data.session.access_token);
-        }
-        setUser(data.user);
-        setSession(data.session);
-        setAuthProvider('supabase');
-
-        // Create or update profile
+      // Attempt background non-blocking sync to Supabase if configured
+      if (isSupabaseConfigured && data.user) {
         try {
-          await supabase.from('farmer_profiles').upsert({
+          supabase.from('farmer_profiles').upsert({
             id: data.user.id,
             name: extraData.full_name || 'Farmer',
             mobile: extraData.mobile_number || extraData.phone || '',
@@ -362,29 +307,23 @@ export const AuthProvider = ({ children }) => {
             main_crop: extraData.main_crop || 'Tomato',
             language: language || 'English',
             updated_at: new Date().toISOString()
-          });
-        } catch (e) {
-          console.warn('Profile sync notice:', e);
-        }
-
-        await fetchBackendProfile(data.session.access_token);
+          }).then(() => {}).catch(() => {});
+        } catch (_) {}
       }
 
       return {
         user: data.user,
         session: data.session,
-        requiresVerification
+        profile: data.profile,
+        requiresVerification: false
       };
     } catch (err) {
-      if (err.message?.includes('fetch failed') || err.message?.includes('Failed to fetch')) {
-        return await registerViaBackend();
-      }
       setAuthError(err.message);
       throw err;
     }
   };
 
-  // Farmer Sign In with Supabase prioritization and fallback
+  // Farmer Sign In: Prioritize FastAuth Engine for immediate, zero-friction access
   const signIn = async (email, password) => {
     setAuthError(null);
     const cleanEmail = email.trim().toLowerCase();
@@ -415,63 +354,59 @@ export const AuthProvider = ({ children }) => {
       return data;
     };
 
-    if (!isSupabaseConfigured) {
-      return await loginViaBackend();
-    }
-
+    // 1. Try local backend login first
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: cleanEmail,
-        password: password
-      });
+      return await loginViaBackend();
+    } catch (backendErr) {
+      // 2. Fallback: If user was registered in Supabase
+      if (isSupabaseConfigured) {
+        try {
+          const { data: supaData, error: supaErr } = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password: password
+          });
 
-      if (error) {
-        if (
-          error.message?.includes('fetch failed') ||
-          error.message?.includes('Failed to fetch') ||
-          error.status === 0
-        ) {
-          console.warn('Supabase endpoint unreachable. Attempting backend login...');
-          return await loginViaBackend();
-        }
-        if (error.message?.toLowerCase().includes('invalid login credentials')) {
-          // Try backend in case user was registered in SQLite before Supabase migration
-          try {
-            return await loginViaBackend();
-          } catch {
-            throw new Error('Invalid email or password. Please check your credentials and try again.');
+          if (!supaErr && supaData?.user && supaData?.session) {
+            localStorage.setItem(BACKEND_TOKEN_KEY, supaData.session.access_token);
+            setUser(supaData.user);
+            setSession(supaData.session);
+            setAuthProvider('supabase');
+            await fetchBackendProfile(supaData.session.access_token);
+            return supaData;
           }
-        }
-        if (error.message?.toLowerCase().includes('email not confirmed')) {
-          // If unconfirmed in Supabase, also attempt backend in case it's a pre-existing verified SQLite account
-          try {
-            return await loginViaBackend();
-          } catch {
-            throw new Error('Your email address has not been confirmed yet. Please verify your email using the link sent to your inbox, or check your credentials.');
+
+          // If Supabase rejected because email was unconfirmed, auto-register/login via FastAuth backend!
+          if (supaErr?.message?.toLowerCase().includes('email not confirmed')) {
+            try {
+              const regRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: cleanEmail,
+                  password: password,
+                  full_name: 'Farmer',
+                  district: 'Kolar',
+                  state: 'Karnataka',
+                  main_crop: 'Tomato',
+                  phone: ''
+                })
+              });
+              const regData = await regRes.json();
+              if (regRes.ok && regData.session?.access_token) {
+                localStorage.setItem(BACKEND_TOKEN_KEY, regData.session.access_token);
+                setUser(regData.user);
+                setSession(regData.session);
+                setProfile(regData.profile);
+                setAuthProvider('backend');
+                return regData;
+              }
+            } catch (_) {}
           }
-        }
-        throw new Error(error.message || 'Failed to sign in. Please check your credentials.');
+        } catch (_) {}
       }
 
-      if (data?.session && data?.user) {
-        localStorage.setItem(BACKEND_TOKEN_KEY, data.session.access_token);
-        setUser(data.user);
-        setSession(data.session);
-        setAuthProvider('supabase');
-        const prof = await fetchBackendProfile(data.session.access_token);
-        if (!prof) {
-          await fetchSupabaseProfile(data.user.id);
-        }
-        return data;
-      } else {
-        throw new Error('Authentication succeeded but no active session was returned.');
-      }
-    } catch (err) {
-      if (err.message?.includes('fetch failed') || err.message?.includes('Failed to fetch')) {
-        return await loginViaBackend();
-      }
-      setAuthError(err.message);
-      throw err;
+      setAuthError(backendErr.message);
+      throw backendErr;
     }
   };
 
@@ -555,6 +490,8 @@ export const AuthProvider = ({ children }) => {
       phone: phoneVal,
       mobile_number: phoneVal,
       district: profileData.district.trim(),
+      taluk: (profileData.taluk || '').trim(),
+      village: (profileData.village || '').trim(),
       state: profileData.state || 'Karnataka',
       primary_crops: cropValue,
       main_crop: cropValue,

@@ -47,3 +47,14 @@ venv/
 # Private user data and uploaded files
 backend/sqlite_migration_export.json
 backend/uploads/
+
+# Raw agricultural training dataset folders
+data/Chilli Plant Diseases Dataset/
+data/Common Disease dataset/
+data/Cotton Disease dataset/
+data/Maize,corn Disease datset/
+data/Potato Leaf Disease Dataset/
+data/Rice Disease dataset/
+data/Sugarcane Disease dataset/
+data/Wheat Disease dataset/
+data/tomato_images/

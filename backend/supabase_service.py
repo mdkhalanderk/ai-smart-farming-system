@@ -30,7 +30,9 @@ from typing import Dict, Any, List, Optional, Tuple
 
 BACKEND_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BACKEND_DIR.parent
-SQLITE_DB_PATH = BACKEND_DIR / "farmer_auth.db"
+DATA_DIR = Path(os.getenv("APP_DATA_DIR") or BACKEND_DIR)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+SQLITE_DB_PATH = DATA_DIR / "farmer_auth.db"
 
 # Load Supabase config from environment or frontend/.env
 SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "https://cgqztsvrnjkzytzhxwiy.supabase.co").strip()
@@ -229,8 +231,8 @@ init_extended_tables()
 # -------------------------------------------------------------------------
 def verify_supabase_token(token: str) -> Optional[Dict[str, Any]]:
     """
-    Verifies Supabase JWT access token via Supabase Auth API (/auth/v1/user).
-    Includes in-memory TTL caching to avoid excessive network calls.
+    Verifies Supabase JWT access token or local SQLite FastAuth session token.
+    Fast-paths local SQLite tokens (non-JWT) instantly with 0ms network overhead.
     """
     if not token or not isinstance(token, str):
         return None
@@ -246,14 +248,39 @@ def verify_supabase_token(token: str) -> Optional[Dict[str, Any]]:
         if now - timestamp < CACHE_TTL:
             return cached_user
 
-    # Verify against live Supabase Auth API
+    # FAST-PATH: Local session tokens are not 3-part JWTs (they do not have 2 dots)
+    if token.count(".") != 2:
+        try:
+            conn = get_sqlite_conn()
+            session_row = conn.execute("""
+                SELECT s.user_id, u.email, u.created_at
+                FROM sessions s
+                JOIN users u ON s.user_id = u.id
+                WHERE s.token = ? AND s.expires_at > datetime('now')
+            """, (token,)).fetchone()
+            conn.close()
+            if session_row:
+                u_dict = {
+                    "id": session_row["user_id"],
+                    "email": session_row["email"],
+                    "user_metadata": {},
+                    "created_at": session_row["created_at"],
+                    "is_local_session": True
+                }
+                _TOKEN_CACHE[token] = (u_dict, now)
+                return u_dict
+        except Exception as e:
+            print(f"SQLite session token check error: {e}")
+        return None
+
+    # SLOW-PATH: Verify against live Supabase Auth API for 3-part JWTs
     if SUPABASE_URL and SUPABASE_KEY and not "placeholder" in SUPABASE_URL:
         try:
             headers = {
                 "apikey": SUPABASE_KEY,
                 "Authorization": f"Bearer {token}"
             }
-            res = requests.get(f"{SUPABASE_URL}/auth/v1/user", headers=headers, timeout=5)
+            res = requests.get(f"{SUPABASE_URL}/auth/v1/user", headers=headers, timeout=3)
             if res.status_code == 200:
                 user_data = res.json()
                 if user_data and "id" in user_data:
@@ -412,7 +439,7 @@ def create_community_alert(data: Dict[str, Any], user: Dict[str, Any]) -> Dict[s
     author_name = data.get("author_name") or user.get("user_metadata", {}).get("full_name") or user.get("email", "").split("@")[0] or "Farmer"
     title = data.get("title", "").strip()
     description = data.get("description", "").strip()
-    crop_name = data.get("crop_name", "Tomato").strip()
+    crop_name = (data.get("crop_name") or data.get("crop") or "Tomato").strip()
     disease_name = data.get("disease_name", "").strip()
     district = data.get("district", "Kolar").strip()
     taluk = data.get("taluk", "").strip()
@@ -528,6 +555,9 @@ def get_community_alerts(
         a["title"] = a.get("title") or a.get("warning_title") or f"{crop_val} Outbreak"
         a["description"] = a.get("description") or a.get("warning_message") or ""
         a["author_name"] = a.get("author_name") or "Farmer"
+        f_id = a.get("farmer_id") or a.get("user_id") or "farmer_creator"
+        a["farmer_id"] = f_id
+        a["user_id"] = f_id
 
         # Distance calculation
         a_dist_name = (a.get("district") or "").strip().lower()
@@ -613,7 +643,7 @@ def upvote_alert(alert_id: str) -> int:
 # 4. FARMER-TO-FARMER PRIVATE CHAT
 # -------------------------------------------------------------------------
 def create_or_get_conversation(
-    alert_id: str,
+    alert_id: Optional[str] = None,
     creator_id: Optional[str] = None,
     participant_id: Optional[str] = None,
     creator_name: Optional[str] = None,
@@ -624,27 +654,60 @@ def create_or_get_conversation(
     """
     Creates a new private 1-to-1 conversation for an alert, or retrieves the existing one.
     Prevents duplicate conversations between the same two farmers for the same alert.
+    Ensures genuine user IDs and real names are preserved.
     """
     conn = get_sqlite_conn()
     now_iso = datetime.now(timezone.utc).isoformat()
+    clean_alert_id = (alert_id or "general").strip()
 
     # Look up alert to verify owner
-    alert_row = conn.execute("SELECT * FROM community_alerts WHERE id = ?", (alert_id,)).fetchone()
+    alert_row = conn.execute("SELECT * FROM community_alerts WHERE id = ?", (clean_alert_id,)).fetchone()
     alert_dict = dict(alert_row) if alert_row else {}
 
-    c_id = creator_id or user_id or alert_dict.get("farmer_id") or "farmer_creator"
-    p_id = participant_id or other_user_id or "farmer_participant"
+    alert_owner = alert_dict.get("farmer_id") or alert_dict.get("user_id")
 
-    if user_id and other_user_id:
-        if user_id == alert_dict.get("farmer_id"):
-            c_id = user_id
-            p_id = other_user_id
+    # Determine caller and target partner
+    curr_user = user_id or creator_id
+    target_partner = other_user_id or participant_id or alert_owner
+
+    # Fallback if target partner is missing or same as caller
+    if not target_partner or (curr_user and target_partner == curr_user):
+        if alert_owner and alert_owner != curr_user:
+            target_partner = alert_owner
         else:
-            c_id = alert_dict.get("farmer_id") or other_user_id
-            p_id = user_id
+            # Connect to another active farmer profile in community
+            p_cand = conn.execute("SELECT user_id FROM profiles WHERE user_id != ? LIMIT 1", (curr_user or "unknown",)).fetchone()
+            if p_cand:
+                target_partner = p_cand[0]
 
-    c_name = creator_name or alert_dict.get("author_name") or "Farmer"
-    p_name = participant_name or "Farmer"
+    # Assign c_id (alert owner or partner) and p_id (inquirer)
+    if curr_user and alert_owner and curr_user == alert_owner:
+        c_id = curr_user
+        p_id = target_partner or "farmer_peer"
+    elif curr_user and target_partner:
+        c_id = target_partner
+        p_id = curr_user
+    else:
+        c_id = alert_owner or curr_user or "farmer_creator"
+        p_id = target_partner or "farmer_peer"
+
+    # Resolve human readable names
+    c_name = creator_name or alert_dict.get("author_name")
+    p_name = participant_name
+
+    if not c_name or c_name.strip().lower() in ("farmer", "anonymous", ""):
+        c_prof = conn.execute("SELECT full_name FROM profiles WHERE user_id = ?", (c_id,)).fetchone()
+        if c_prof and c_prof[0]:
+            c_name = c_prof[0].strip()
+        else:
+            c_name = alert_dict.get("author_name") or "Farmer"
+
+    if not p_name or p_name.strip().lower() in ("farmer", "anonymous", ""):
+        p_prof = conn.execute("SELECT full_name FROM profiles WHERE user_id = ?", (p_id,)).fetchone()
+        if p_prof and p_prof[0]:
+            p_name = p_prof[0].strip()
+        else:
+            p_name = "Farmer"
 
     with conn:
         existing = conn.execute("""
@@ -653,9 +716,10 @@ def create_or_get_conversation(
                 (creator_id = ? AND participant_id = ?) OR
                 (creator_id = ? AND participant_id = ?)
             )
-        """, (alert_id, c_id, p_id, p_id, c_id)).fetchone()
+        """, (clean_alert_id, c_id, p_id, p_id, c_id)).fetchone()
 
         if existing:
+            conn.close()
             return dict(existing)
 
         conv_id = f"conv_{int(time.time() * 1000)}_{uuid.uuid4().hex[:6]}"
@@ -665,14 +729,14 @@ def create_or_get_conversation(
                 participant_name, last_message, last_message_at, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, 'Conversation opened', ?, ?, ?)
         """, (
-            conv_id, alert_id, c_id, p_id, c_name,
+            conv_id, clean_alert_id, c_id, p_id, c_name,
             p_name, now_iso, now_iso, now_iso
         ))
 
     conn.close()
     return {
         "id": conv_id,
-        "alert_id": alert_id,
+        "alert_id": clean_alert_id,
         "creator_id": c_id,
         "participant_id": p_id,
         "creator_name": c_name,
@@ -719,6 +783,15 @@ def get_user_conversations(user_id: str) -> List[Dict[str, Any]]:
             if a_row and a_row[0] and a_row[0].strip().lower() not in ("farmer", "anonymous", ""):
                 other_name = a_row[0].strip()
 
+        # Fallback to users email prefix if profile name is still generic
+        if not other_name or other_name.strip().lower() in ("farmer", "anonymous", ""):
+            u_row = conn.execute("SELECT email FROM users WHERE id = ?", (other_id,)).fetchone()
+            if u_row and u_row[0]:
+                other_name = u_row[0].split("@")[0].capitalize()
+
+        if not c_dict.get("alert_title"):
+            c_dict["alert_title"] = "Direct Farmer Chat"
+
         c_dict["other_user_id"] = other_id
         c_dict["other_user_name"] = other_name or "Farmer"
         c_dict["other_farmer_name"] = other_name or "Farmer"
@@ -733,6 +806,31 @@ def get_user_conversations(user_id: str) -> List[Dict[str, Any]]:
 
     conn.close()
     return conversations
+
+
+def list_community_farmers(exclude_user_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Lists all registered community farmer accounts so users can start direct 1-to-1 chats."""
+    conn = get_sqlite_conn()
+    rows = conn.execute("""
+        SELECT u.id as user_id, u.email, p.full_name, p.district, p.main_crop, p.state
+        FROM users u
+        LEFT JOIN profiles p ON u.id = p.user_id
+        WHERE u.id != ?
+        ORDER BY u.created_at DESC
+    """, (exclude_user_id or "",)).fetchall()
+    conn.close()
+
+    farmers = []
+    for r in rows:
+        d = dict(r)
+        name = d.get("full_name")
+        if not name or name.strip().lower() in ("farmer", "anonymous", ""):
+            name = (d.get("email") or "farmer").split("@")[0].capitalize()
+        d["full_name"] = name
+        d["district"] = d.get("district") or "Karnataka"
+        d["main_crop"] = d.get("main_crop") or "Mixed Crops"
+        farmers.append(d)
+    return farmers
 
 
 def get_conversation_messages(conv_id: str, user_id: str) -> List[Dict[str, Any]]:
@@ -955,8 +1053,8 @@ def upload_file_to_storage(
         ext = ".jpg"
     unique_name = f"{int(time.time())}_{uuid.uuid4().hex[:8]}{ext}"
 
-    # Ensure local directory exists
-    uploads_dir = BACKEND_DIR / "uploads" / bucket
+    # Ensure local directory exists in persistent DATA_DIR
+    uploads_dir = DATA_DIR / "uploads" / bucket
     uploads_dir.mkdir(parents=True, exist_ok=True)
     local_file_path = uploads_dir / unique_name
 

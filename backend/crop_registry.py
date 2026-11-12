@@ -38,19 +38,18 @@ CROP_CATALOGUE: Dict[str, Dict[str, Any]] = {
         "vernacular_name": "Dhan / Chawal",
         "scientific_name": "Oryza sativa",
         "model_status": "active",
-        "model_architecture": "VMamba & NRRI Vision Classifier (6 Classes)",
-        "model_weights": "builtin_vision_engine",
-        "num_classes": 6,
+        "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
+        "model_weights": "model/best_multicrop_model.pth",
+        "num_classes": 5,
         "classes": [
-            "Bacterial Leaf Blight (Xanthomonas oryzae)",
-            "Rice Blast (Magnaporthe oryzae)",
-            "Brown Spot (Bipolaris oryzae)",
-            "Sheath Blight (Rhizoctonia solani)",
-            "Rice Tungro Virus",
-            "Healthy"
+            "Bacterial Leaf Blight",
+            "Brown Spot",
+            "Leaf Smut",
+            "Rice Blast",
+            "Tungro Virus"
         ],
         "advisory_source": "ICAR-National Rice Research Institute (NRRI), Cuttack",
-        "description": "Validated 6-class vision pathology classifier running ICAR NRRI diagnostic criteria."
+        "description": "5-class VMamba SS2D deep learning classifier for major rice blast and blight pathotypes."
     },
     "wheat": {
         "id": "wheat",
@@ -58,19 +57,24 @@ CROP_CATALOGUE: Dict[str, Dict[str, Any]] = {
         "vernacular_name": "Gehun / Godhi",
         "scientific_name": "Triticum aestivum",
         "model_status": "active",
-        "model_architecture": "VMamba & IIWBR Vision Classifier (6 Classes)",
-        "model_weights": "builtin_vision_engine",
-        "num_classes": 6,
+        "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
+        "model_weights": "model/best_multicrop_model.pth",
+        "num_classes": 11,
         "classes": [
-            "Yellow / Stripe Rust (Puccinia striiformis)",
-            "Brown / Leaf Rust (Puccinia triticina)",
-            "Loose Smut (Ustilago tritici)",
-            "Karnal Bunt (Tilletia indica)",
-            "Powdery Mildew (Blumeria graminis)",
-            "Healthy"
+            "Flag Smut",
+            "Healthy",
+            "Brown Leaf Rust",
+            "Stem Fly",
+            "Wheat Aphid",
+            "Black Rust / Stem Rust",
+            "Leaf Blight",
+            "Wheat Mite",
+            "Powdery Mildew",
+            "Wheat Scab / Fusarium Head Blight",
+            "Yellow / Stripe Rust"
         ],
         "advisory_source": "ICAR-Indian Institute of Wheat and Barley Research (IIWBR), Karnal",
-        "description": "Validated 6-class northern plains rust and blight pathology classifier."
+        "description": "11-class VMamba SS2D deep learning classifier for wheat rusts, smuts, pests, and healthy foliage."
     },
     "potato": {
         "id": "potato",
@@ -78,18 +82,22 @@ CROP_CATALOGUE: Dict[str, Dict[str, Any]] = {
         "vernacular_name": "Aloo / Aalugadde",
         "scientific_name": "Solanum tuberosum",
         "model_status": "active",
-        "model_architecture": "VMamba & CPRI Vision Classifier (5 Classes)",
-        "model_weights": "builtin_vision_engine",
-        "num_classes": 5,
+        "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
+        "model_weights": "model/best_multicrop_model.pth",
+        "num_classes": 9,
         "classes": [
-            "Early Blight (Alternaria solani)",
-            "Late Blight (Phytophthora infestans)",
-            "Black Scurf (Rhizoctonia solani)",
-            "Common Scab (Streptomyces scabies)",
-            "Healthy"
+            "Bacterial Wilt",
+            "Early Blight",
+            "Fungal Leaf Spot",
+            "Healthy",
+            "Late Blight",
+            "Nematode Damage",
+            "Pest Damage",
+            "Phytophthora Infestans",
+            "Potato Virus"
         ],
         "advisory_source": "ICAR-Central Potato Research Institute (CPRI), Shimla",
-        "description": "Foliar and tuber disease classification running CPRI standards."
+        "description": "9-class VMamba SS2D deep learning classifier for potato blights, wilts, virus, and healthy foliage."
     },
     "chilli": {
         "id": "chilli",
@@ -116,18 +124,24 @@ CROP_CATALOGUE: Dict[str, Dict[str, Any]] = {
         "vernacular_name": "Kapas / Hatti",
         "scientific_name": "Gossypium hirsutum",
         "model_status": "active",
-        "model_architecture": "VMamba & CICR Vision Classifier (5 Classes)",
-        "model_weights": "builtin_vision_engine",
-        "num_classes": 5,
+        "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
+        "model_weights": "model/best_multicrop_model.pth",
+        "num_classes": 11,
         "classes": [
-            "Bacterial Blight / Angular Leaf Spot (Xanthomonas citri pv. malvacearum)",
-            "Grey Mildew / Dahiya (Ramularia areola)",
-            "Cotton Leaf Curl Virus (CLCuV)",
-            "Alternaria Leaf Spot",
-            "Healthy"
+            "American Bollworm",
+            "Anthracnose",
+            "Bacterial Blight",
+            "Bollworm & Rot Damage",
+            "Cotton Aphid",
+            "Healthy",
+            "Mealybug",
+            "Pink Bollworm",
+            "Red Cotton Bug",
+            "Thrips",
+            "Whitefly"
         ],
         "advisory_source": "ICAR-Central Institute for Cotton Research (CICR), Nagpur",
-        "description": "Cotton foliar disease classifier running CICR diagnostics."
+        "description": "11-class VMamba SS2D deep learning classifier for cotton bollworms, blight, sap-feeders, and healthy foliage."
     },
     "maize": {
         "id": "maize",
@@ -135,18 +149,20 @@ CROP_CATALOGUE: Dict[str, Dict[str, Any]] = {
         "vernacular_name": "Makka / Musukina Jola",
         "scientific_name": "Zea mays",
         "model_status": "active",
-        "model_architecture": "VMamba & IIMR Vision Classifier (5 Classes)",
-        "model_weights": "builtin_vision_engine",
-        "num_classes": 5,
+        "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
+        "model_weights": "model/best_multicrop_model.pth",
+        "num_classes": 7,
         "classes": [
-            "Maydis Leaf Blight (Bipolaris maydis)",
-            "Turcicum Leaf Blight (Exserohilum turcicum)",
-            "Common Rust (Puccinia sorghi)",
-            "Banded Leaf and Sheath Blight (Rhizoctonia solani)",
-            "Healthy"
+            "Armyworm",
+            "Common Rust",
+            "Ear Rot",
+            "Fall Armyworm",
+            "Gray Leaf Spot",
+            "Healthy",
+            "Stem Borer"
         ],
         "advisory_source": "ICAR-Indian Institute of Maize Research (IIMR), Ludhiana",
-        "description": "Corn foliar pathology model running IIMR diagnostics."
+        "description": "7-class VMamba SS2D deep learning classifier for corn rust, armyworm, ear rot, and healthy foliage."
     },
     "sugarcane": {
         "id": "sugarcane",
@@ -154,18 +170,18 @@ CROP_CATALOGUE: Dict[str, Dict[str, Any]] = {
         "vernacular_name": "Ganna / Kabbu",
         "scientific_name": "Saccharum officinarum",
         "model_status": "active",
-        "model_architecture": "VMamba & SBI Vision Classifier (5 Classes)",
-        "model_weights": "builtin_vision_engine",
+        "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
+        "model_weights": "model/best_multicrop_model.pth",
         "num_classes": 5,
         "classes": [
-            "Red Rot (Colletotrichum falcatum)",
-            "Smut (Sporisorium scitamineum)",
-            "Grassy Shoot Disease (Phytoplasma)",
-            "Pokkah Boeng (Fusarium moniliforme)",
-            "Healthy"
+            "Healthy",
+            "Mosaic Virus",
+            "Red Rot",
+            "Red Rust",
+            "Yellow Rust"
         ],
         "advisory_source": "ICAR-Sugarcane Breeding Institute (SBI), Coimbatore & IISR Lucknow",
-        "description": "Sugarcane stalk and leaf pathology classifier."
+        "description": "5-class VMamba SS2D deep learning classifier for sugarcane red rot, rusts, mosaic virus, and healthy stalks."
     },
     "groundnut": {
         "id": "groundnut",

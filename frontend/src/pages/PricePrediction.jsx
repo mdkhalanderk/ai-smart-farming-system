@@ -28,7 +28,7 @@ import {
   formatLocalizedDate
 } from '../lib/dynamicTranslator';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../lib/config';
 
 // Interactive SVG 7-Day Price Forecast Graph Component
 const PriceTrendChart = ({ forecast, avgPrice, currentLang, commodity, market }) => {

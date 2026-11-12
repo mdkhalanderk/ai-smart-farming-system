@@ -34,7 +34,7 @@ import {
 import { ALL_KARNATAKA_DISTRICTS } from '../lib/locationData';
 import { getLocalizedAlert, formatLocalizedDate, getLocalizedLocation, getLocalizedCropName } from '../lib/dynamicTranslator';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../lib/config';
 
 const CROPS_LIST = [
   'Tomato',
@@ -117,6 +117,9 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
   const [chatPhotoFile, setChatPhotoFile] = useState(null);
   const [chatPhotoPreview, setChatPhotoPreview] = useState(null);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [communityFarmers, setCommunityFarmers] = useState([]);
+  const [showFarmerPicker, setShowFarmerPicker] = useState(false);
+  const [farmerSearch, setFarmerSearch] = useState('');
   const chatContainerRef = useRef(null);
   const lastMsgCountRef = useRef(0);
   const chatFileInputRef = useRef(null);
@@ -201,6 +204,28 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
     }, 350);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Fetch all registered community farmers for direct 1-to-1 chats
+  const fetchCommunityFarmers = useCallback(async () => {
+    const token = localStorage.getItem('smart_crop_backend_token');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/farmers`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      if (data.status === 'success' && Array.isArray(data.farmers)) {
+        setCommunityFarmers(data.farmers);
+      }
+    } catch (err) {
+      console.warn('Error fetching community farmers:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showFarmerPicker) {
+      fetchCommunityFarmers();
+    }
+  }, [showFarmerPicker, fetchCommunityFarmers]);
 
   // Fetch Conversations for Authenticated Farmer
   const fetchConversations = useCallback(async () => {
@@ -299,10 +324,10 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
       }
     }
 
-    // Secondary polling interval (every 5s) to ensure reliability without jerking the UI
+    // Secondary polling interval (every 3s) to ensure snappy delivery across accounts
     const interval = setInterval(() => {
       fetchMessages(activeConv.id, true);
-    }, 5000);
+    }, 3000);
 
     return () => {
       if (channel) {
@@ -515,8 +540,10 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
       return;
     }
 
+    const targetCreatorId = alertObj.farmer_id || alertObj.user_id;
+
     // Do not chat with yourself
-    if (alertObj.user_id && alertObj.user_id === user.id) {
+    if (targetCreatorId && targetCreatorId === user.id) {
       alert("This is your own alert. Other farmers will contact you here.");
       setActiveTab('messages');
       return;
@@ -531,7 +558,7 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
         },
         body: JSON.stringify({
           alert_id: alertObj.id,
-          receiver_id: alertObj.user_id
+          receiver_id: targetCreatorId
         })
       });
 
@@ -547,6 +574,46 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
     } catch (err) {
       console.error('Error starting conversation:', err);
       alert('Unable to connect to farmer chat.');
+    }
+  };
+
+  // Start / Open Direct Chat with any registered Farmer Account
+  const handleStartDirectChat = async (targetFarmer) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    const token = localStorage.getItem('smart_crop_backend_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/community/conversations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          alert_id: 'direct_chat',
+          receiver_id: targetFarmer.user_id
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.conversation) {
+        setShowFarmerPicker(false);
+        setActiveTab('messages');
+        setActiveConv(data.conversation);
+        fetchConversations();
+      } else {
+        alert(data.detail || 'Could not start direct chat.');
+      }
+    } catch (err) {
+      console.error('Direct chat error:', err);
+      alert('Unable to start chat with farmer.');
     }
   };
 
@@ -1012,14 +1079,24 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
                     <MessageSquare className="w-4 h-4 text-[#1b432a]" />
                     <span>{t('my_farmer_chats', currentLang) || 'My Farmer Chats'}</span>
                   </h3>
-                  <button
-                    onClick={fetchConversations}
-                    disabled={loadingConvs}
-                    className="p-1 rounded text-[#526055] hover:text-[#1a2e1d] cursor-pointer"
-                    title="Refresh chats"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${loadingConvs ? 'animate-spin' : ''}`} />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setShowFarmerPicker(true)}
+                      className="px-2.5 py-1 rounded-md bg-[#1b432a] hover:bg-[#143420] text-white text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Message any registered farmer account"
+                    >
+                      <PlusCircle className="w-3.5 h-3.5" />
+                      <span>New Chat</span>
+                    </button>
+                    <button
+                      onClick={fetchConversations}
+                      disabled={loadingConvs}
+                      className="p-1 rounded text-[#526055] hover:text-[#1a2e1d] cursor-pointer"
+                      title="Refresh chats"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${loadingConvs ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
                 </div>
 
                 {loadingConvs ? (
@@ -1267,8 +1344,93 @@ export const CommunityPage = ({ initialTab = 'alerts' }) => {
                   <p className="text-xs text-[#526055] max-w-sm leading-relaxed">
                     {t('no_conversations_subtitle', currentLang)}
                   </p>
+                  <button
+                    onClick={() => setShowFarmerPicker(true)}
+                    className="mt-2 py-2 px-4 rounded-lg bg-[#1b432a] hover:bg-[#143420] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>Message Another Farmer Account</span>
+                  </button>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: PICK REGISTERED FARMER FOR DIRECT CHAT */}
+        {showFarmerPicker && (
+          <div className="fixed inset-0 z-50 bg-[#142618]/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+            <div className="editorial-card max-w-md w-full p-6 space-y-4 my-8 bg-white">
+              <div className="flex items-center justify-between border-b border-[#e4dfd5] pb-3">
+                <div>
+                  <h3 className="font-serif font-bold text-lg text-[#142618]">
+                    Message Community Farmers
+                  </h3>
+                  <p className="text-xs text-[#6b7c70]">
+                    Select any registered farmer account to start a live chat
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowFarmerPicker(false)}
+                  className="p-1.5 rounded-full hover:bg-[#f0ece2] text-[#526055] cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="relative">
+                <Search className="w-4 h-4 text-[#6b7c70] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={farmerSearch}
+                  onChange={(e) => setFarmerSearch(e.target.value)}
+                  placeholder="Search by farmer name, email, or district..."
+                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-[#d6cfc3] bg-white text-xs font-medium text-[#1a2e1d] focus:outline-none focus:ring-1 focus:ring-[#1b432a]"
+                />
+              </div>
+
+              <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                {communityFarmers
+                  .filter((f) => {
+                    const q = farmerSearch.trim().toLowerCase();
+                    if (!q) return true;
+                    return (
+                      (f.full_name || '').toLowerCase().includes(q) ||
+                      (f.email || '').toLowerCase().includes(q) ||
+                      (f.district || '').toLowerCase().includes(q)
+                    );
+                  })
+                  .map((f) => (
+                    <div
+                      key={f.user_id}
+                      className="p-3 rounded-xl border border-[#e4dfd5] hover:border-[#1b432a] bg-[#faf8f5]/50 hover:bg-white flex items-center justify-between gap-3 transition-all"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-bold text-xs text-[#142618] truncate">
+                          {f.full_name}
+                        </p>
+                        <p className="text-[11px] text-[#526055] truncate">
+                          {f.district} • {f.main_crop}
+                        </p>
+                        <p className="text-[10px] text-[#6b7c70] truncate">
+                          {f.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleStartDirectChat(f)}
+                        className="shrink-0 py-1.5 px-3 rounded-lg bg-[#1b432a] hover:bg-[#143420] text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>Chat</span>
+                      </button>
+                    </div>
+                  ))}
+                {communityFarmers.length === 0 && (
+                  <p className="text-center text-xs text-[#6b7c70] py-6">
+                    No other farmer accounts found yet.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}

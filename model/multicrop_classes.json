@@ -1,0 +1,603 @@
+{
+  "num_classes": 58,
+  "classes": [
+    {
+      "index": 0,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "American Bollworm",
+      "full_name": "Cotton - American Bollworm",
+      "is_healthy": false
+    },
+    {
+      "index": 1,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Anthracnose",
+      "full_name": "Cotton - Anthracnose",
+      "is_healthy": false
+    },
+    {
+      "index": 2,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Bacterial Blight",
+      "full_name": "Cotton - Bacterial Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 3,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Bollworm & Rot Damage",
+      "full_name": "Cotton - Bollworm & Rot Damage",
+      "is_healthy": false
+    },
+    {
+      "index": 4,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Cotton Aphid",
+      "full_name": "Cotton - Cotton Aphid",
+      "is_healthy": false
+    },
+    {
+      "index": 5,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Healthy",
+      "full_name": "Cotton - Healthy",
+      "is_healthy": true
+    },
+    {
+      "index": 6,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Mealybug",
+      "full_name": "Cotton - Mealybug",
+      "is_healthy": false
+    },
+    {
+      "index": 7,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Pink Bollworm",
+      "full_name": "Cotton - Pink Bollworm",
+      "is_healthy": false
+    },
+    {
+      "index": 8,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Red Cotton Bug",
+      "full_name": "Cotton - Red Cotton Bug",
+      "is_healthy": false
+    },
+    {
+      "index": 9,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Thrips",
+      "full_name": "Cotton - Thrips",
+      "is_healthy": false
+    },
+    {
+      "index": 10,
+      "crop": "cotton",
+      "crop_title": "Cotton",
+      "disease_name": "Whitefly",
+      "full_name": "Cotton - Whitefly",
+      "is_healthy": false
+    },
+    {
+      "index": 11,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Armyworm",
+      "full_name": "Maize - Armyworm",
+      "is_healthy": false
+    },
+    {
+      "index": 12,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Common Rust",
+      "full_name": "Maize - Common Rust",
+      "is_healthy": false
+    },
+    {
+      "index": 13,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Ear Rot",
+      "full_name": "Maize - Ear Rot",
+      "is_healthy": false
+    },
+    {
+      "index": 14,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Fall Armyworm",
+      "full_name": "Maize - Fall Armyworm",
+      "is_healthy": false
+    },
+    {
+      "index": 15,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Gray Leaf Spot",
+      "full_name": "Maize - Gray Leaf Spot",
+      "is_healthy": false
+    },
+    {
+      "index": 16,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Healthy",
+      "full_name": "Maize - Healthy",
+      "is_healthy": true
+    },
+    {
+      "index": 17,
+      "crop": "maize",
+      "crop_title": "Maize",
+      "disease_name": "Stem Borer",
+      "full_name": "Maize - Stem Borer",
+      "is_healthy": false
+    },
+    {
+      "index": 18,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Bacterial Wilt",
+      "full_name": "Potato - Bacterial Wilt",
+      "is_healthy": false
+    },
+    {
+      "index": 19,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Early Blight",
+      "full_name": "Potato - Early Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 20,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Fungal Leaf Spot",
+      "full_name": "Potato - Fungal Leaf Spot",
+      "is_healthy": false
+    },
+    {
+      "index": 21,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Healthy",
+      "full_name": "Potato - Healthy",
+      "is_healthy": true
+    },
+    {
+      "index": 22,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Late Blight",
+      "full_name": "Potato - Late Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 23,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Nematode Damage",
+      "full_name": "Potato - Nematode Damage",
+      "is_healthy": false
+    },
+    {
+      "index": 24,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Pest Damage",
+      "full_name": "Potato - Pest Damage",
+      "is_healthy": false
+    },
+    {
+      "index": 25,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Phytophthora Infestans",
+      "full_name": "Potato - Phytophthora Infestans",
+      "is_healthy": false
+    },
+    {
+      "index": 26,
+      "crop": "potato",
+      "crop_title": "Potato",
+      "disease_name": "Potato Virus",
+      "full_name": "Potato - Potato Virus",
+      "is_healthy": false
+    },
+    {
+      "index": 27,
+      "crop": "rice",
+      "crop_title": "Rice",
+      "disease_name": "Bacterial Leaf Blight",
+      "full_name": "Rice - Bacterial Leaf Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 28,
+      "crop": "rice",
+      "crop_title": "Rice",
+      "disease_name": "Brown Spot",
+      "full_name": "Rice - Brown Spot",
+      "is_healthy": false
+    },
+    {
+      "index": 29,
+      "crop": "rice",
+      "crop_title": "Rice",
+      "disease_name": "Leaf Smut",
+      "full_name": "Rice - Leaf Smut",
+      "is_healthy": false
+    },
+    {
+      "index": 30,
+      "crop": "rice",
+      "crop_title": "Rice",
+      "disease_name": "Rice Blast",
+      "full_name": "Rice - Rice Blast",
+      "is_healthy": false
+    },
+    {
+      "index": 31,
+      "crop": "rice",
+      "crop_title": "Rice",
+      "disease_name": "Tungro Virus",
+      "full_name": "Rice - Tungro Virus",
+      "is_healthy": false
+    },
+    {
+      "index": 32,
+      "crop": "sugarcane",
+      "crop_title": "Sugarcane",
+      "disease_name": "Healthy",
+      "full_name": "Sugarcane - Healthy",
+      "is_healthy": true
+    },
+    {
+      "index": 33,
+      "crop": "sugarcane",
+      "crop_title": "Sugarcane",
+      "disease_name": "Mosaic Virus",
+      "full_name": "Sugarcane - Mosaic Virus",
+      "is_healthy": false
+    },
+    {
+      "index": 34,
+      "crop": "sugarcane",
+      "crop_title": "Sugarcane",
+      "disease_name": "Red Rot",
+      "full_name": "Sugarcane - Red Rot",
+      "is_healthy": false
+    },
+    {
+      "index": 35,
+      "crop": "sugarcane",
+      "crop_title": "Sugarcane",
+      "disease_name": "Red Rust",
+      "full_name": "Sugarcane - Red Rust",
+      "is_healthy": false
+    },
+    {
+      "index": 36,
+      "crop": "sugarcane",
+      "crop_title": "Sugarcane",
+      "disease_name": "Yellow Rust",
+      "full_name": "Sugarcane - Yellow Rust",
+      "is_healthy": false
+    },
+    {
+      "index": 37,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Bacterial Spot",
+      "full_name": "Tomato - Bacterial Spot",
+      "is_healthy": false
+    },
+    {
+      "index": 38,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Early Blight",
+      "full_name": "Tomato - Early Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 39,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Healthy",
+      "full_name": "Tomato - Healthy",
+      "is_healthy": true
+    },
+    {
+      "index": 40,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Late Blight",
+      "full_name": "Tomato - Late Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 41,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Leaf Mold",
+      "full_name": "Tomato - Leaf Mold",
+      "is_healthy": false
+    },
+    {
+      "index": 42,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Septoria Leaf Spot",
+      "full_name": "Tomato - Septoria Leaf Spot",
+      "is_healthy": false
+    },
+    {
+      "index": 43,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Spider Mites (Two-Spotted)",
+      "full_name": "Tomato - Spider Mites (Two-Spotted)",
+      "is_healthy": false
+    },
+    {
+      "index": 44,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Target Spot",
+      "full_name": "Tomato - Target Spot",
+      "is_healthy": false
+    },
+    {
+      "index": 45,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Tomato Mosaic Virus",
+      "full_name": "Tomato - Tomato Mosaic Virus",
+      "is_healthy": false
+    },
+    {
+      "index": 46,
+      "crop": "tomato",
+      "crop_title": "Tomato",
+      "disease_name": "Tomato Yellow Leaf Curl Virus",
+      "full_name": "Tomato - Tomato Yellow Leaf Curl Virus",
+      "is_healthy": false
+    },
+    {
+      "index": 47,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Black Rust / Stem Rust",
+      "full_name": "Wheat - Black Rust / Stem Rust",
+      "is_healthy": false
+    },
+    {
+      "index": 48,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Brown Leaf Rust",
+      "full_name": "Wheat - Brown Leaf Rust",
+      "is_healthy": false
+    },
+    {
+      "index": 49,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Flag Smut",
+      "full_name": "Wheat - Flag Smut",
+      "is_healthy": false
+    },
+    {
+      "index": 50,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Healthy",
+      "full_name": "Wheat - Healthy",
+      "is_healthy": true
+    },
+    {
+      "index": 51,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Leaf Blight",
+      "full_name": "Wheat - Leaf Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 52,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Powdery Mildew",
+      "full_name": "Wheat - Powdery Mildew",
+      "is_healthy": false
+    },
+    {
+      "index": 53,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Stem Fly",
+      "full_name": "Wheat - Stem Fly",
+      "is_healthy": false
+    },
+    {
+      "index": 54,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Wheat Aphid",
+      "full_name": "Wheat - Wheat Aphid",
+      "is_healthy": false
+    },
+    {
+      "index": 55,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Wheat Mite",
+      "full_name": "Wheat - Wheat Mite",
+      "is_healthy": false
+    },
+    {
+      "index": 56,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Wheat Scab / Fusarium Head Blight",
+      "full_name": "Wheat - Wheat Scab / Fusarium Head Blight",
+      "is_healthy": false
+    },
+    {
+      "index": 57,
+      "crop": "wheat",
+      "crop_title": "Wheat",
+      "disease_name": "Yellow / Stripe Rust",
+      "full_name": "Wheat - Yellow / Stripe Rust",
+      "is_healthy": false
+    }
+  ],
+  "crop_to_indices": {
+    "cotton": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "maize": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "potato": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "rice": [
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "sugarcane": [
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "tomato": [
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "wheat": [
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57
+    ]
+  },
+  "idx_to_class": {
+    "0": "Cotton - American Bollworm",
+    "1": "Cotton - Anthracnose",
+    "2": "Cotton - Bacterial Blight",
+    "3": "Cotton - Bollworm & Rot Damage",
+    "4": "Cotton - Cotton Aphid",
+    "5": "Cotton - Healthy",
+    "6": "Cotton - Mealybug",
+    "7": "Cotton - Pink Bollworm",
+    "8": "Cotton - Red Cotton Bug",
+    "9": "Cotton - Thrips",
+    "10": "Cotton - Whitefly",
+    "11": "Maize - Armyworm",
+    "12": "Maize - Common Rust",
+    "13": "Maize - Ear Rot",
+    "14": "Maize - Fall Armyworm",
+    "15": "Maize - Gray Leaf Spot",
+    "16": "Maize - Healthy",
+    "17": "Maize - Stem Borer",
+    "18": "Potato - Bacterial Wilt",
+    "19": "Potato - Early Blight",
+    "20": "Potato - Fungal Leaf Spot",
+    "21": "Potato - Healthy",
+    "22": "Potato - Late Blight",
+    "23": "Potato - Nematode Damage",
+    "24": "Potato - Pest Damage",
+    "25": "Potato - Phytophthora Infestans",
+    "26": "Potato - Potato Virus",
+    "27": "Rice - Bacterial Leaf Blight",
+    "28": "Rice - Brown Spot",
+    "29": "Rice - Leaf Smut",
+    "30": "Rice - Rice Blast",
+    "31": "Rice - Tungro Virus",
+    "32": "Sugarcane - Healthy",
+    "33": "Sugarcane - Mosaic Virus",
+    "34": "Sugarcane - Red Rot",
+    "35": "Sugarcane - Red Rust",
+    "36": "Sugarcane - Yellow Rust",
+    "37": "Tomato - Bacterial Spot",
+    "38": "Tomato - Early Blight",
+    "39": "Tomato - Healthy",
+    "40": "Tomato - Late Blight",
+    "41": "Tomato - Leaf Mold",
+    "42": "Tomato - Septoria Leaf Spot",
+    "43": "Tomato - Spider Mites (Two-Spotted)",
+    "44": "Tomato - Target Spot",
+    "45": "Tomato - Tomato Mosaic Virus",
+    "46": "Tomato - Tomato Yellow Leaf Curl Virus",
+    "47": "Wheat - Black Rust / Stem Rust",
+    "48": "Wheat - Brown Leaf Rust",
+    "49": "Wheat - Flag Smut",
+    "50": "Wheat - Healthy",
+    "51": "Wheat - Leaf Blight",
+    "52": "Wheat - Powdery Mildew",
+    "53": "Wheat - Stem Fly",
+    "54": "Wheat - Wheat Aphid",
+    "55": "Wheat - Wheat Mite",
+    "56": "Wheat - Wheat Scab / Fusarium Head Blight",
+    "57": "Wheat - Yellow / Stripe Rust"
+  }
+}

@@ -13,7 +13,9 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "farmer_auth.db"
+DATA_DIR = Path(os.getenv("APP_DATA_DIR") or Path(__file__).parent)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+DB_PATH = DATA_DIR / "farmer_auth.db"
 
 def get_db():
     conn = sqlite3.connect(str(DB_PATH))

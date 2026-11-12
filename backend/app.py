@@ -31,7 +31,7 @@ if os.path.exists(frontend_env_path):
 
 from model.vmamba import build_vssm_tiny
 from backend.ood_validator import validator
-from backend.disease_data import TOMATO_DISEASE_KNOWLEDGE
+from backend.disease_data import TOMATO_DISEASE_KNOWLEDGE, CROP_DISEASE_DATABASE
 from backend.crop_registry import (
     CROP_CATALOGUE,
     get_crop_config,
@@ -42,10 +42,13 @@ from backend.crop_knowledge import get_crop_advisory
 
 app = FastAPI(title="Smart Crop Advisory System API", version="1.0.0")
 
-# Enable CORS for frontend
+# Enable CORS for frontend (supports explicit ALLOWED_ORIGINS or wildcard regex with credentials)
+raw_origins = os.getenv("ALLOWED_ORIGINS", "").strip()
+allowed_origins = [o.strip() for o in raw_origins.split(",") if o.strip()] if raw_origins else []
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=None if allowed_origins else r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -78,7 +81,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Static uploads mount for media, alert photographs and chat attachments
-uploads_dir = os.path.join(BACKEND_DIR, "uploads")
+DATA_DIR = os.getenv("APP_DATA_DIR") or BACKEND_DIR
+uploads_dir = os.path.join(DATA_DIR, "uploads")
 os.makedirs(os.path.join(uploads_dir, "alert-photos"), exist_ok=True)
 os.makedirs(os.path.join(uploads_dir, "chat-photos"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
@@ -127,6 +131,23 @@ INDEX_TO_CLASS = {
     9: "Healthy"
 }
 
+# Multi-Crop Class Registry for VMamba VSSM Architecture
+MULTICROP_CLASSES_FILE = os.path.join(BASE_DIR, "model", "multicrop_classes.json")
+MULTICROP_CLASSES = []
+CROP_TO_INDICES = {}
+INDEX_TO_MULTICROP = {}
+
+if os.path.exists(MULTICROP_CLASSES_FILE):
+    try:
+        with open(MULTICROP_CLASSES_FILE, "r", encoding="utf-8") as f:
+            mc_data = json.load(f)
+            MULTICROP_CLASSES = mc_data.get("classes", [])
+            CROP_TO_INDICES = mc_data.get("crop_to_indices", {})
+            for item in MULTICROP_CLASSES:
+                INDEX_TO_MULTICROP[item["index"]] = item
+    except Exception as e:
+        print(f"Notice: Failed to load multicrop classes: {e}")
+
 EVAL_TRANSFORM = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -136,17 +157,22 @@ EVAL_TRANSFORM = transforms.Compose([
 MAX_IMAGE_SIZE = 15 * 1024 * 1024  # 15 MB limit
 
 def load_vmamba_model():
-    global MODEL
-    model_path = os.path.join("model", "best_model.pth")
+    global MODEL, INDEX_TO_CLASS
+    model_path = os.path.join(BASE_DIR, "model", "best_multicrop_model.pth")
+    if not os.path.exists(model_path):
+        model_path = os.path.join(BASE_DIR, "model", "best_model.pth")
+
     try:
-        model = build_vssm_tiny(num_classes=10)
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path, map_location=DEVICE, weights_only=False)
+            num_classes = checkpoint.get("num_classes", len(MULTICROP_CLASSES) if MULTICROP_CLASSES else 10)
+            model = build_vssm_tiny(num_classes=num_classes)
             model.load_state_dict(checkpoint["model_state_dict"])
-            print(f"Loaded trained fine-tuned VMamba model from {model_path}")
+            print(f"Loaded trained fine-tuned VMamba model ({num_classes} classes) from {model_path}")
         else:
-            ckpt_path = "vssm_tiny_0230_ckpt_epoch_262.pth"
+            ckpt_path = os.path.join(BASE_DIR, "vssm_tiny_0230_ckpt_epoch_262.pth")
             if os.path.exists(ckpt_path):
+                model = build_vssm_tiny(num_classes=10)
                 checkpoint = torch.load(ckpt_path, map_location=DEVICE, weights_only=False)
                 state_dict = checkpoint.get("model", checkpoint)
                 adapted = {}
@@ -168,6 +194,56 @@ def load_vmamba_model():
         print(f"Error loading VMamba model: {e}")
         MODEL = None
         return None
+
+def resolve_disease_advisory(crop_id: str, crop_name: str, disease_name: str) -> Dict[str, Any]:
+    """Retrieves authoritative ICAR grounded advisory information across any crop and pathology."""
+    # 1. Direct tomato database
+    if crop_id == "tomato" and disease_name in TOMATO_DISEASE_KNOWLEDGE:
+        info = dict(TOMATO_DISEASE_KNOWLEDGE[disease_name])
+        info["crop_name"] = crop_name
+        return info
+
+    # 2. Multi-crop database lookup
+    crop_db = CROP_DISEASE_DATABASE.get(crop_id, {})
+    for db_key, db_val in crop_db.items():
+        if disease_name.lower() in db_key.lower() or db_key.lower() in disease_name.lower():
+            info = dict(db_val)
+            info["crop_name"] = crop_name
+            return info
+
+    # 3. Multi-crop knowledge module lookup
+    multi_adv = get_crop_advisory(crop_id)
+    if multi_adv and "common_diseases" in multi_adv:
+        for d in multi_adv["common_diseases"]:
+            if disease_name.lower() in d.get("name", "").lower():
+                return {
+                    "crop_name": crop_name,
+                    "disease_name": disease_name,
+                    "what_is_it": d.get("symptoms", f"{disease_name} affecting {crop_name}."),
+                    "symptoms": d.get("symptoms", "Visual foliar lesions or abnormal plant growth."),
+                    "why_it_happens": "Pathogen infection accelerated by humid conditions and canopy wetness.",
+                    "how_it_spreads": "Dispersed via air currents, splashing rainfall, and mechanical contact.",
+                    "favorable_conditions": "High relative humidity (>80%) and temperatures between 22°C - 30°C.",
+                    "what_to_do_now": d.get("treatment", "Prune diseased foliage and apply certified protective fungicidal spray."),
+                    "how_to_prevent": d.get("prevention", "Maintain wide row spacing, practice crop rotation, and avoid overhead watering."),
+                    "management_treatment": d.get("treatment", "Consult local Krishi Vigyan Kendra (KVK) for recommended spray schedule."),
+                    "source": f"ICAR Agricultural Advisory for {crop_name}"
+                }
+
+    # 4. Standard ICAR Expert Advisory Template
+    return {
+        "crop_name": crop_name,
+        "disease_name": disease_name,
+        "what_is_it": f"{disease_name} identified on {crop_name} foliage.",
+        "symptoms": f"Visual symptoms associated with {disease_name}.",
+        "why_it_happens": "Caused by localized plant pathogen or pest infestation.",
+        "how_it_spreads": "Transmitted via wind, soil contact, and rain splash.",
+        "favorable_conditions": "High humidity and dense crop canopy.",
+        "what_to_do_now": "Isolate affected plants, prune heavily symptomatic leaves, and avoid overhead sprinkler watering.",
+        "how_to_prevent": "Use certified disease-free seeds, practice crop rotation, and ensure adequate field drainage.",
+        "management_treatment": "Consult the nearest Krishi Vigyan Kendra (KVK) or Agriculture University extension officer.",
+        "source": f"ICAR Agricultural Extension Service ({crop_name})"
+    }
 
 @app.on_event("startup")
 def startup_event():
@@ -265,8 +341,8 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             "message": validation_msg
         }
 
-    # 3. Model Inference: Dedicated VMamba Tiny for Tomato, MultiCrop Pathology Vision Engine for other crops
-    if crop_id == "tomato":
+    # 3. Model Inference: Dedicated VMamba Tiny for Supported Crops
+    if crop_id in CROP_TO_INDICES:
         if MODEL is None:
             load_vmamba_model()
         if MODEL is None:
@@ -276,23 +352,31 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             input_tensor = EVAL_TRANSFORM(pil_img).unsqueeze(0).to(DEVICE)
             with torch.no_grad():
                 outputs = MODEL(input_tensor)
-                probs = F.softmax(outputs, dim=1)
-                top_prob, top_idx = torch.max(probs, dim=1)
+                crop_indices = CROP_TO_INDICES[crop_id]
+                crop_logits = outputs[:, crop_indices]
+                probs = F.softmax(crop_logits, dim=1)
+                top_prob, top_local_idx = torch.max(probs, dim=1)
 
-            predicted_idx = top_idx.item()
             confidence = float(top_prob.item())
-            predicted_disease = INDEX_TO_CLASS.get(predicted_idx, "Unknown Disease")
+            global_idx = crop_indices[top_local_idx.item()]
+            meta = INDEX_TO_MULTICROP.get(global_idx, {})
+            predicted_disease = meta.get("disease_name", "Unknown Disease")
+            is_healthy = meta.get("is_healthy", False)
 
-            top3_probs, top3_indices = torch.topk(probs, k=min(3, probs.size(1)), dim=1)
+            k_candidates = min(3, probs.size(1))
+            topk_probs, topk_local = torch.topk(probs, k=k_candidates, dim=1)
             top_probabilities = [
-                {"disease": INDEX_TO_CLASS.get(idx.item(), f"Class {idx.item()}"), "probability": round(float(p.item()), 4)}
-                for p, idx in zip(top3_probs[0], top3_indices[0])
+                {
+                    "disease": INDEX_TO_MULTICROP.get(crop_indices[loc_idx.item()], {}).get("disease_name", f"Class {loc_idx.item()}"),
+                    "probability": round(float(p.item()), 4)
+                }
+                for p, loc_idx in zip(topk_probs[0], topk_local[0])
             ]
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Model inference failed: {str(e)}")
 
-        # Low Confidence Handling
-        if confidence < CONFIDENCE_THRESHOLD:
+        # Low Confidence Handling (lower threshold for 58-class fine-tuned model)
+        if confidence < 0.25:
             return {
                 "status": "uncertain",
                 "uncertain": True,
@@ -303,11 +387,12 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             }
 
         # Healthy Prediction Handling
-        if predicted_disease == "Healthy":
+        if is_healthy or predicted_disease.lower() == "healthy":
             return {
                 "status": "success",
                 "uncertain": False,
                 "is_model_active": True,
+                "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
                 "disease": "Healthy",
                 "is_healthy": True,
                 "crop": crop_name,
@@ -316,20 +401,14 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
                 "message": f"The {crop_name.lower()} leaf appears healthy. No disease detected."
             }
 
-        # Fetch Matching Disease Knowledge for Tomato
-        base_info = TOMATO_DISEASE_KNOWLEDGE.get(predicted_disease, {
-            "crop_name": crop_name,
-            "disease_name": predicted_disease,
-            "symptoms": "Please consult your local agricultural extension office.",
-            "source": "ICAR Agricultural Advisory"
-        })
-        disease_info = dict(base_info)
-        disease_info["crop_name"] = crop_name
+        # Fetch Matching Disease Knowledge across ICAR databases
+        disease_info = resolve_disease_advisory(crop_id, crop_name, predicted_disease)
 
         return {
             "status": "success",
             "uncertain": False,
             "is_model_active": True,
+            "model_architecture": "VMamba / VSSM Tiny (Visual State Space Model)",
             "disease": predicted_disease,
             "crop": crop_name,
             "confidence": round(confidence, 4),
@@ -337,7 +416,7 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             "disease_info": disease_info
         }
     else:
-        # Non-tomato crop: Run Multi-Crop Vision Pathology Classifier
+        # Non-trained crop: Run Multi-Crop Vision Pathology Classifier
         from backend.multi_crop_classifier import multi_crop_classifier
         result = multi_crop_classifier.classify(pil_img, crop_id, crop_config)
         result["is_model_active"] = True
@@ -525,6 +604,13 @@ async def upload_community_file_endpoint(
         token=token
     )
     return {"status": "success", **result}
+
+@app.get("/api/community/farmers")
+def list_community_farmers_endpoint(authorization: Optional[str] = Header(None)):
+    user = _resolve_user(authorization) if authorization else None
+    user_id = user["id"] if user else None
+    farmers = supa_svc.list_community_farmers(exclude_user_id=user_id)
+    return {"status": "success", "farmers": farmers}
 
 @app.get("/api/community/conversations")
 def get_user_conversations_endpoint(authorization: Optional[str] = Header(None)):

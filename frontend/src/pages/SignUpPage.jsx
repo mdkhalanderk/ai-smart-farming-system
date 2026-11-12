@@ -92,10 +92,10 @@ export const SignUpPage = () => {
         <div className="mb-6 p-3 rounded-xl bg-[#f5f8f5] border border-[#d8e2dc] text-[#2d5038] text-xs leading-relaxed flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-            <span className="font-medium text-[#1b432a]">Auth Service Active</span>
+            <span className="font-medium text-[#1b432a]">Instant Account Activation</span>
           </div>
-          <span className="text-[11px] text-[#526055] font-mono">
-            {authProvider === 'supabase' && isSupabaseConfigured ? 'Supabase Cloud' : 'Local FastAuth Engine'}
+          <span className="text-[11px] text-[#166534] font-medium bg-[#dcfce7] px-2 py-0.5 rounded-full border border-[#bbf7d0]">
+            ⚡ Instant Login (No Email Wait)
           </span>
         </div>
 

@@ -1,23 +1,69 @@
-==========================================
-VMamba / VSSM Tiny Tomato Disease Classification Report
-==========================================
+================================================================================
+VMAMBA MULTI-CROP AGRICULTURAL PATHOLOGY CLASSIFICATION REPORT
+Overall Test Accuracy: 75.70%
+================================================================================
 
-Test Accuracy: 99.82%
-Macro F1-Score: 99.78%
+                                           precision    recall  f1-score   support
 
-                                        precision    recall  f1-score   support
+               Cotton - American Bollworm       0.21      0.33      0.26         9
+                     Cotton - Anthracnose       0.20      0.20      0.20         5
+                Cotton - Bacterial Blight       0.75      0.80      0.77        15
+           Cotton - Bollworm & Rot Damage       0.00      0.00      0.00         5
+                    Cotton - Cotton Aphid       0.62      0.71      0.67         7
+                         Cotton - Healthy       0.88      0.93      0.90        15
+                        Cotton - Mealybug       0.69      0.60      0.64        15
+                   Cotton - Pink Bollworm       0.25      0.20      0.22         5
+                  Cotton - Red Cotton Bug       0.47      0.82      0.60        11
+                          Cotton - Thrips       0.20      0.17      0.18         6
+                        Cotton - Whitefly       0.62      0.56      0.59         9
+                         Maize - Armyworm       0.67      0.67      0.67         6
+                      Maize - Common Rust       1.00      0.93      0.97        15
+                          Maize - Ear Rot       0.61      0.73      0.67        15
+                    Maize - Fall Armyworm       0.71      0.80      0.75        15
+                   Maize - Gray Leaf Spot       1.00      0.87      0.93        15
+                          Maize - Healthy       0.82      0.93      0.88        15
+                       Maize - Stem Borer       0.71      0.33      0.45        15
+                  Potato - Bacterial Wilt       0.71      0.67      0.69        15
+                    Potato - Early Blight       1.00      1.00      1.00        15
+                Potato - Fungal Leaf Spot       0.50      0.73      0.59        15
+                         Potato - Healthy       0.75      0.60      0.67        15
+                     Potato - Late Blight       0.88      1.00      0.94        15
+                 Potato - Nematode Damage       0.67      0.73      0.70        11
+                     Potato - Pest Damage       0.69      0.60      0.64        15
+          Potato - Phytophthora Infestans       0.54      0.47      0.50        15
+                    Potato - Potato Virus       0.56      0.60      0.58        15
+             Rice - Bacterial Leaf Blight       0.80      0.80      0.80        15
+                        Rice - Brown Spot       0.74      0.93      0.82        15
+                         Rice - Leaf Smut       1.00      1.00      1.00         6
+                        Rice - Rice Blast       0.58      0.47      0.52        15
+                      Rice - Tungro Virus       0.94      1.00      0.97        15
+                      Sugarcane - Healthy       0.88      0.93      0.90        15
+                 Sugarcane - Mosaic Virus       0.81      0.87      0.84        15
+                      Sugarcane - Red Rot       0.85      0.73      0.79        15
+                     Sugarcane - Red Rust       1.00      1.00      1.00        12
+                  Sugarcane - Yellow Rust       0.92      0.73      0.81        15
+                  Tomato - Bacterial Spot       1.00      0.93      0.97        15
+                    Tomato - Early Blight       0.88      0.93      0.90        15
+                         Tomato - Healthy       1.00      1.00      1.00        15
+                     Tomato - Late Blight       0.87      0.87      0.87        15
+                       Tomato - Leaf Mold       1.00      1.00      1.00        15
+              Tomato - Septoria Leaf Spot       1.00      0.93      0.97        15
+      Tomato - Spider Mites (Two-Spotted)       0.87      0.87      0.87        15
+                     Tomato - Target Spot       0.82      0.93      0.88        15
+             Tomato - Tomato Mosaic Virus       1.00      1.00      1.00        15
+   Tomato - Tomato Yellow Leaf Curl Virus       1.00      0.93      0.97        15
+           Wheat - Black Rust / Stem Rust       0.92      0.80      0.86        15
+                  Wheat - Brown Leaf Rust       1.00      1.00      1.00        15
+                        Wheat - Flag Smut       0.55      0.73      0.63        15
+                          Wheat - Healthy       0.85      0.73      0.79        15
+                      Wheat - Leaf Blight       0.59      0.67      0.62        15
+                   Wheat - Powdery Mildew       0.55      0.40      0.46        15
+                         Wheat - Stem Fly       0.67      0.53      0.59        15
+                      Wheat - Wheat Aphid       0.41      0.47      0.44        15
+                       Wheat - Wheat Mite       0.56      0.33      0.42        15
+Wheat - Wheat Scab / Fusarium Head Blight       0.75      0.80      0.77        15
+             Wheat - Yellow / Stripe Rust       1.00      0.87      0.93        15
 
-                        Bacterial Spot     1.0000    0.9969    0.9984       319
-                          Early Blight     1.0000    0.9800    0.9899       150
-                           Late Blight     0.9931    1.0000    0.9965       286
-                             Leaf Mold     1.0000    1.0000    1.0000       143
-                    Septoria Leaf Spot     1.0000    1.0000    1.0000       265
-Spider Mites – Two-Spotted Spider Mite     0.9921    1.0000    0.9960       252
-                           Target Spot     1.0000    0.9953    0.9976       211
-                   Tomato Mosaic Virus     1.0000    1.0000    1.0000        56
-         Tomato Yellow Leaf Curl Virus     0.9988    1.0000    0.9994       804
-                               Healthy     1.0000    1.0000    1.0000       238
-
-                              accuracy                         0.9982      2724
-                             macro avg     0.9984    0.9972    0.9978      2724
-                          weighted avg     0.9982    0.9982    0.9982      2724
+                                 accuracy                           0.76       782
+                                macro avg       0.73      0.73      0.72       782
+                             weighted avg       0.77      0.76      0.76       782
