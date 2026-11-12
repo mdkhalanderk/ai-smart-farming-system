@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sprout, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../lib/config';
 
-export function PageLoader({ message = 'Loading Krishi Drishti...' }) {
+export function PageLoader({ message = 'Loading Smart Crop Advisory...' }) {
   return (
     <div className="min-h-[60vh] w-full flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-150">
       <div className="relative flex items-center justify-center mb-4">
