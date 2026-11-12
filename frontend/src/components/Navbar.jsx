@@ -161,7 +161,14 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16 gap-2 lg:gap-3">
           
           {/* Brand Logo & Editorial Title */}
-          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+          <a
+            href={user ? '/dashboard' : '/'}
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = user ? '/dashboard' : '/';
+            }}
+            className="flex items-center gap-2.5 group shrink-0 cursor-pointer"
+          >
             <img
               src="/logo.png"
               alt="Smart Crop Advisory Logo"
@@ -175,7 +182,7 @@ export const Navbar = () => {
                 {t('precision_agri', currentLang)}
               </span>
             </div>
-          </Link>
+          </a>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1">

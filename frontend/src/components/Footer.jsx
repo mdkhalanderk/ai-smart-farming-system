@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { t } from '../lib/i18n';
 
 export const Footer = () => {
-  const { language } = useAuth();
+  const { user, language } = useAuth();
   const currentLang = language || 'English';
 
   return (
@@ -15,7 +15,14 @@ export const Footer = () => {
           
           {/* Brand & Overview */}
           <div className="md:col-span-1 space-y-3">
-            <Link to="/" className="flex items-center gap-2.5">
+            <a
+              href={user ? '/dashboard' : '/'}
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = user ? '/dashboard' : '/';
+              }}
+              className="flex items-center gap-2.5 cursor-pointer"
+            >
               <img
                 src="/logo.png"
                 alt="Smart Crop Advisory Logo"
@@ -24,7 +31,7 @@ export const Footer = () => {
               <span className="font-serif font-bold text-white text-lg tracking-tight">
                 {t('app_name', currentLang)}
               </span>
-            </Link>
+            </a>
             <p className="text-xs text-[#9eb3a4] leading-relaxed">
               {t('footer_desc', currentLang)}
             </p>
