@@ -1,331 +1,213 @@
 # Smart Crop Advisory System (SCA)
-### AI-Powered Agricultural Advisory, Pathology Vision, Yield Estimation & Market Intelligence Platform
+### Precision Indian Agriculture • AI Pathology Vision, Market Intelligence & Yield Forecasting Platform
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18%2F19-61DAFB.svg)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF.svg)](https://vitejs.dev/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-VMamba%20SS2D-EE4C2C.svg)](https://pytorch.org/)
-[![Accuracy](https://img.shields.io/badge/Test%20Accuracy-99.82%25-brightgreen.svg)]()
-[![Multilingual](https://img.shields.io/badge/Languages-English%20%7C%20ಕನ್ನಡ%20%7C%20हिन्दी-success.svg)]()
-
----
-
-## 📌 Executive Summary & Abstract
-
-The **Smart Crop Advisory System (SCA)** is a production-grade, full-stack agricultural decision-support platform designed to empower smallholder and commercial farmers across India. Combining state-of-the-art **Deep Learning Vision Models (VMamba)**, **Ensemble Machine Learning Regressors (Random Forest)**, **OpenStreetMap GIS Mapping**, and a **Real-Time Community Biosecurity Outbreak Network**, the system delivers immediate, scientifically grounded agronomic advice.
-
-The platform is designed ground-up for accessibility with complete tri-lingual support (**English**, **Kannada / ಕನ್ನಡ**, and **Hindi / हिन्दी**), zero-latency edge-resilient SQLite architecture, and curated agricultural knowledge based on verified **ICAR (Indian Council of Agricultural Research)** and **KVK (Krishi Vigyan Kendra)** agronomic protocols.
+[![Live Frontend](https://img.shields.io/badge/Vercel-Live%20App-black?logo=vercel)](https://ai-smart-farming-system-ivory.vercel.app)
+[![Live Backend](https://img.shields.io/badge/Render-API%20Online-46E3B7?logo=render)](https://ai-smart-farming-system-if62.onrender.com/health)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18%2F19-61DAFB.svg?logo=react)](https://react.dev/)
+[![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-INT8%20(27MB)-005CED.svg)](https://onnxruntime.ai/)
+[![Database](https://img.shields.io/badge/Database-Neon%20PostgreSQL-00E599.svg?logo=postgresql)](https://neon.tech)
+[![Languages](https://img.shields.io/badge/Languages-English%20%7C%20ಕನ್ನಡ%20%7C%20हिन्दी-success.svg)]()
 
 ---
 
-## 🏗️ System Architecture
+## 📌 1. Project Overview & Abstract
 
-The project follows a **Decoupled Client-Server Micro-Architecture**:
+The **Smart Crop Advisory System (SCA)** is a full-stack, AI-powered agricultural decision-support platform designed to address the three most critical uncertainties Indian farmers face every season:
+1. **Unidentified Foliar Crop Diseases:** Delays in identifying plant pathogens destroy substantial portions of standing crops.
+2. **Volatile Mandi Market Prices:** Farmers lack predictive visibility into APMC mandi price trends, leading to distress sales.
+3. **Seasonal Harvest Planning:** Estimating realistic production volume (tonnes per hectare) across varying soil, weather, and irrigation conditions.
+
+The platform unites a **Visual State Space Model (VMamba / VSSM Tiny)** quantized to INT8 (27.02 MB) for 58-class multi-crop disease detection, **two weather-aware Random Forest Regressors** for 7-day mandi rate forecasting and crop yield prediction, an **ICAR-grounded treatment repository**, and **Groq LLM-powered community outbreak bulletins** into a single multilingual web application (**English**, **Kannada / ಕನ್ನಡ**, and **Hindi / हिन्दी**).
+
+* **Live Frontend:** [https://ai-smart-farming-system-ivory.vercel.app](https://ai-smart-farming-system-ivory.vercel.app)
+* **Live API & Health:** [https://ai-smart-farming-system-if62.onrender.com/health](https://ai-smart-farming-system-if62.onrender.com/health)
+* **Swagger API Docs:** [https://ai-smart-farming-system-if62.onrender.com/docs](https://ai-smart-farming-system-if62.onrender.com/docs)
+
+---
+
+## 🏗️ 2. System Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Frontend["React 18/19 + Vite Web Application"]
-        UI["Tailwind CSS 4 Responsive UI"]
-        i18n["Centralized Multilingual Engine (EN, KN, HI)"]
-        Map["Leaflet GIS Interactive Map"]
-        Chart["SVG Price Trend & Forecast Graph"]
-        AuthContext["Auth State (Dual SQLite / Supabase)"]
+    subgraph Client["Frontend Client (React + Vite + Tailwind CSS)"]
+        UI["Responsive UI (Mobile & Desktop)"]
+        i18n["Localization Engine (English, ಕನ್ನಡ, हिन्दी)"]
+        Map["Leaflet GIS District & Taluk Map"]
+        Chart["SVG Price Trend & Forecast Visualizer"]
+        AuthCtx["Client Auth State (FastAuth Token + Profile)"]
     end
 
-    subgraph Backend["FastAPI Python REST API (Uvicorn ASGI)"]
-        Router["FastAPI Application Router (CORS / Endpoints)"]
-        OOD["OOD & Blur Validator (OpenCV Laplacian / Chlorophyll HSV)"]
-        AuthService["PBKDF2-HMAC-SHA256 Auth & Session Manager"]
-        ComService["Community Alerts & P2P Encrypted Chat"]
+    subgraph Server["FastAPI Backend (Render Cloud / Uvicorn ASGI)"]
+        App["FastAPI REST Router (CORS, GZip, Security Headers)"]
+        OOD["Out-of-Distribution (OOD) Leaf Quality Gate"]
+        TTA["Aspect-Preserving 2-View Preprocessor"]
+        AuthSvc["FastAuth Authentication Service (PBKDF2-HMAC-SHA256)"]
+        CommSvc["Community Surveillance & Outbreak Service"]
     end
 
-    subgraph Engines["AI / ML & Analytical Services"]
-        VMamba["VMamba Tiny Deep Learning Model (2D Selective Scan SS2D)"]
-        CVClassifier["Multi-Crop CV Color Space Feature Extractor"]
-        YieldModel["Crop Yield Random Forest Regressor"]
-        PriceModel["APMC Mandi 19-Feature Random Forest + Open-Meteo"]
-        GISDB["Karnataka Regional GIS Engine (31 Districts, 240+ Taluks)"]
+    subgraph Models["AI / ML Inference Engines"]
+        VMamba["VMamba Tiny (ONNX INT8, 58 Classes, 27.02 MB)"]
+        PriceRF["Weather-Aware 19-Feature Mandi Price Random Forest"]
+        YieldRF["Agro-Climatic 11-Feature Crop Yield Random Forest"]
+        Groq["Groq LLM API (llama-3.3-70b-versatile Outbreak Generator)"]
     end
 
-    subgraph Storage["Data & Storage Layer"]
-        SQLite[("Local SQLite Database: farmer_auth.db")]
-        Datasets[("Mandi Price Series & Agricultural Datasets")]
-        ModelWeights[("Trained Model Checkpoint: best_model.pth (114 MB)")]
+    subgraph Data["Persistent Storage & External Feeds"]
+        DB[("Neon Serverless PostgreSQL (SQLite local fallback)")]
+        MandiCSV[("karnataka_recent.csv (398 KB Pre-filtered APMC Data)")]
+        OpenMeteo["Open-Meteo 7-Day Live Weather Forecast API"]
+        ICARDB[("Curated ICAR & NHB Agronomic Treatment Knowledgebase")]
     end
 
-    Frontend <-->|REST HTTP / JSON| Backend
-    Backend --> OOD
-    OOD --> VMamba
-    OOD --> CVClassifier
-    Backend --> YieldModel
-    Backend --> PriceModel
-    Backend --> GISDB
-    Backend <--> AuthService
-    Backend <--> ComService
-    AuthService <--> SQLite
-    ComService <--> SQLite
-    PriceModel <--> Datasets
-    VMamba <--> ModelWeights
+    Client <-->|HTTPS / JSON REST| Server
+    Server --> OOD --> TTA --> VMamba
+    Server --> PriceRF
+    PriceRF <--> MandiCSV
+    PriceRF <--> OpenMeteo
+    Server --> YieldRF
+    VMamba --> ICARDB
+    ICARDB --> Groq --> CommSvc
+    Server <--> AuthSvc <--> DB
+    Server <--> CommSvc <--> DB
 ```
 
 ---
 
-## ✨ Core Modules & Key Features
+## 🚀 3. Core Modules & End-to-End User Guide
 
-### 1. Leaf Pathology Vision Diagnostic Engine (`/detect`)
-* **State-of-the-Art Deep Learning**: Powered by **VMamba Tiny (Visual State Space Model with 2D Selective Scan `SS2D`)** with 29.95M parameters (`model/best_model.pth`).
-* **Tomato Pathology (10 Classes)**: Detects *Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria Leaf Spot, Two-Spotted Spider Mites, Target Spot, Tomato Mosaic Virus, Tomato Yellow Leaf Curl Virus (TYLCV)*, and *Healthy*.
-* **Empirical Benchmarks**: Tested across 18,160 leaf images from the PlantVillage dataset achieving **99.82% overall test accuracy**, 0.9983 macro precision, and 0.9982 macro recall.
-* **Out-of-Distribution (OOD) & Blur Rejection**: Integrates OpenCV Laplacian variance check ($\text{Var}(\nabla^2 I) \ge 12.0$) and HSV chlorophyll masking to automatically reject non-leaf or blurry images before reaching the neural network.
-* **14 Indian Crops Supported**: In addition to Tomato, incorporates a computer-vision quantitative color-space diagnostic engine for *Potato, Rice, Wheat, Cotton, Maize, Chilli, Onion, Sugarcane, Soybean, Groundnut, Banana, Apple, Mango*.
-* **ICAR Standardized Remedies**: Provides organic solutions, cultural management practices, chemical fungicides/pesticides with safe dilution ratios, and safety disclaimers.
-
-### 2. Mandi Price Prediction & 7-Day Forecasting (`/price-prediction`)
-* **Machine Learning Engine**: 19-feature **Random Forest Regressor** trained on multi-year APMC mandi transaction records.
-* **Engineered Features**: 1-day, 2-day, 7-day price lags, 7-day & 14-day rolling moving averages, historical volatility, and cyclical calendar features.
-* **Weather Integration**: Automatically extracts real-time weather regressors (ambient temperature, rainfall mm, relative humidity) via Open-Meteo for the selected mandi coordinates.
-* **Interactive 7-Day Price Graph**: Built-in SVG trend line graph with drop shadow, emerald gradient fill, 4 horizontal Y-axis price levels, 7-day average benchmark line, and hover inspection cards.
-* **Multi-Layer Resilient Fallback**: 2-second timeout fallback to curated APMC historical records if external cloud APIs experience cold-start delays.
-
-### 3. Agro-Climatic Crop Yield Estimator (`/yield-prediction`)
-* **Agronomic Random Forest Model**: Calibrated against Karnataka state agricultural statistics across 7 input parameters:
-  1. Crop variety (Tomato, Rice, Wheat, Maize, Cotton, etc.)
-  2. Cultivated land area (in acres / hectares)
-  3. Soil classification (Red Sandy Loam, Medium Black, Alluvial, Laterite, Coastal Sandy)
-  4. Seasonal precipitation (mm)
-  5. Ambient temperature (°C)
-  6. Irrigation infrastructure (Drip, Sprinkler, Canal / Flood, Rainfed)
-  7. Fertilizer protocol (NPK balanced, Organic, Integrated)
-* **Outputs**: Predicted yield per hectare, total expected harvest, 90% confidence bounds, and actionable soil conditioning recommendations.
-
-### 4. Interactive GIS Map & Regional Advisory (`/dashboard`)
-* **Coverage**: All **31 Karnataka Districts** and **240+ Taluks**.
-* **Zero-Cost GIS Mapping**: Integrated **Leaflet** with CartoDB and OpenStreetMap tiles (no paid Google Maps API dependencies).
-* **Smooth Panning**: Features 1-click district and taluk switching with dynamic `flyTo()` coordinates.
-* **Regional Intelligence**: Displays agro-climatic zones, dominant soil profiles, annual rainfall normals, nearest APMC mandi yard, and ranked crop suitability match scores.
-
-### 5. Community Biosecurity Network & Farmer-to-Farmer Chat (`/community`)
-* **Real-Time Outbreak Surveillance**: Allows farmers to broadcast localized pest and disease outbreak alerts with photo evidence, danger level, crop, and taluk tags.
-* **Proximity Calculation**: Calculates physical distances (in km) between the user's farm and reported outbreaks.
-* **Peer Upvotes**: Live voting system for farmers to confirm outbreak severity.
-* **Farmer-to-Farmer Chat**: Dedicated private messaging system enabling neighboring growers to coordinate field containment and spray schedules.
-
-### 6. 100% Complete Multilingual System (`en`, `kn`, `hi`)
-* **Immediate Reactive Switching**: English, **Kannada (ಕನ್ನಡ)**, and **Hindi (हिन्दी)** supported across every page without requiring page reload.
-* **Persistent Preference**: Stores the selected language in localStorage and synchronizes with the farmer's database profile.
-* **Dynamic Translation Engine**: Translates dynamic API responses including district names, taluks, crops, soil profiles, mandi names, alert titles, descriptions, and dates into culturally natural regional language terms.
+### 🌾 Module 1: AI Leaf Disease Scanner (`/detect`)
+1. **Select Cultivated Crop:** Choose from Cotton, Maize, Potato, Rice, Sugarcane, Tomato, or Wheat (controls the active AI model and grounded pathology scope).
+2. **Upload Leaf Photo:** Upload a clear smartphone leaf image (JPEG, PNG, WebP up to 15 MB).
+3. **Automatic Quality Validation:** The built-in **Out-of-Distribution (OOD) Validator** checks for blur, extreme aspect ratios, and chlorophyll/vegetation color saturation (≥8% leaf pixels). Non-leaf or blurry uploads are gracefully rejected with a helpful prompt.
+4. **2-View Test-Time Augmentation (TTA):** The system generates two aspect-ratio-preserving views (standard 224×224 center crop + 78% tight leaf zoom) and runs inference through `vmamba_int8.onnx`.
+5. **Diagnostic Card & ICAR Advice:**
+   * **Diagnosis:** Identified pathogen, confidence percentage, and top-3 differential possibilities.
+   * **ICAR Treatment:** What is it, key foliar symptoms, why it happens, how it spreads, severity level, step-by-step immediate cultural remedies, preventive measures, certified chemical fungicides, and direct link to the local **Krishi Vigyan Kendra (KVK)** network.
+   * **Share with Community:** A single click uses Groq LLM to summarize the verified detection into a farmer warning bulletin for your district.
 
 ---
 
-## 🛠️ Technology Stack
-
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend Framework** | React 18 / 19, Vite 8.3 |
-| **Styling & Icons** | Tailwind CSS 4, Lucide React Icons |
-| **GIS Mapping** | Leaflet 1.9, CartoDB Light Tile Layer, OpenStreetMap |
-| **Multilingual (i18n)** | i18next 26.7, react-i18next 17.1, custom dynamic translator |
-| **Backend Framework** | FastAPI 0.110+, Python 3.10+, Uvicorn ASGI Server |
-| **Deep Learning** | PyTorch, Torchvision, VMamba 2D Selective Scan (`SS2D`) |
-| **Machine Learning** | Scikit-Learn, NumPy, Pandas, Joblib |
-| **Computer Vision** | OpenCV (`cv2`), Pillow (PIL) |
-| **Database & Auth** | SQLite 3, PBKDF2-HMAC-SHA256 (100,000 iterations), Bearer Tokens |
-| **External APIs** | Open-Meteo Weather API, Mandi Price Cloud API |
+### 📈 Module 2: Mandi Market Price Forecasting (`/price-prediction`)
+1. **Choose District & Market:** Select any of the **42 Karnataka APMC mandis** (e.g., Kolar, Hassan, Belagavi, Mysuru, Mandya).
+2. **Select Commodity:** Choose agricultural commodity (Tomato, Onion, Potato, Wheat, Rice, etc.).
+3. **Click "Forecast 7-Day Prices":**
+   * The 19-feature **Random Forest Regressor** ingests historical price momentum (`lag_1`, `lag_3`, `lag_7`, `rolling_7`) and live **Open-Meteo 7-day meteorological forecasts** (temperature, rainfall, humidity, wind speed).
+   * **Visual Trend:** Interactive 7-day price trajectory line graph showing daily price per quintal (₹/Qtl) and per kilogram (₹/kg).
+   * **Market Regime Badge:** Identifies market status into **Low (Glut/Distress)**, **Medium (Normal Trading)**, or **High (Peak Seasonal Rate)** based on strictly fitted training terciles.
 
 ---
 
-## 📂 Repository Directory Layout
-
-```
-major-main/finalproject-main/
-├── backend/                         # FastAPI Python Backend Application
-│   ├── app.py                       # Main API routes, CORS, middleware, endpoints
-│   ├── auth_service.py              # SQLite user auth, password hashing, sessions
-│   ├── community_service.py         # Outbreak broadcast alerts & audit history
-│   ├── crop_registry.py             # 14 Indian crops catalog & class mappings
-│   ├── crop_knowledge.py            # ICAR agronomy recommendations & remedies
-│   ├── disease_data.py              # Pathology descriptions & chemical remedies
-│   ├── groq_service.py              # Groq LLaMA 3 advisory generation fallback
-│   ├── multi_crop_classifier.py     # Multi-crop computer vision HSV leaf analyzer
-│   ├── ood_validator.py             # Out-of-Distribution & Laplacian blur validator
-│   ├── price_service.py             # APMC mandi forecasting & weather integration
-│   ├── regional_advisory.py         # Karnataka GIS (31 districts, 240+ taluks)
-│   ├── yield_service.py             # Crop yield machine learning regressor
-│   └── farmer_auth.db               # SQLite database file
-├── frontend/                        # React + Vite Frontend Client
-│   ├── src/
-│   │   ├── App.jsx                  # Master client router & route guards
-│   │   ├── main.jsx                 # Vite application entry point
-│   │   ├── context/
-│   │   │   └── AuthContext.jsx      # Authentication & language state provider
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx           # Top header navigation & language selector
-│   │   │   ├── Footer.jsx           # Standard application footer
-│   │   │   ├── ProtectedRoute.jsx   # Route security guard
-│   │   │   └── IndiaAgriculturalMap.jsx # Interactive Leaflet map & regional cards
-│   │   ├── pages/
-│   │   │   ├── LandingPage.jsx      # Public presentation & platform hero
-│   │   │   ├── LoginPage.jsx        # Farmer credentials sign-in
-│   │   │   ├── SignUpPage.jsx       # Registration with district selection
-│   │   │   ├── Dashboard.jsx        # Biosecurity preview, mandi snapshot, weather
-│   │   │   ├── DiseaseDetection.jsx # Leaf pathology scanner (14 crops)
-│   │   │   ├── YieldPrediction.jsx  # Agro-climatic yield calculator
-│   │   │   ├── PricePrediction.jsx  # Mandi rates, 7-day forecast & SVG chart
-│   │   │   ├── CommunityPage.jsx    # Peer outbreak feed, filters & chat
-│   │   │   ├── ReportsPage.jsx      # AI model metrics & diagnosis history
-│   │   │   └── ProfilePage.jsx      # Farmer profile & language settings
-│   │   ├── locales/                 # Translation dictionaries
-│   │   │   ├── en.js                # English translations
-│   │   │   ├── kn.js                # Kannada (ಕನ್ನಡ) translations
-│   │   │   └── hi.js                # Hindi (हिन्दी) translations
-│   │   └── lib/
-│   │       ├── dynamicTranslator.js # Dynamic entities localization engine
-│   │       ├── i18n.js              # Centralized i18next singleton setup
-│   │       └── locationData.js      # Karnataka district & taluk geo database
-├── model/                           # Deep Learning Neural Network Architecture
-│   ├── vmamba.py                    # PyTorch 2D Selective Scan (SS2D) code
-│   └── best_model.pth               # Trained VMamba weights (114.34 MB)
-├── reports/                         # Academic Evaluation & Benchmark Reports
-│   ├── metrics.json                 # 99.82% empirical test metrics
-│   ├── confusion_matrix.png         # 10-class evaluation confusion matrix
-│   └── training_curves.png          # Train/Validation loss and accuracy plots
-├── data/                            # Datasets, training samples & mandi series
-├── requirements.txt                 # Backend Python package requirements
-├── start_app.bat                    # 1-click Windows deployment launcher
-└── PROJECT_REVIEW_GUIDE.md          # Guide & HOD technical viva review guide
-```
+### 🚜 Module 3: Seasonal Crop Yield Forecasting (`/yield-prediction`)
+1. **Input Agro-Climatic Parameters:**
+   * **Crop & Land Size:** Crop variety and cultivated area (in acres / hectares).
+   * **Soil & Region:** Soil classification (Red Sandy Loam, Medium Black, Alluvial, Clay, Laterite) and state/season.
+   * **Irrigation & Water:** Irrigation infrastructure (Drip, Sprinkler, Canal, Rainfed) and expected rainfall.
+2. **Click "Calculate Estimated Yield":**
+   * An 11-feature **Random Forest Regressor** ($R^2 = 0.9902$) computes the expected seasonal production volume.
+   * **Outputs:** Predicted yield in **tonnes per hectare (t/ha)**, total expected farm harvest volume, and an agronomic yield tier badge (**Low**, **Medium**, or **High**).
 
 ---
 
-## ⚡ Installation & Getting Started
+### 🛡️ Module 4: Biosecurity Community Outbreak Network (`/community`)
+1. **Interactive Geospatial Map:** Leaflet-powered district map highlighting active pest and disease hotspots across Karnataka.
+2. **Live Warning Bulletins:** Feed of district warnings generated by **Groq LLM (llama-3.3-70b)**, strictly grounded in verified ICAR disease guidelines to eliminate hallucinations.
+3. **Direct Farmer-to-Farmer Chat:** Zero-latency peer-to-peer messaging allowing neighboring farmers to coordinate preventive spraying schedules and crop containment.
+
+---
+
+## 📊 4. Verified AI/ML Model Benchmarks
+
+All metrics below are verified from held-out empirical evaluation files in `reports/`:
+
+| Model & Task | Architecture | Dataset & Held-Out Test Set | Key Results |
+| :--- | :--- | :--- | :--- |
+| **Multi-Crop Leaf Disease Diagnosis** | **VMamba (VSSM Tiny)** INT8 Quantized (`model/vmamba_int8.onnx`, 27.02 MB) | 58 Classes across 7 crops (782 unseen test images) | **Clean Test Accuracy:** `76.60%` (vs `61.51%` baseline)<br>**Shifted/Field Accuracy:** `71.10%` (vs `42.20%` baseline, **+28.90 pts**)<br>**Crop-Gated Deploy Accuracy:** `~80.4%` (Rice 90.9%, Sugarcane 87.5%, Tomato 86.7%, Maize 84.4%, Wheat 80.6%) |
+| **APMC Mandi Price Forecasting** | **Random Forest Regressor** (19 features, 300 trees, depth 25) | AGMARKNET Karnataka APMC (2,629 chronological test rows) | **MAE:** `₹294.47/Qtl`<br>**RMSE:** `₹526.65/Qtl`<br>**$R^2$:** `0.7525`<br>**Regime Accuracy:** `89.35%` (Macro F1: `89.34%`)<br>**Tolerance Bands:** 82.15% (±10%), 88.70% (±15%), 93.42% (±20%) |
+| **Seasonal Crop Yield Prediction** | **Random Forest Regressor** (11 features, 100 trees, depth 16) | DES MoA&FW + ICRISAT (600 held-out records) | **MAE:** `1.1596 t/ha`<br>**RMSE:** `2.6307 t/ha`<br>**$R^2$:** `0.9902`<br>**Yield Tier Accuracy:** `93.17%` (Macro F1: `93.04%`) |
+| **Cloud Memory Optimization** | Dynamic Quantization + Glibc `malloc_trim(0)` | Render Free Tier (512 MB RAM limit) | **Server RAM Footprint:** `< 360 MB`<br>**Inference Latency:** `244 ms` median (2 views on single CPU thread)<br>**Market Data Size:** `398 KB` (pruned from 59.5 MB) |
+
+---
+
+## 💻 5. Local Development Quickstart
 
 ### Prerequisites
-* **Python**: 3.10, 3.11, or 3.12 installed.
-* **Node.js**: v18+ or v20+ with `npm`.
-* **Git**: Installed for source control.
+* **Python:** 3.10, 3.11, or 3.12
+* **Node.js:** v18 or v20+ with `npm`
 
-### Option A: 1-Click Launch (Windows)
-Simply double-click the included batch launcher from the root folder:
-```bat
-start_app.bat
-```
-This automatically boots both the FastAPI backend server on `http://127.0.0.1:8000` and the Vite frontend on `http://localhost:5173`.
-
----
-
-### Option B: Manual Command Line Launch
-
-#### 1. Backend Setup:
+### Step 1: Clone the Repository
 ```bash
-# Navigate to the project root
-cd major-main/finalproject-main
+git clone https://github.com/mdkhalanderk/ai-smart-farming-system.git
+cd ai-smart-farming-system
+```
 
-# Create and activate a Python virtual environment (recommended)
+### Step 2: Backend Setup
+```bash
+# Create and activate virtual environment
 python -m venv venv
 # Windows:
-venv\Scripts\activate
+.\venv\Scripts\activate
 # Linux/macOS:
 source venv/bin/activate
 
-# Install required Python dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Start the FastAPI server via Uvicorn
+# Start FastAPI backend (runs on http://127.0.0.1:8000)
 python -m uvicorn backend.app:app --host 127.0.0.1 --port 8000 --reload
 ```
-*API will be available at:* `http://127.0.0.1:8000`  
-*Interactive Swagger Documentation:* `http://127.0.0.1:8000/docs`
 
-#### 2. Frontend Setup:
-Open a second terminal window:
+Verify backend health:
 ```bash
-# Navigate to the frontend directory
-cd major-main/finalproject-main/frontend
+curl http://127.0.0.1:8000/health
+# Response: {"status":"healthy","device":"cpu","gpu_name":"CPU","confidence_threshold":0.7,"model_loaded":true}
+```
 
-# Install node dependencies
+### Step 3: Frontend Setup
+```bash
+cd frontend
+
+# Install npm dependencies
 npm install
 
-# Start the Vite development server
+# Start Vite dev server (runs on http://127.0.0.1:5173)
 npm run dev
 ```
-*Frontend application will be live at:* `http://localhost:5173`
+
+Open `http://localhost:5173` in your browser. Demo farmer credentials:
+* **Email:** `test_farmer@krishi.in`
+* **Password:** `farmer123`
 
 ---
 
-## 📡 API Reference Documentation
+## 🔌 6. API Reference & Endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/predict` | Upload leaf image & crop name to run VMamba AI pathology diagnosis |
-| `GET` | `/api/crops` | Retrieve list of 14 supported Indian crops |
-| `POST` | `/api/yield/predict` | Calculate expected crop harvest using agro-climatic parameters |
-| `GET` | `/api/price/current` | Retrieve current modal price for market and commodity |
-| `POST` | `/api/price/predict` | Generate 7-day predictive price forecast and weather regressors |
-| `GET` | `/api/price/markets` | Retrieve all 42 supported Karnataka APMC markets |
-| `GET` | `/api/regional-advisory` | Fetch agro-climatic profile, soil classification, and recommended crops |
-| `POST` | `/api/auth/register` | Register a new farmer account |
-| `POST` | `/api/auth/login` | Authenticate farmer and return bearer session token |
-| `GET` | `/api/auth/me` | Fetch authenticated farmer profile and preferences |
-| `GET` | `/api/community/reports` | Retrieve district outbreak alert feed with proximity filters |
-| `POST` | `/api/community/reports` | Broadcast a new pest/disease warning to neighboring farmers |
-| `POST` | `/api/community/reports/{id}/upvote` | Upvote a community outbreak alert |
-| `GET` | `/api/reports` | Fetch official VMamba test benchmark metrics (99.82% accuracy) |
+| `GET` | `/health` | Server status, active device, and model readiness flag. |
+| `POST` | `/api/predict` | Multipart upload (`file`, `crop`) returning disease diagnosis, confidence, and ICAR advisory. |
+| `POST` | `/api/price/predict` | JSON body (`district`, `market`, `commodity`) returning 7-day price forecasts and regime. |
+| `GET` | `/api/price/markets` | Returns catalogue of supported Karnataka APMC markets and commodities. |
+| `POST` | `/api/yield/predict` | JSON body (11 agro-climatic parameters) returning predicted yield (t/ha) and tier. |
+| `GET` | `/api/community/alerts` | Returns geotagged outbreak alerts filtered by district or crop. |
+| `POST` | `/api/community/generate-warning` | Groq LLM endpoint converting disease detections into district warning summaries. |
+| `POST` | `/api/auth/login` | Authenticates farmer and issues bearer token with profile context. |
 
 ---
 
-## 📊 Evaluation & Model Performance
+## 👥 7. Project Information & Contributors
 
-### Deep Learning Model: VMamba Tiny (Visual State Space Model)
-* **Dataset**: PlantVillage Tomato Pathology (18,160 leaf images).
-* **Partition**: 70% Training (12,712 images), 15% Validation (2,724 images), 15% Independent Test (2,724 images).
-* **Overall Test Accuracy**: **99.82%**
-* **Macro Average Precision**: **0.9983**
-* **Macro Average Recall**: **0.9982**
-* **Macro Average F1-Score**: **0.9982**
-* **Loss Convergence**: Cross-Entropy Loss reduced from 2.15 to **0.0094**.
-
-```
-+------------------------------------+------------+-----------+---------+
-| Pathology Class                    | Precision  | Recall    | F1-Score|
-+------------------------------------+------------+-----------+---------+
-| Bacterial Spot                     | 0.9953     | 1.0000    | 0.9976  |
-| Early Blight                       | 0.9950     | 0.9950    | 0.9950  |
-| Late Blight                        | 1.0000     | 0.9947    | 0.9974  |
-| Leaf Mold                          | 1.0000     | 1.0000    | 1.0000  |
-| Septoria Leaf Spot                 | 0.9944     | 0.9944    | 0.9944  |
-| Two-Spotted Spider Mites           | 0.9940     | 1.0000    | 0.9970  |
-| Target Spot                        | 1.0000     | 0.9929    | 0.9964  |
-| Tomato Mosaic Virus                | 1.0000     | 1.0000    | 1.0000  |
-| Yellow Leaf Curl Virus (TYLCV)     | 1.0000     | 1.0000    | 1.0000  |
-| Healthy                            | 1.0000     | 1.0000    | 1.0000  |
-+------------------------------------+------------+-----------+---------+
-| Macro Average                      | 0.9983     | 0.9982    | 0.9982  |
-+------------------------------------+------------+-----------+---------+
-```
+* **Institution:** Department of Artificial Intelligence and Machine Learning, CMR Institute of Technology, Bengaluru – 560037
+* **Affiliation:** Visvesvaraya Technological University (VTU), Belagavi (Academic Year 2025–2026)
+* **Project Guide:** Laya N, Assistant Professor, Department of AIML, CMRIT
+* **Project Team:**
+  1. **Navneet Gowda GT** – `1CR23AI071`
+  2. **Sachinkumar Narayan Naik** – `1CR24AI407`
+  3. **Jayanth Gowda CR** – `1CR23AI041`
+  4. **Mohammed Khalander K** – `1CR23AI062`
 
 ---
 
-## 🔒 Security & Data Integrity
-
-1. **Password Encryption**: All passwords are stored using salted **PBKDF2-HMAC-SHA256 with 100,000 iterations** and individual 16-byte cryptographically secure random salts.
-2. **Timing Attack Protection**: Password verification utilizes constant-time string comparison (`secrets.compare_digest`).
-3. **Session Management**: Authenticated requests require 43-character URL-safe bearer tokens with 30-day sliding expiry.
-4. **Input Sanitization**: Request bodies are strictly validated at runtime through Pydantic data schemas. File uploads are capped at 15MB with verified image MIME headers.
-
----
-
-## 🗺️ Future Scope & Roadmap
-
-1. **Edge ONNX Runtime Inference**: Converting PyTorch `.pth` models to ONNX to allow browser-side inference on mobile devices with zero internet connection.
-2. **SMS & WhatsApp Alerts**: Direct integration with Twilio / Gupshup for biosecurity outbreak SMS broadcasts to non-smartphone rural farmers.
-3. **Deep Learning Weights for Remaining 13 Crops**: Expanding dedicated VMamba weights to Rice blast, Cotton bollworm, and Potato late blight.
-4. **Satellite NDVI Integration**: Fetching Sentinel-2 normalized difference vegetation index (NDVI) rasters for farm-level drought and chlorophyll monitoring.
-
----
-
-## 📜 License & Academic Citation
-
-Developed as a Major Academic Capstone Project.  
-Advisory recommendations derived from official publications of the **Indian Council of Agricultural Research (ICAR)**, **ICAR-IIHR Bengaluru**, **CPRI Shimla**, and **UAS Bangalore**.
-
+## 📜 8. License
+This project is open-source under the [MIT License](LICENSE).
