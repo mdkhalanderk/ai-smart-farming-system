@@ -170,15 +170,41 @@ if os.path.exists(MULTICROP_CLASSES_FILE):
     except Exception as e:
         print(f"Notice: Failed to load multicrop classes: {e}")
 
-def preprocess_image_numpy(pil_img: Image.Image) -> np.ndarray:
-    """Pure PIL+NumPy preprocessing matching torchvision Resize(224,224) + ImageNet Normalize."""
-    resized = pil_img.resize((224, 224), Image.BILINEAR)
-    arr = np.asarray(resized, dtype=np.float32) / 255.0
+def _normalize_crop_to_nchw(cropped_img: Image.Image) -> np.ndarray:
+    arr = np.asarray(cropped_img, dtype=np.float32) / 255.0
     mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
     std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
     arr = (arr - mean) / std
     arr = np.transpose(arr, (2, 0, 1))
     return np.expand_dims(arr, axis=0).astype(np.float32)
+
+
+def preprocess_image_numpy(pil_img: Image.Image) -> np.ndarray:
+    """Aspect-ratio-preserving Resize(256) + CenterCrop(224) + ImageNet Normalize."""
+    w, h = pil_img.size
+    if w == 0 or h == 0:
+        return _normalize_crop_to_nchw(pil_img.resize((224, 224), Image.BILINEAR))
+    scale = 256.0 / min(w, h)
+    new_w, new_h = max(224, int(round(w * scale))), max(224, int(round(h * scale)))
+    resized = pil_img.resize((new_w, new_h), Image.BILINEAR)
+    left = (new_w - 224) // 2
+    top = (new_h - 224) // 2
+    cropped = resized.crop((left, top, left + 224, top + 224))
+    return _normalize_crop_to_nchw(cropped)
+
+
+def preprocess_tta_views(pil_img: Image.Image) -> List[np.ndarray]:
+    """Generates 2 aspect-preserved views (standard center + tight leaf zoom) for TTA."""
+    view1 = preprocess_image_numpy(pil_img)
+    w, h = pil_img.size
+    if w > 0 and h > 0:
+        crop_side = int(round(min(w, h) * 0.78))
+        left = max(0, (w - crop_side) // 2)
+        top = max(0, (h - crop_side) // 2)
+        tight = pil_img.crop((left, top, left + crop_side, top + crop_side)).resize((224, 224), Image.BILINEAR)
+        view2 = _normalize_crop_to_nchw(tight)
+        return [view1, view2]
+    return [view1]
 
 MAX_IMAGE_SIZE = 15 * 1024 * 1024  # 15 MB limit
 
@@ -420,18 +446,25 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             raise HTTPException(status_code=503, detail="AI Disease Detection model is currently unavailable on the server.")
 
         try:
-            input_arr = preprocess_image_numpy(pil_img)
-            if MODEL_BACKEND == "onnx":
-                outputs = MODEL.run(["logits"], {"input": input_arr})[0]
-            else:
-                with torch.no_grad():
-                    input_tensor = torch.from_numpy(input_arr).to(DEVICE)
-                    outputs = MODEL(input_tensor).cpu().numpy()
-
+            tta_views = preprocess_tta_views(pil_img)
             crop_indices = CROP_TO_INDICES[crop_id]
-            crop_logits = outputs[0, crop_indices]
-            exp_logits = np.exp(crop_logits - np.max(crop_logits))
-            probs = exp_logits / np.sum(exp_logits)
+            probs_accum = None
+            temperature = 1.20
+
+            for input_arr in tta_views:
+                if MODEL_BACKEND == "onnx":
+                    outputs = MODEL.run(["logits"], {"input": input_arr})[0]
+                else:
+                    with torch.no_grad():
+                        input_tensor = torch.from_numpy(input_arr).to(DEVICE)
+                        outputs = MODEL(input_tensor).cpu().numpy()
+
+                crop_logits = outputs[0, crop_indices] / temperature
+                exp_logits = np.exp(crop_logits - np.max(crop_logits))
+                view_probs = exp_logits / np.sum(exp_logits)
+                probs_accum = view_probs if probs_accum is None else (probs_accum + view_probs)
+
+            probs = probs_accum / len(tta_views)
 
             top_local_idx = int(np.argmax(probs))
             confidence = float(probs[top_local_idx])
