@@ -111,10 +111,10 @@ def _haversine_distance_km(coord1: Tuple[float, float], coord2: Tuple[float, flo
 # -------------------------------------------------------------------------
 # SQLITE HELPER & PERSISTENCE SAFETY
 # -------------------------------------------------------------------------
+from backend.db_compat import get_db_connection
+
 def get_sqlite_conn():
-    conn = sqlite3.connect(str(SQLITE_DB_PATH))
-    conn.row_factory = sqlite3.Row
-    return conn
+    return get_db_connection(SQLITE_DB_PATH)
 
 
 def init_extended_tables():

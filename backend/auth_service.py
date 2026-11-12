@@ -13,14 +13,14 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from pathlib import Path
 
+from backend.db_compat import get_db_connection
+
 DATA_DIR = Path(os.getenv("APP_DATA_DIR") or Path(__file__).parent)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA_DIR / "farmer_auth.db"
 
 def get_db():
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
-    return conn
+    return get_db_connection(DB_PATH)
 
 def init_auth_db():
     """Initializes the users, profiles, and sessions tables."""
