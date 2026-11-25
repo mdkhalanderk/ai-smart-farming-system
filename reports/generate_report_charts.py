@@ -466,3 +466,4 @@ if __name__ == "__main__":
     print(f"  - Crop Yield (Low/Med/High) : Accuracy = {cm_info['yield_accuracy']:.2f}%, R² = {cm_info['yield_r2']:.4f}")
     print(f"    Recalls: Low = {cm_info['yield_recalls'][0]:.2f}%, Med = {cm_info['yield_recalls'][1]:.2f}%, High = {cm_info['yield_recalls'][2]:.2f}%")
     print("=" * 76 + "\n")
+
