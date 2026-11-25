@@ -4483,5 +4483,35 @@
   "top1_accuracy": 79.54,
   "top2_accuracy": 89.39,
   "top3_accuracy": 93.73,
-  "evaluation_mode": "Top-3 Differential Decision Support & Hierarchical Multi-Crop Gating"
+  "evaluation_mode": "Top-3 Differential Decision Support & Hierarchical Multi-Crop Gating",
+  "domain_shift_evaluation": {
+    "Cotton": {
+      "clean": 70.59,
+      "shifted": 69.61
+    },
+    "Maize": {
+      "clean": 84.38,
+      "shifted": 84.38
+    },
+    "Potato": {
+      "clean": 68.7,
+      "shifted": 69.47
+    },
+    "Rice": {
+      "clean": 90.91,
+      "shifted": 86.36
+    },
+    "Sugarcane": {
+      "clean": 87.5,
+      "shifted": 87.5
+    },
+    "Tomato": {
+      "clean": 86.67,
+      "shifted": 74.0
+    },
+    "Wheat": {
+      "clean": 80.61,
+      "shifted": 75.76
+    }
+  }
 }

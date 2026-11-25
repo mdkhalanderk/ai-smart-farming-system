@@ -1,0 +1,31 @@
+============================================================================
+PROJECT CONFUSION MATRICES: PRICE REGIME & CROP YIELD TIERS
+============================================================================
+
+1. MANDI PRICE REGIME CONFUSION MATRIX (Random Forest Regressor, 42 APMCs)
+   Test Set Size: 2629 samples | Accuracy: 89.35% | R²: 0.7525
+   Economic Terciles: Low <= ₹1800/Qtl | Medium: ₹1800-₹2750/Qtl | High > ₹2750/Qtl
+   Regression Residuals: MAE = ₹294.47/Qtl | RMSE = ₹526.65/Qtl
+
+                        Pred Low    Pred Medium    Pred High      Total     Recall
+   ------------------------------------------------------------------
+   Actual Low      :          515             56            8        579     88.95%
+   Actual Medium   :           52            930           57       1039     89.51%
+   Actual High     :           11             96          904       1011     89.42%
+   ------------------------------------------------------------------
+   Diagonal Hits: 2349 / 2629 (89.35% overall accuracy)
+
+2. CROP YIELD PRODUCTIVITY TIER CONFUSION MATRIX (DES/ICRISAT 12 Indian Crops)
+   Test Set Size: 600 records | Accuracy: 93.17% | R²: 0.9902
+   Agronomic Tiers: Low <= 2.00 t/ha | Medium: 2.00-4.42 t/ha | High > 4.42 t/ha
+   Regression Residuals: MAE = 1.1596 t/ha | RMSE = 2.6307 t/ha
+
+                        Pred Low    Pred Medium    Pred High      Total     Recall
+   ------------------------------------------------------------------
+   Actual Low      :          194             12            0        206     94.17%
+   Actual Medium   :            8            167           15        190     87.89%
+   Actual High     :            0              6          198        204     97.06%
+   ------------------------------------------------------------------
+   Diagonal Hits: 559 / 600 (93.17% overall accuracy)
+
+============================================================================
