@@ -16,7 +16,9 @@ import {
   Globe,
   Edit3,
   Bell,
-  MessageSquare
+  MessageSquare,
+  Database,
+  BarChart3
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getSavedLanguage, setSavedLanguage, t } from '../lib/i18n';
 
@@ -83,7 +85,7 @@ export const Navbar = () => {
       });
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: 1 })));
       setUnreadCount(0);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleNotificationClick = async (notif) => {
@@ -92,7 +94,7 @@ export const Navbar = () => {
       fetch(`${API_BASE_URL}/api/community/notifications/${notif.id}/read`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => {});
+      }).catch(() => { });
       setNotifications((prev) => prev.map((n) => (n.id === notif.id ? { ...n, is_read: 1 } : n)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     }
@@ -148,10 +150,9 @@ export const Navbar = () => {
 
   const navLinkClass = (path) => `
     px-2 xl:px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0
-    ${
-      isActive(path)
-        ? 'bg-[#1b432a] text-white shadow-xs'
-        : 'text-[#2d3a2f] hover:text-[#143420] hover:bg-[#f0ece2]'
+    ${isActive(path)
+      ? 'bg-[#1b432a] text-white shadow-xs'
+      : 'text-[#2d3a2f] hover:text-[#143420] hover:bg-[#f0ece2]'
     }
   `;
 
@@ -159,7 +160,7 @@ export const Navbar = () => {
     <header className="sticky top-0 z-50 bg-white border-b border-[#e4dfd5] shadow-xs w-full">
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-16 gap-2 lg:gap-3">
-          
+
           {/* Brand Logo & Editorial Title */}
           <a
             href={user ? '/dashboard' : '/'}
@@ -213,6 +214,16 @@ export const Navbar = () => {
                   <Users className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
                   <span>{t('nav_community', currentLang)}</span>
                 </Link>
+
+                <Link to="/data-sources" className={navLinkClass('/data-sources')}>
+                  <Database className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
+                  <span>Data Sources</span>
+                </Link>
+
+                <Link to="/reports" className={navLinkClass('/reports')}>
+                  <BarChart3 className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
+                  <span>Evaluation &amp; Charts</span>
+                </Link>
               </>
             ) : (
               <>
@@ -234,11 +245,10 @@ export const Navbar = () => {
                 <button
                   key={l.code}
                   onClick={() => handleLanguageSelect(l.code)}
-                  className={`px-2 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    currentLang === l.code
+                  className={`px-2 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${currentLang === l.code
                       ? 'bg-[#1b432a] text-white shadow-xs'
                       : 'text-[#445247] hover:text-[#1b432a]'
-                  }`}
+                    }`}
                   title={`Switch to ${l.label}`}
                 >
                   {l.native}
@@ -301,9 +311,8 @@ export const Navbar = () => {
                             <div
                               key={n.id}
                               onClick={() => handleNotificationClick(n)}
-                              className={`p-3 text-xs hover:bg-[#faf8f5] transition-colors cursor-pointer space-y-1 ${
-                                !n.is_read ? 'bg-[#f0fdf4]/60 font-medium' : ''
-                              }`}
+                              className={`p-3 text-xs hover:bg-[#faf8f5] transition-colors cursor-pointer space-y-1 ${!n.is_read ? 'bg-[#f0fdf4]/60 font-medium' : ''
+                                }`}
                             >
                               <div className="flex items-start justify-between gap-1.5">
                                 <span className="font-bold text-[#142618] text-[11px] truncate">{n.title}</span>
@@ -341,60 +350,69 @@ export const Navbar = () => {
 
                   {/* Profile Settings Dropdown */}
                   {profileDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl bg-white border border-[#e4dfd5] shadow-xl py-2 z-50">
-                    <div className="px-4 py-3 border-b border-[#f0ece2] bg-[#faf8f5]/60 rounded-t-2xl">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#1b432a] text-white font-serif font-bold flex items-center justify-center text-xs shrink-0">
-                          {profile?.full_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || 'F'}
-                        </div>
-                        <div className="overflow-hidden">
-                          <p className="text-xs font-bold text-[#1a2e1d] truncate">
-                            {profile?.full_name || 'Farmer Account'}
-                          </p>
-                          <p className="text-[11px] text-[#6b7c70] truncate mt-0.5">
-                            {profile?.district || 'Karnataka'}{profile?.main_crop ? ` • ${profile.main_crop}` : ''}
-                          </p>
+                    <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl bg-white border border-[#e4dfd5] shadow-xl py-2 z-50">
+                      <div className="px-4 py-3 border-b border-[#f0ece2] bg-[#faf8f5]/60 rounded-t-2xl">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-[#1b432a] text-white font-serif font-bold flex items-center justify-center text-xs shrink-0">
+                            {profile?.full_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || 'F'}
+                          </div>
+                          <div className="overflow-hidden">
+                            <p className="text-xs font-bold text-[#1a2e1d] truncate">
+                              {profile?.full_name || 'Farmer Account'}
+                            </p>
+                            <p className="text-[11px] text-[#6b7c70] truncate mt-0.5">
+                              {profile?.district || 'Karnataka'}{profile?.main_crop ? ` • ${profile.main_crop}` : ''}
+                            </p>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="w-full px-4 py-2 text-left text-xs font-semibold text-[#1a2e1d] hover:bg-[#faf8f5] flex items-center gap-2.5 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-[#1b432a]" />
+                          <span>{t('profile_settings', currentLang)}</span>
+                        </Link>
+
+                        <Link
+                          to="/profile-setup"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="w-full px-4 py-2 text-left text-xs font-semibold text-[#1a2e1d] hover:bg-[#faf8f5] flex items-center gap-2.5 transition-colors"
+                        >
+                          <Edit3 className="w-4 h-4 text-[#1b432a]" />
+                          <span>{t('edit_farm_details', currentLang)}</span>
+                        </Link>
+
+                        <Link
+                          to="/reports"
+                          onClick={() => setProfileDropdownOpen(false)}
+                          className="w-full px-4 py-2 text-left text-xs font-semibold text-[#1a2e1d] hover:bg-[#faf8f5] flex items-center gap-2.5 transition-colors"
+                        >
+                          <BarChart3 className="w-4 h-4 text-[#1b432a]" />
+                          <span>Model Benchmarks &amp; Charts</span>
+                        </Link>
+                      </div>
+
+                      <div className="border-t border-[#f0ece2] my-1" />
+
+                      <div className="px-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProfileDropdownOpen(false);
+                            handleLogout();
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-xs font-semibold text-[#991b1b] hover:bg-[#fef2f2] rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>{t('nav_signout', currentLang)}</span>
+                        </button>
+                      </div>
                     </div>
-
-                    <div className="py-1">
-                      <Link
-                        to="/profile"
-                        onClick={() => setProfileDropdownOpen(false)}
-                        className="w-full px-4 py-2 text-left text-xs font-semibold text-[#1a2e1d] hover:bg-[#faf8f5] flex items-center gap-2.5 transition-colors"
-                      >
-                        <User className="w-4 h-4 text-[#1b432a]" />
-                        <span>{t('profile_settings', currentLang)}</span>
-                      </Link>
-
-                      <Link
-                        to="/profile-setup"
-                        onClick={() => setProfileDropdownOpen(false)}
-                        className="w-full px-4 py-2 text-left text-xs font-semibold text-[#1a2e1d] hover:bg-[#faf8f5] flex items-center gap-2.5 transition-colors"
-                      >
-                        <Edit3 className="w-4 h-4 text-[#1b432a]" />
-                        <span>{t('edit_farm_details', currentLang)}</span>
-                      </Link>
-                    </div>
-
-                    <div className="border-t border-[#f0ece2] my-1" />
-
-                    <div className="px-1.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setProfileDropdownOpen(false);
-                          handleLogout();
-                        }}
-                        className="w-full px-3 py-1.5 text-left text-xs font-semibold text-[#991b1b] hover:bg-[#fef2f2] rounded-lg flex items-center gap-2.5 transition-colors cursor-pointer"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>{t('nav_signout', currentLang)}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  )}
                 </div>
               </div>
             ) : (
@@ -415,11 +433,10 @@ export const Navbar = () => {
                 <button
                   key={l.code}
                   onClick={() => handleLanguageSelect(l.code)}
-                  className={`px-1.5 py-0.5 text-[11px] font-semibold rounded transition-all cursor-pointer ${
-                    currentLang === l.code
+                  className={`px-1.5 py-0.5 text-[11px] font-semibold rounded transition-all cursor-pointer ${currentLang === l.code
                       ? 'bg-[#1b432a] text-white shadow-xs'
                       : 'text-[#445247] hover:text-[#1b432a]'
-                  }`}
+                    }`}
                   title={`Switch to ${l.label}`}
                 >
                   {l.native}
@@ -512,6 +529,22 @@ export const Navbar = () => {
               >
                 <Users className="w-4 h-4" />
                 <span>{t('nav_community', currentLang)}</span>
+              </Link>
+              <Link
+                to="/data-sources"
+                onClick={() => setMobileMenuOpen(false)}
+                className={navLinkClass('/data-sources')}
+              >
+                <Database className="w-4 h-4" />
+                <span>Data Sources</span>
+              </Link>
+              <Link
+                to="/reports"
+                onClick={() => setMobileMenuOpen(false)}
+                className={navLinkClass('/reports')}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Evaluation &amp; Charts</span>
               </Link>
 
               <div className="pt-3 border-t border-[#e4dfd5]">

@@ -19,7 +19,7 @@ from pydantic import BaseModel
 LOW_MEMORY_MODE = os.getenv("LOW_MEMORY_MODE", "false").lower() == "true"
 
 try:
-    import onnxruntime as ort
+    import onnxruntisoucesme as ort
 except ImportError:
     ort = None
 
@@ -105,6 +105,10 @@ uploads_dir = os.path.join(DATA_DIR, "uploads")
 os.makedirs(os.path.join(uploads_dir, "alert-photos"), exist_ok=True)
 os.makedirs(os.path.join(uploads_dir, "chat-photos"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
+reports_charts_dir = os.path.join(BASE_DIR, "reports", "charts")
+if os.path.exists(reports_charts_dir):
+    app.mount("/reports/charts", StaticFiles(directory=reports_charts_dir), name="reports_charts")
 
 import backend.auth_service
 import backend.community_service

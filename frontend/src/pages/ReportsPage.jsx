@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { t } from '../lib/i18n';
+import { ResearchChartsView } from '../components/ResearchChartsView';
 
 import { API_BASE_URL } from '../lib/config';
 
@@ -34,7 +35,7 @@ export const ReportsPage = () => {
   const { user, profile, language } = useAuth();
   const currentLang = language || 'English';
 
-  // Tabs: 'overall' | 'disease' | 'price' | 'yield' | 'history'
+  // Tabs: 'overall' | 'charts' | 'disease' | 'price' | 'yield' | 'history'
   const [activeTab, setActiveTab] = useState('overall');
   const [evalData, setEvalData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -268,6 +269,19 @@ export const ReportsPage = () => {
 
               <button
                 type="button"
+                onClick={() => setActiveTab('charts')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'charts'
+                    ? 'bg-[#52b775] text-[#0d1e11] shadow'
+                    : 'text-[#d6dfd8] hover:text-white'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Research Charts &amp; Code (7)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setActiveTab('disease')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'disease'
@@ -368,6 +382,30 @@ export const ReportsPage = () => {
                 <div className="text-3xl font-black text-[#ea580c]">{system_summary.total_incorrect_predictions.toLocaleString()}</div>
                 <p className="text-xs text-[#6b7c70]">Total error / tier misclassification cases</p>
               </div>
+            </div>
+
+            {/* Quick Callout to Research Benchmark Charts & Code */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-linear-to-r from-[#142618] to-[#1b3420] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#2b4c32] shadow-sm">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-[#52b775]/20 text-[#72d494] flex items-center justify-center shrink-0 border border-[#52b775]/30">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="font-serif font-bold text-sm sm:text-base text-[#f5f2ea]">
+                    Research Evaluation Charts &amp; Extraction Code
+                  </h4>
+                  <p className="text-xs text-[#a4b5a8]">
+                    Explore all 7 high-resolution figures, confusion matrices, latency histograms, and copyable Python code.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('charts')}
+                className="px-4 py-2.5 rounded-xl bg-[#52b775] hover:bg-[#43a164] text-[#0d1e11] text-xs font-black transition-all shrink-0 cursor-pointer shadow-sm"
+              >
+                Open Charts &amp; Code (7) →
+              </button>
             </div>
 
             {/* Model Comparison Table */}
@@ -530,6 +568,11 @@ export const ReportsPage = () => {
         )}
 
         {/* ============================================================== */}
+        {/* TAB: RESEARCH BENCHMARK CHARTS & CODE (7 HIGH-RES FIGURES)     */}
+        {/* ============================================================== */}
+        {activeTab === 'charts' && <ResearchChartsView />}
+
+        {/* ============================================================== */}
         {/* TAB 2: DISEASE DETECTION EVALUATION (10-CLASS CLASSIFICATION)  */}
         {/* ============================================================== */}
         {activeTab === 'disease' && (
@@ -559,6 +602,30 @@ export const ReportsPage = () => {
                 <div className="text-3xl font-black text-[#b45309]">{disease.f1_macro}%</div>
                 <p className="text-xs text-[#6b7c70]">Harmonic mean of precision and recall</p>
               </div>
+            </div>
+
+            {/* Quick Link to Disease Charts */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-r from-[#142618] to-[#1e3a24] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#2b4c32] shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#52b775]/20 text-[#72d494] flex items-center justify-center shrink-0 border border-[#52b775]/30">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-sm text-[#f5f2ea]">
+                    Disease Vision Benchmark Charts (Charts #3, #5, #6)
+                  </h4>
+                  <p className="text-xs text-[#a4b5a8]">
+                    View Per-Crop Clean vs Shifted accuracy bar chart, 295-run inference latency histogram, and 80-epoch training curves.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('charts')}
+                className="px-4 py-2 rounded-xl bg-[#52b775] text-[#0d1e11] text-xs font-black hover:bg-[#43a164] transition-colors shrink-0 cursor-pointer shadow-xs"
+              >
+                View Vision Charts &amp; Code →
+              </button>
             </div>
 
             {/* Per-Crop Accuracy Breakdown Grid across 7 Agricultural Crops */}
@@ -720,6 +787,30 @@ export const ReportsPage = () => {
               </div>
             </div>
 
+            {/* Quick Link to Mandi Price Charts */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-r from-[#142618] to-[#1e3a24] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#2b4c32] shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#52b775]/20 text-[#72d494] flex items-center justify-center shrink-0 border border-[#52b775]/30">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-sm text-[#f5f2ea]">
+                    Mandi Price Evaluation Charts (Charts #1 &amp; #7)
+                  </h4>
+                  <p className="text-xs text-[#a4b5a8]">
+                    Inspect the 3-Class Regime Confusion Matrix (89.35% accuracy) and 19-Feature Gini Importance breakdown with executable Python code.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('charts')}
+                className="px-4 py-2 rounded-xl bg-[#52b775] text-[#0d1e11] text-xs font-black hover:bg-[#43a164] transition-colors shrink-0 cursor-pointer shadow-xs"
+              >
+                View Price Charts &amp; Code →
+              </button>
+            </div>
+
             {/* Real-Time Live Architecture Banner */}
             <div className="p-5 rounded-2xl bg-[#eef5ee] border border-[#cbe2ce] shadow-xs space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -861,6 +952,30 @@ export const ReportsPage = () => {
                 <div className="text-3xl font-black text-[#b45309]">{cropYield.categorization?.accuracy}%</div>
                 <p className="text-xs text-[#6b7c70]">Correct Low / Medium / High harvest tier prediction</p>
               </div>
+            </div>
+
+            {/* Quick Link to Yield Charts */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-linear-to-r from-[#142618] to-[#1e3a24] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#2b4c32] shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#52b775]/20 text-[#72d494] flex items-center justify-center shrink-0 border border-[#52b775]/30">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-sm text-[#f5f2ea]">
+                    Crop Yield Tier Confusion Matrix (Chart #2)
+                  </h4>
+                  <p className="text-xs text-[#a4b5a8]">
+                    Inspect the 93.17% productivity tier confusion matrix, tercile thresholds, and scikit-learn pipeline code.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('charts')}
+                className="px-4 py-2 rounded-xl bg-[#52b775] text-[#0d1e11] text-xs font-black hover:bg-[#43a164] transition-colors shrink-0 cursor-pointer shadow-xs"
+              >
+                View Yield Chart &amp; Code →
+              </button>
             </div>
 
             {/* Documented Category Boundaries Box */}
