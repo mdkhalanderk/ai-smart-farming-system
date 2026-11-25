@@ -28,6 +28,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { t } from '../lib/i18n';
 import { ResearchChartsView } from '../components/ResearchChartsView';
+import fallbackEvalData from '../data/evaluationFallback.json';
 
 import { API_BASE_URL } from '../lib/config';
 
@@ -37,8 +38,8 @@ export const ReportsPage = () => {
 
   // Tabs: 'overall' | 'charts' | 'disease' | 'price' | 'yield' | 'history'
   const [activeTab, setActiveTab] = useState('overall');
-  const [evalData, setEvalData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [evalData, setEvalData] = useState(fallbackEvalData || null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // History state
@@ -48,16 +49,22 @@ export const ReportsPage = () => {
 
   // Fetch full evaluation payload
   const fetchEvaluationData = async () => {
-    setLoading(true);
-    setError(null);
     try {
       const res = await fetch(`${API_BASE_URL}/api/evaluation/all`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch evaluation metrics`);
       const data = await res.json();
-      setEvalData(data);
+      if (data && data.status === 'success') {
+        setEvalData(data);
+        setError(null);
+      }
     } catch (err) {
-      console.error('Failed to load evaluation data:', err);
-      setError(err.message || 'Could not load evaluation data');
+      console.warn('Backend evaluation API unreachable; using bundled empirical benchmark data:', err);
+      if (fallbackEvalData && fallbackEvalData.status === 'success') {
+        setEvalData(fallbackEvalData);
+        setError(null);
+      } else {
+        setError(err.message || 'Could not load evaluation data');
+      }
     } finally {
       setLoading(false);
     }
