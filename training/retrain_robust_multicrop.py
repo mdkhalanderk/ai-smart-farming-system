@@ -125,9 +125,9 @@ class MultiViewDataset(Dataset):
         return tensor, label
 
 
-def extract_features(model, items, bg_pool=None, batch_size=32, desc="Split"):
+def extract_features(model, items, bg_pool=None, batch_size=48, desc="Split"):
     ds = MultiViewDataset(items, bg_pool=bg_pool)
-    loader = DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=0)
+    loader = DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=2)
     feats_list, labels_list = [], []
     t0 = time.time()
     model.eval()
@@ -171,9 +171,9 @@ def main():
 
     train_records, val_records, test_records = get_balanced_multicrop_split(
         data_root="data",
-        max_train_per_class=50,
-        max_val_per_class=12,
-        max_test_per_class=12,
+        max_train_per_class=75,
+        max_val_per_class=15,
+        max_test_per_class=15,
         seed=SEED,
     )
     print(f"Split -> Train: {len(train_records)}, Val: {len(val_records)}, Test: {len(test_records)}")
@@ -218,11 +218,11 @@ def main():
     # Train regularized linear head with label smoothing
     head = nn.Linear(train_X.shape[1], num_classes)
     head.load_state_dict(model.classifier.head.state_dict())
-    dropout = nn.Dropout(p=0.25)
+    dropout = nn.Dropout(p=0.15)
 
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
-    optimizer = AdamW(head.parameters(), lr=2e-3, weight_decay=2e-2)
-    epochs = 90
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.06)
+    optimizer = AdamW(head.parameters(), lr=1.8e-3, weight_decay=1.2e-2)
+    epochs = 120
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
 
     best_val_acc = -1.0
