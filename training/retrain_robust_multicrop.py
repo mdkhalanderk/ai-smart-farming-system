@@ -38,7 +38,7 @@ SEED = 42
 random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
-torch.set_num_threads(8)
+torch.set_num_threads(min(10, os.cpu_count() or 8))
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
@@ -171,9 +171,9 @@ def main():
 
     train_records, val_records, test_records = get_balanced_multicrop_split(
         data_root="data",
-        max_train_per_class=75,
-        max_val_per_class=15,
-        max_test_per_class=15,
+        max_train_per_class=50,
+        max_val_per_class=12,
+        max_test_per_class=12,
         seed=SEED,
     )
     print(f"Split -> Train: {len(train_records)}, Val: {len(val_records)}, Test: {len(test_records)}")
