@@ -171,9 +171,9 @@ def main():
 
     train_records, val_records, test_records = get_balanced_multicrop_split(
         data_root="data",
-        max_train_per_class=75,
-        max_val_per_class=15,
-        max_test_per_class=15,
+        max_train_per_class=150,
+        max_val_per_class=25,
+        max_test_per_class=25,
         seed=SEED,
     )
     print(f"Split -> Train: {len(train_records)}, Val: {len(val_records)}, Test: {len(test_records)}")
@@ -201,10 +201,27 @@ def main():
     test_items = [(p, l, "clean") for p, l in test_records]
     test_bg_items = [(p, l, "bg_aug" if is_plantvillage_path(p) else "aug") for p, l in test_records]
 
-    # Baseline evaluation before retraining
-    val_X, val_y = extract_features(model, val_items, desc="Val")
-    test_X, test_y = extract_features(model, test_items, desc="Test-Clean")
-    test_bg_X, test_bg_y = extract_features(model, test_bg_items, bg_pool=bg_pool, desc="Test-FieldAug")
+    cache_path = "model/features_cache_150.pt"
+    if os.path.exists(cache_path):
+        print(f"Loading cached features from {cache_path}...")
+        cached = torch.load(cache_path, map_location="cpu")
+        val_X, val_y = cached["val_X"], cached["val_y"]
+        test_X, test_y = cached["test_X"], cached["test_y"]
+        test_bg_X, test_bg_y = cached["test_bg_X"], cached["test_bg_y"]
+        train_X, train_y = cached["train_X"], cached["train_y"]
+    else:
+        # Extract features across all splits
+        val_X, val_y = extract_features(model, val_items, desc="Val")
+        test_X, test_y = extract_features(model, test_items, desc="Test-Clean")
+        test_bg_X, test_bg_y = extract_features(model, test_bg_items, bg_pool=bg_pool, desc="Test-FieldAug")
+        train_X, train_y = extract_features(model, train_items, bg_pool=bg_pool, desc="Train-MultiView")
+        torch.save({
+            "val_X": val_X, "val_y": val_y,
+            "test_X": test_X, "test_y": test_y,
+            "test_bg_X": test_bg_X, "test_bg_y": test_bg_y,
+            "train_X": train_X, "train_y": train_y,
+        }, cache_path)
+        print(f"Saved extracted features to {cache_path}")
 
     with torch.no_grad():
         base_clean_acc, base_clean_crops = eval_per_crop(model.classifier.head(test_X), test_y, crop_to_indices)
@@ -212,17 +229,14 @@ def main():
     print(f"\nBaseline Test-Clean Global: {base_clean_acc}% | Per-Crop: {base_clean_crops}")
     print(f"Baseline Test-FieldAug Global: {base_bg_acc}% | Per-Crop: {base_bg_crops}")
 
-    # Extract multi-view training features
-    train_X, train_y = extract_features(model, train_items, bg_pool=bg_pool, desc="Train-MultiView")
-
     # Train regularized linear head with label smoothing
     head = nn.Linear(train_X.shape[1], num_classes)
     head.load_state_dict(model.classifier.head.state_dict())
     dropout = nn.Dropout(p=0.15)
 
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.06)
-    optimizer = AdamW(head.parameters(), lr=1.8e-3, weight_decay=1.2e-2)
-    epochs = 120
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.05)
+    optimizer = AdamW(head.parameters(), lr=1.6e-3, weight_decay=1.0e-2)
+    epochs = 150
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-5)
 
     best_val_acc = -1.0
