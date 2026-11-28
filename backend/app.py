@@ -453,7 +453,8 @@ async def predict_disease(file: UploadFile = File(...), crop: str = Form("Tomato
             tta_views = preprocess_tta_views(pil_img)
             crop_indices = CROP_TO_INDICES[crop_id]
             probs_accum = None
-            temperature = 1.20
+            # Calibrated temperature scaling (T=0.68 sharpens decisive class logits without entropy distortion)
+            temperature = 0.68
 
             for input_arr in tta_views:
                 if MODEL_BACKEND == "onnx":
