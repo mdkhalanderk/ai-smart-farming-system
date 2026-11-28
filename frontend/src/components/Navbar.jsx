@@ -17,7 +17,6 @@ import {
   Edit3,
   Bell,
   MessageSquare,
-  Database,
   BarChart3
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES, getSavedLanguage, setSavedLanguage, t } from '../lib/i18n';
@@ -213,16 +212,6 @@ export const Navbar = () => {
                 <Link to="/community" className={navLinkClass('/community')}>
                   <Users className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
                   <span>{t('nav_community', currentLang)}</span>
-                </Link>
-
-                <Link to="/data-sources" className={navLinkClass('/data-sources')}>
-                  <Database className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span>Data Sources</span>
-                </Link>
-
-                <Link to="/reports" className={navLinkClass('/reports')}>
-                  <BarChart3 className="w-3.5 h-3.5 xl:w-4 xl:h-4 shrink-0" />
-                  <span>Evaluation &amp; Charts</span>
                 </Link>
               </>
             ) : (
@@ -529,22 +518,6 @@ export const Navbar = () => {
               >
                 <Users className="w-4 h-4" />
                 <span>{t('nav_community', currentLang)}</span>
-              </Link>
-              <Link
-                to="/data-sources"
-                onClick={() => setMobileMenuOpen(false)}
-                className={navLinkClass('/data-sources')}
-              >
-                <Database className="w-4 h-4" />
-                <span>Data Sources</span>
-              </Link>
-              <Link
-                to="/reports"
-                onClick={() => setMobileMenuOpen(false)}
-                className={navLinkClass('/reports')}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Evaluation &amp; Charts</span>
               </Link>
 
               <div className="pt-3 border-t border-[#e4dfd5]">
