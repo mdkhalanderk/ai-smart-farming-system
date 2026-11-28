@@ -19,7 +19,7 @@ from pydantic import BaseModel
 LOW_MEMORY_MODE = os.getenv("LOW_MEMORY_MODE", "false").lower() == "true"
 
 try:
-    import onnxruntisoucesme as ort
+    import onnxruntime as ort
 except ImportError:
     ort = None
 
@@ -223,7 +223,7 @@ def load_vmamba_model():
             pass
 
     onnx_path = os.path.join(BASE_DIR, "model", "vmamba_int8.onnx")
-    if ort is not None and os.path.exists(onnx_path) and (LOW_MEMORY_MODE or torch is None):
+    if ort is not None and os.path.exists(onnx_path):
         try:
             sess_opts = ort.SessionOptions()
             sess_opts.intra_op_num_threads = 1

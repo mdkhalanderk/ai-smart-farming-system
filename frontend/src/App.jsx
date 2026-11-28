@@ -19,6 +19,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ defaul
 const PricePrediction = lazy(() => import('./pages/PricePrediction').then(m => ({ default: m.PricePrediction })));
 const YieldPrediction = lazy(() => import('./pages/YieldPrediction').then(m => ({ default: m.YieldPrediction })));
 const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })));
+const DataSourcesPage = lazy(() => import('./pages/DataSourcesPage').then(m => ({ default: m.DataSourcesPage })));
 
 export default function App() {
   // Silently preload heavy route bundles after initial paint so mobile navigation is instant
@@ -30,6 +31,7 @@ export default function App() {
       import('./pages/YieldPrediction');
       import('./pages/CommunityPage');
       import('./pages/ReportsPage');
+      import('./pages/DataSourcesPage');
     }, 1200);
     return () => clearTimeout(timer);
   }, []);
@@ -123,6 +125,14 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/data-sources"
+                    element={
+                      <ProtectedRoute requireProfile={true}>
+                        <DataSourcesPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/evaluation"
                     element={
                       <ProtectedRoute requireProfile={true}>
@@ -144,7 +154,7 @@ export default function App() {
                 </Routes>
               </Suspense>
             </main>
-            
+
             <Footer />
           </div>
         </Router>
